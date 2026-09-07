@@ -19,6 +19,8 @@ export default function TourCard({ tour }: { tour: Tour }) {
     "tibet-high-plateau": "/8.jpg",
 
     "ladakh-high-altitude": "/9.jpg",
+    
+    "kailash-mansarovar-journey": "/10.jpg",
   };
 
   const image = images[tour.slug] || null;
