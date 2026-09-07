@@ -42,23 +42,35 @@ export async function POST(req: Request) {
       throw error;
     }
 
-    // Send booking notification email
+    // Safe diagnostic log: only true/false, no secrets shown
+    console.log("Booking email config:", {
+      resendKeyExists: Boolean(process.env.RESEND_API_KEY),
+      notificationEmailExists: Boolean(
+        process.env.BOOKING_NOTIFICATION_EMAIL
+      ),
+    });
+
+    // Send email notification
     if (
       process.env.RESEND_API_KEY &&
       process.env.BOOKING_NOTIFICATION_EMAIL
     ) {
-      const emailResponse = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from: "Himalayan Adventures <onboarding@resend.dev>",
-          to: [process.env.BOOKING_NOTIFICATION_EMAIL],
-          reply_to: body.email,
-          subject: `New booking request: ${body.tourSlug || "Himalayan Journey"}`,
-          text: `
+      const emailResponse = await fetch(
+        "https://api.resend.com/emails",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            from: "Himalayan Adventures <onboarding@resend.dev>",
+            to: [process.env.BOOKING_NOTIFICATION_EMAIL],
+            reply_to: body.email,
+            subject: `New booking request: ${
+              body.tourSlug || "Himalayan Journey"
+            }`,
+            text: `
 New Himalayan Adventures booking
 
 Tour: ${body.tourSlug || "Not specified"}
@@ -69,16 +81,26 @@ Travelers: ${body.travelers || 1}
 
 Message:
 ${body.message || "No message"}
-          `.trim(),
-        }),
+            `.trim(),
+          }),
+        }
+      );
+
+      const emailResult = await emailResponse.text();
+
+      console.log("Resend response:", {
+        status: emailResponse.status,
+        ok: emailResponse.ok,
+        result: emailResult,
       });
 
       if (!emailResponse.ok) {
-        console.error(
-          "Resend email error:",
-          await emailResponse.text()
-        );
+        console.error("Resend email error:", emailResult);
       }
+    } else {
+      console.error(
+        "Resend email skipped because an environment variable is missing."
+      );
     }
 
     return NextResponse.json({
