@@ -1,3 +1,98 @@
-export const tours = [{"slug": "everest-base-camp", "name": "Everest Base Camp", "country": "Nepal", "days": "14 days", "price": "$1,490", "difficulty": "Challenging", "lat": 27.9881, "lng": 86.925}, {"slug": "annapurna-classic", "name": "Annapurna Classic", "country": "Nepal", "days": "10 days", "price": "$1,190", "difficulty": "Moderate", "lat": 28.53, "lng": 84.0}, {"slug": "langtang-valley", "name": "Langtang Valley", "country": "Nepal", "days": "8 days", "price": "$990", "difficulty": "Moderate", "lat": 28.21, "lng": 85.55}, {"slug": "manaslu-circuit", "name": "Manaslu Circuit", "country": "Nepal", "days": "15 days", "price": "$1,690", "difficulty": "Challenging", "lat": 28.66, "lng": 84.56}, {"slug": "upper-mustang", "name": "Upper Mustang", "country": "Nepal", "days": "11 days", "price": "$1,790", "difficulty": "Moderate", "lat": 29.18, "lng": 83.98}, {"slug": "bhutan-mountain-culture", "name": "Bhutan Mountain & Culture", "country": "Bhutan", "days": "9 days", "price": "$2,490", "difficulty": "Easy–Moderate", "lat": 27.4305, "lng": 89.6339}, {"slug": "tibet-high-plateau", "name": "Tibet High Plateau", "country": "Tibet", "days": "12 days", "price": "$2,190", "difficulty": "Moderate", "lat": 29.65, "lng": 91.1}, {"slug": "ladakh-high-altitude", "name": "Ladakh High Altitude", "country": "India", "days": "10 days", "price": "$1,590", "difficulty": "Moderate", "lat": 34.15, "lng": 77.58}] as const;
-export type Tour = typeof tours[number];
-export function getTour(slug:string){return tours.find(t=>t.slug===slug)}
+export const tours = [
+  {
+    slug: "everest-base-camp",
+    name: "Everest Base Camp",
+    country: "Nepal",
+    days: "14 days",
+    price: "$1,490",
+    difficulty: "Challenging",
+    lat: 27.9881,
+    lng: 86.925,
+  },
+  {
+    slug: "annapurna-classic",
+    name: "Annapurna Classic",
+    country: "Nepal",
+    days: "10 days",
+    price: "$1,190",
+    difficulty: "Moderate",
+    lat: 28.53,
+    lng: 84.0,
+  },
+  {
+    slug: "langtang-valley",
+    name: "Langtang Valley",
+    country: "Nepal",
+    days: "8 days",
+    price: "$990",
+    difficulty: "Moderate",
+    lat: 28.21,
+    lng: 85.55,
+  },
+  {
+    slug: "manaslu-circuit",
+    name: "Manaslu Circuit",
+    country: "Nepal",
+    days: "15 days",
+    price: "$1,690",
+    difficulty: "Challenging",
+    lat: 28.66,
+    lng: 84.56,
+  },
+  {
+    slug: "upper-mustang",
+    name: "Upper Mustang",
+    country: "Nepal",
+    days: "11 days",
+    price: "$1,790",
+    difficulty: "Moderate",
+    lat: 29.18,
+    lng: 83.98,
+  },
+  {
+    slug: "bhutan-mountain-culture",
+    name: "Bhutan Mountain & Culture",
+    country: "Bhutan",
+    days: "9 days",
+    price: "$2,490",
+    difficulty: "Easy–Moderate",
+    lat: 27.4305,
+    lng: 89.6339,
+  },
+  {
+    slug: "tibet-high-plateau",
+    name: "Tibet High Plateau",
+    country: "Tibet",
+    days: "12 days",
+    price: "$2,190",
+    difficulty: "Moderate",
+    lat: 29.65,
+    lng: 91.1,
+  },
+  {
+    slug: "ladakh-high-altitude",
+    name: "Ladakh High Altitude",
+    country: "India",
+    days: "10 days",
+    price: "$1,590",
+    difficulty: "Moderate",
+    lat: 34.15,
+    lng: 77.58,
+  },
+  {
+    slug: "kailash-mansarovar-journey",
+    name: "Kailash Mansarovar Journey",
+    country: "Tibet",
+    days: "15 days",
+    price: "$2,890",
+    difficulty: "Moderate",
+    lat: 31.0675,
+    lng: 81.3119,
+  },
+] as const;
+
+export type Tour = (typeof tours)[number];
+
+export function getTour(slug: string) {
+  return tours.find((t) => t.slug === slug);
+}
