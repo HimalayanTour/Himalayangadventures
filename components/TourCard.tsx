@@ -3,13 +3,30 @@ import type { Tour } from "@/lib/tours";
 
 export default function TourCard({ tour }: { tour: Tour }) {
   const images: Record<string, string> = {
-    "everest-base-camp": "/ChatGPT Image Sep 7, 2026, 01_05_24 AM.png",
+    // Everest Base Camp
+    "everest-base-camp":
+      "/ChatGPT Image Sep 7, 2026, 01_05_24 AM.png",
+
+    // Annapurna Classic
     "annapurna-classic": "/2.png",
+
+    // Langtang Valley
     "langtang-valley": "/3.png",
+
+    // Manaslu Circuit
     "manaslu-circuit": "/4.png",
+
+    // Upper Mustang
     "upper-mustang": "/5.png",
+
+    // Bhutan Mountain & Culture
     "bhutan-mountain-culture": "/6.png",
-    "sikkim-himalaya": "/7.png",
+
+    // Sikkim Himalaya
+    "sikkim-himalaya": "/8.jpg",
+
+    // Tibet High Plateau
+    "tibet-high-plateau": "/9.jpg",
   };
 
   const image = images[tour.slug] || null;
@@ -31,6 +48,7 @@ export default function TourCard({ tour }: { tour: Tour }) {
       )}
 
       <span className="pill">{tour.country}</span>
+
       <h3>{tour.name}</h3>
 
       <p className="muted">
