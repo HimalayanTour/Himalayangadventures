@@ -1,12 +1,18 @@
-
 import Link from "next/link";
 import type { Tour } from "@/lib/tours";
 
 export default function TourCard({ tour }: { tour: Tour }) {
-  const image =
-    tour.slug === "everest-base-camp"
-      ? "/ChatGPT Image Sep 7, 2026, 01_05_24 AM.png"
-      : null;
+  const images: Record<string, string> = {
+    "everest-base-camp": "/ChatGPT Image Sep 7, 2026, 01_05_24 AM.png",
+    "annapurna-classic": "/2.png",
+    "langtang-valley": "/3.png",
+    "manaslu-circuit": "/4.png",
+    "upper-mustang": "/5.png",
+    "bhutan-mountain-culture": "/6.png",
+    "sikkim-himalaya": "/7.png",
+  };
+
+  const image = images[tour.slug] || null;
 
   return (
     <article className="card">
@@ -26,10 +32,13 @@ export default function TourCard({ tour }: { tour: Tour }) {
 
       <span className="pill">{tour.country}</span>
       <h3>{tour.name}</h3>
+
       <p className="muted">
         {tour.days} · {tour.difficulty}
       </p>
+
       <div className="price">{tour.price}</div>
+
       <Link className="btn" href={"/tours/" + tour.slug}>
         View details
       </Link>
