@@ -6,19 +6,15 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    // 1. Check required customer information
+    // 1. Check required information
     if (!body.name || !body.email) {
       return NextResponse.json(
-        {
-          error: "Name and email are required",
-        },
-        {
-          status: 400,
-        }
+        { error: "Name and email are required" },
+        { status: 400 }
       );
     }
 
-    // 2. Read Vercel environment variables
+    // 2. Environment variables
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseServiceKey =
       process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -27,34 +23,14 @@ export async function POST(req: Request) {
     const bookingNotificationEmail =
       process.env.BOOKING_NOTIFICATION_EMAIL;
 
-    // Safe debug information.
-    // This NEVER prints your secret key.
-    console.log("Booking environment check:", {
-      supabaseUrlExists: Boolean(supabaseUrl),
-      supabaseKeyExists: Boolean(supabaseServiceKey),
-      resendKeyExists: Boolean(resendApiKey),
-      notificationEmailExists: Boolean(
-        bookingNotificationEmail
-      ),
-    });
-
-    // 3. Make sure Supabase is configured
     if (!supabaseUrl || !supabaseServiceKey) {
-      console.error(
-        "Supabase environment variables are missing."
-      );
-
       return NextResponse.json(
-        {
-          error: "Database connection is not configured.",
-        },
-        {
-          status: 500,
-        }
+        { error: "Database connection is not configured." },
+        { status: 500 }
       );
     }
 
-    // 4. Connect to Supabase
+    // 3. Connect to Supabase
     const { createClient } = await import(
       "@supabase/supabase-js"
     );
@@ -64,16 +40,101 @@ export async function POST(req: Request) {
       supabaseServiceKey
     );
 
-    // 5. Save booking to Supabase
+    // Clean booking values
+    const name = String(body.name).trim();
+    const email = String(body.email)
+      .trim()
+      .toLowerCase();
+
+    const tourSlug = body.tourSlug
+      ? String(body.tourSlug)
+      : null;
+
+    const dates = body.dates
+      ? String(body.dates).trim()
+      : null;
+
+    const travelers = Number(body.travelers || 1);
+
+    const message = body.message
+      ? String(body.message).trim()
+      : null;
+
+    // 4. DUPLICATE PROTECTION
+    // Check if same person already sent the same booking
+    // during the last 10 minutes.
+    const tenMinutesAgo = new Date(
+      Date.now() - 10 * 60 * 1000
+    ).toISOString();
+
+    let duplicateQuery = db
+      .from("bookings")
+      .select("id")
+      .eq("email", email)
+      .eq("name", name)
+      .gte("created_at", tenMinutesAgo)
+      .limit(1);
+
+    if (tourSlug) {
+      duplicateQuery = duplicateQuery.eq(
+        "tour_slug",
+        tourSlug
+      );
+    } else {
+      duplicateQuery = duplicateQuery.is(
+        "tour_slug",
+        null
+      );
+    }
+
+    if (dates) {
+      duplicateQuery = duplicateQuery.eq(
+        "dates",
+        dates
+      );
+    } else {
+      duplicateQuery = duplicateQuery.is(
+        "dates",
+        null
+      );
+    }
+
+    const {
+      data: duplicateBookings,
+      error: duplicateError,
+    } = await duplicateQuery;
+
+    if (duplicateError) {
+      console.error(
+        "Duplicate check error:",
+        duplicateError
+      );
+    }
+
+    if (
+      duplicateBookings &&
+      duplicateBookings.length > 0
+    ) {
+      console.log("Duplicate booking blocked.");
+
+      return NextResponse.json({
+        message:
+          "We already received this booking request. You do not need to send it again.",
+        duplicate: true,
+        emailSent: false,
+      });
+    }
+
+    // 5. Save new booking
     const { error: bookingError } = await db
       .from("bookings")
       .insert({
-        tour_slug: body.tourSlug || null,
-        name: body.name,
-        email: body.email,
-        dates: body.dates || null,
-        travelers: Number(body.travelers || 1),
-        message: body.message || null,
+        tour_slug: tourSlug,
+        name,
+        email,
+        dates,
+        travelers,
+        message,
         status: "new",
       });
 
@@ -86,34 +147,24 @@ export async function POST(req: Request) {
       throw bookingError;
     }
 
-    console.log("Booking saved to Supabase.");
+    console.log("New booking saved.");
 
-    // 6. Check Resend settings
+    // 6. If Resend is not configured,
+    // keep the booking but skip email
     if (!resendApiKey || !bookingNotificationEmail) {
-      console.error(
-        "Resend skipped because an environment variable is missing.",
-        {
-          resendKeyExists: Boolean(resendApiKey),
-          notificationEmailExists: Boolean(
-            bookingNotificationEmail
-          ),
-        }
-      );
-
       return NextResponse.json({
         message:
-          "Booking saved, but email notification is not configured.",
+          "Booking request received. Our team will contact you.",
         emailSent: false,
       });
     }
 
-    console.log("Calling Resend API...");
-
-    // 7. Send booking notification email
+    // 7. Send notification email
     const emailResponse = await fetch(
       "https://api.resend.com/emails",
       {
         method: "POST",
+
         headers: {
           Authorization: `Bearer ${resendApiKey}`,
           "Content-Type": "application/json",
@@ -125,32 +176,32 @@ export async function POST(req: Request) {
 
           to: [bookingNotificationEmail],
 
-          reply_to: body.email,
+          reply_to: email,
 
           subject: `New booking request: ${
-            body.tourSlug || "Himalayan Journey"
+            tourSlug || "Himalayan Journey"
           }`,
 
           text: `
 NEW HIMALAYAN ADVENTURES BOOKING
 
 Tour:
-${body.tourSlug || "Not specified"}
+${tourSlug || "Not specified"}
 
 Name:
-${body.name}
+${name}
 
 Customer email:
-${body.email}
+${email}
 
 Preferred dates:
-${body.dates || "Not specified"}
+${dates || "Not specified"}
 
 Travelers:
-${body.travelers || 1}
+${travelers}
 
 Message:
-${body.message || "No message"}
+${message || "No message"}
 
 --------------------------
 Himalayan Adventures
@@ -159,13 +210,12 @@ Himalayan Adventures
       }
     );
 
-    const resendResult = await emailResponse.text();
+    const resendResult =
+      await emailResponse.text();
 
-    // 8. Log Resend result
-    console.log("Resend API result:", {
+    console.log("Resend result:", {
       status: emailResponse.status,
       ok: emailResponse.ok,
-      response: resendResult,
     });
 
     if (!emailResponse.ok) {
@@ -178,17 +228,15 @@ Himalayan Adventures
         message:
           "Booking saved, but email notification failed.",
         emailSent: false,
-        resendStatus: emailResponse.status,
       });
     }
 
-    console.log("Booking notification email sent.");
-
-    // 9. Everything succeeded
+    // 8. Success
     return NextResponse.json({
       message:
         "Booking request received. Our team will contact you.",
       emailSent: true,
+      duplicate: false,
     });
   } catch (error) {
     console.error("Booking API error:", error);
