@@ -14,6 +14,7 @@ type Booking = {
   travelers: number | null;
   message: string | null;
   status: string | null;
+  admin_notes: string | null;
   created_at: string;
 };
 
@@ -77,7 +78,7 @@ async function getBooking(
     const { data, error } = await db
       .from("bookings")
       .select(
-        "id,tour_slug,name,email,dates,travelers,message,status,created_at"
+        "id,tour_slug,name,email,dates,travelers,message,status,admin_notes,created_at"
       )
       .eq("id", id)
       .single();
@@ -157,11 +158,68 @@ async function updateBookingStatus(
   );
 }
 
+async function saveAdminNotes(
+  formData: FormData
+) {
+  "use server";
+
+  const loggedIn = await isAdminLoggedIn();
+
+  if (!loggedIn) {
+    redirect("/admin");
+  }
+
+  const bookingId = String(
+    formData.get("bookingId") || ""
+  );
+
+  const adminNotes = String(
+    formData.get("adminNotes") || ""
+  ).trim();
+
+  if (!bookingId) {
+    return;
+  }
+
+  const db = await getDb();
+
+  const { error } = await db
+    .from("bookings")
+    .update({
+      admin_notes:
+        adminNotes.length > 0
+          ? adminNotes
+          : null,
+    })
+    .eq("id", bookingId);
+
+  if (error) {
+    console.error(
+      "Admin notes update error:",
+      error
+    );
+
+    return;
+  }
+
+  revalidatePath(
+    `/admin/bookings/${bookingId}`
+  );
+
+  redirect(
+    `/admin/bookings/${bookingId}?saved=1`
+  );
+}
+
 export default async function BookingDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{
     id: string;
+  }>;
+  searchParams: Promise<{
+    saved?: string;
   }>;
 }) {
   const loggedIn =
@@ -172,6 +230,7 @@ export default async function BookingDetailPage({
   }
 
   const { id } = await params;
+  const query = await searchParams;
 
   const booking =
     await getBooking(id);
@@ -249,18 +308,24 @@ export default async function BookingDetailPage({
           </p>
 
           <p>
-            <strong>Preferred dates:</strong>{" "}
+            <strong>
+              Preferred dates:
+            </strong>{" "}
             {booking.dates ||
               "Not specified"}
           </p>
 
           <p>
-            <strong>Travelers:</strong>{" "}
+            <strong>
+              Travelers:
+            </strong>{" "}
             {booking.travelers || 1}
           </p>
 
           <p>
-            <strong>Received:</strong>{" "}
+            <strong>
+              Received:
+            </strong>{" "}
             {new Date(
               booking.created_at
             ).toLocaleString()}
@@ -285,6 +350,65 @@ export default async function BookingDetailPage({
                 "No message provided."}
             </div>
           </div>
+        </div>
+
+        <div
+          className="card"
+          style={{
+            marginTop: 24,
+          }}
+        >
+          <h2>
+            Private admin notes
+          </h2>
+
+          <p className="muted">
+            These notes are for your team only
+            and are never shown to customers.
+          </p>
+
+          {query.saved ? (
+            <div
+              className="notice"
+              style={{
+                marginBottom: 16,
+              }}
+            >
+              Admin notes saved.
+            </div>
+          ) : null}
+
+          <form action={saveAdminNotes}>
+            <input
+              type="hidden"
+              name="bookingId"
+              value={booking.id}
+            />
+
+            <div className="field">
+              <label>
+                Notes
+              </label>
+
+              <textarea
+                name="adminNotes"
+                defaultValue={
+                  booking.admin_notes || ""
+                }
+                placeholder="Example: Called customer, waiting for passport copy..."
+                style={{
+                  minHeight: 150,
+                }}
+              />
+            </div>
+
+            <button
+              className="btn"
+              type="submit"
+            >
+              Save notes
+            </button>
+          </form>
         </div>
 
         <div
