@@ -46,7 +46,6 @@ async function isAdminLoggedIn() {
   }
 
   const cookieStore = await cookies();
-
   const session =
     cookieStore.get("admin_session")?.value;
 
@@ -445,45 +444,80 @@ export default async function AdminPage({
             marginBottom: 24,
           }}
         >
-          <div className="card">
+          <a
+            href="/admin"
+            className="card"
+            style={{
+              textDecoration: "none",
+              color: "inherit",
+              cursor: "pointer",
+            }}
+          >
             <div className="muted">
               Total
             </div>
-
             <h2>{counts.total}</h2>
-          </div>
+          </a>
 
-          <div className="card">
+          <a
+            href="/admin?status=new"
+            className="card"
+            style={{
+              textDecoration: "none",
+              color: "inherit",
+              cursor: "pointer",
+            }}
+          >
             <div className="muted">
               New
             </div>
-
             <h2>{counts.new}</h2>
-          </div>
+          </a>
 
-          <div className="card">
+          <a
+            href="/admin?status=contacted"
+            className="card"
+            style={{
+              textDecoration: "none",
+              color: "inherit",
+              cursor: "pointer",
+            }}
+          >
             <div className="muted">
               Contacted
             </div>
-
             <h2>{counts.contacted}</h2>
-          </div>
+          </a>
 
-          <div className="card">
+          <a
+            href="/admin?status=confirmed"
+            className="card"
+            style={{
+              textDecoration: "none",
+              color: "inherit",
+              cursor: "pointer",
+            }}
+          >
             <div className="muted">
               Confirmed
             </div>
-
             <h2>{counts.confirmed}</h2>
-          </div>
+          </a>
 
-          <div className="card">
+          <a
+            href="/admin?status=cancelled"
+            className="card"
+            style={{
+              textDecoration: "none",
+              color: "inherit",
+              cursor: "pointer",
+            }}
+          >
             <div className="muted">
               Cancelled
             </div>
-
             <h2>{counts.cancelled}</h2>
-          </div>
+          </a>
         </div>
 
         <div
