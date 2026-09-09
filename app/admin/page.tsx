@@ -89,7 +89,6 @@ async function logoutAdmin() {
   "use server";
 
   const cookieStore = await cookies();
-
   cookieStore.delete("admin_session");
 
   redirect("/admin");
@@ -177,10 +176,7 @@ async function getBookingCounts(): Promise<BookingCounts> {
       cancelled: cancelledResult.count || 0,
     };
   } catch (error) {
-    console.error(
-      "Booking count error:",
-      error
-    );
+    console.error("Booking count error:", error);
 
     return {
       total: 0,
@@ -303,6 +299,23 @@ async function updateBookingStatus(
   }
 }
 
+function countCardStyle(active: boolean) {
+  return {
+    textDecoration: "none",
+    color: "inherit",
+    cursor: "pointer",
+    border: active
+      ? "2px solid #63e6c6"
+      : undefined,
+    boxShadow: active
+      ? "0 0 0 3px rgba(99, 230, 198, 0.12)"
+      : undefined,
+    transform: active
+      ? "translateY(-2px)"
+      : undefined,
+  };
+}
+
 export default async function AdminPage({
   searchParams,
 }: {
@@ -323,7 +336,6 @@ export default async function AdminPage({
         <div className="container">
           <div className="card">
             <h1>Admin is not configured</h1>
-
             <p className="muted">
               ADMIN_PASSWORD is missing in Vercel.
             </p>
@@ -447,11 +459,7 @@ export default async function AdminPage({
           <a
             href="/admin"
             className="card"
-            style={{
-              textDecoration: "none",
-              color: "inherit",
-              cursor: "pointer",
-            }}
+            style={countCardStyle(!status)}
           >
             <div className="muted">
               Total
@@ -462,11 +470,9 @@ export default async function AdminPage({
           <a
             href="/admin?status=new"
             className="card"
-            style={{
-              textDecoration: "none",
-              color: "inherit",
-              cursor: "pointer",
-            }}
+            style={countCardStyle(
+              status === "new"
+            )}
           >
             <div className="muted">
               New
@@ -477,11 +483,9 @@ export default async function AdminPage({
           <a
             href="/admin?status=contacted"
             className="card"
-            style={{
-              textDecoration: "none",
-              color: "inherit",
-              cursor: "pointer",
-            }}
+            style={countCardStyle(
+              status === "contacted"
+            )}
           >
             <div className="muted">
               Contacted
@@ -492,11 +496,9 @@ export default async function AdminPage({
           <a
             href="/admin?status=confirmed"
             className="card"
-            style={{
-              textDecoration: "none",
-              color: "inherit",
-              cursor: "pointer",
-            }}
+            style={countCardStyle(
+              status === "confirmed"
+            )}
           >
             <div className="muted">
               Confirmed
@@ -507,11 +509,9 @@ export default async function AdminPage({
           <a
             href="/admin?status=cancelled"
             className="card"
-            style={{
-              textDecoration: "none",
-              color: "inherit",
-              cursor: "pointer",
-            }}
+            style={countCardStyle(
+              status === "cancelled"
+            )}
           >
             <div className="muted">
               Cancelled
@@ -631,8 +631,7 @@ export default async function AdminPage({
               </h3>
 
               <p className="muted">
-                Try another search or
-                status filter.
+                Try another search or status filter.
               </p>
             </div>
           ) : (
