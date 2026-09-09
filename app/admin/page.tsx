@@ -14,6 +14,7 @@ type Booking = {
   travelers: number | null;
   message: string | null;
   status: string | null;
+  admin_notes: string | null;
   created_at: string;
 };
 
@@ -203,7 +204,7 @@ async function getBookings(
     let query = db
       .from("bookings")
       .select(
-        "id,tour_slug,name,email,dates,travelers,message,status,created_at"
+        "id,tour_slug,name,email,dates,travelers,message,status,admin_notes,created_at"
       )
       .order("created_at", {
         ascending: false,
@@ -670,9 +671,24 @@ export default async function AdminPage({
                 className="card"
                 key={booking.id}
               >
-                <span className="pill">
-                  {booking.status || "new"}
-                </span>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 8,
+                    flexWrap: "wrap",
+                    alignItems: "center",
+                  }}
+                >
+                  <span className="pill">
+                    {booking.status || "new"}
+                  </span>
+
+                  {booking.admin_notes?.trim() ? (
+                    <span className="pill">
+                      Has notes
+                    </span>
+                  ) : null}
+                </div>
 
                 <h3
                   style={{
