@@ -17,6 +17,14 @@ type Booking = {
   created_at: string;
 };
 
+type BookingCounts = {
+  total: number;
+  new: number;
+  contacted: number;
+  confirmed: number;
+  cancelled: number;
+};
+
 const allowedStatuses = [
   "new",
   "contacted",
@@ -109,6 +117,80 @@ async function getDb() {
     supabaseUrl,
     supabaseServiceKey
   );
+}
+
+async function getBookingCounts(): Promise<BookingCounts> {
+  try {
+    const db = await getDb();
+
+    const [
+      totalResult,
+      newResult,
+      contactedResult,
+      confirmedResult,
+      cancelledResult,
+    ] = await Promise.all([
+      db
+        .from("bookings")
+        .select("*", {
+          count: "exact",
+          head: true,
+        }),
+
+      db
+        .from("bookings")
+        .select("*", {
+          count: "exact",
+          head: true,
+        })
+        .eq("status", "new"),
+
+      db
+        .from("bookings")
+        .select("*", {
+          count: "exact",
+          head: true,
+        })
+        .eq("status", "contacted"),
+
+      db
+        .from("bookings")
+        .select("*", {
+          count: "exact",
+          head: true,
+        })
+        .eq("status", "confirmed"),
+
+      db
+        .from("bookings")
+        .select("*", {
+          count: "exact",
+          head: true,
+        })
+        .eq("status", "cancelled"),
+    ]);
+
+    return {
+      total: totalResult.count || 0,
+      new: newResult.count || 0,
+      contacted: contactedResult.count || 0,
+      confirmed: confirmedResult.count || 0,
+      cancelled: cancelledResult.count || 0,
+    };
+  } catch (error) {
+    console.error(
+      "Booking count error:",
+      error
+    );
+
+    return {
+      total: 0,
+      new: 0,
+      contacted: 0,
+      confirmed: 0,
+      cancelled: 0,
+    };
+  }
 }
 
 async function getBookings(
@@ -241,9 +323,7 @@ export default async function AdminPage({
       <section className="section">
         <div className="container">
           <div className="card">
-            <h1>
-              Admin is not configured
-            </h1>
+            <h1>Admin is not configured</h1>
 
             <p className="muted">
               ADMIN_PASSWORD is missing in Vercel.
@@ -326,8 +406,11 @@ export default async function AdminPage({
   const status =
     String(params.status || "").trim();
 
-  const bookings =
-    await getBookings(search, status);
+  const [bookings, counts] =
+    await Promise.all([
+      getBookings(search, status),
+      getBookingCounts(),
+    ]);
 
   return (
     <section className="section">
@@ -337,9 +420,7 @@ export default async function AdminPage({
             ADMIN DASHBOARD
           </div>
 
-          <h1>
-            Booking requests
-          </h1>
+          <h1>Booking requests</h1>
 
           <p className="muted">
             Search, filter and manage
@@ -354,6 +435,55 @@ export default async function AdminPage({
               Log out
             </button>
           </form>
+        </div>
+
+        <div
+          className="grid"
+          style={{
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(160px, 1fr))",
+            marginBottom: 24,
+          }}
+        >
+          <div className="card">
+            <div className="muted">
+              Total
+            </div>
+
+            <h2>{counts.total}</h2>
+          </div>
+
+          <div className="card">
+            <div className="muted">
+              New
+            </div>
+
+            <h2>{counts.new}</h2>
+          </div>
+
+          <div className="card">
+            <div className="muted">
+              Contacted
+            </div>
+
+            <h2>{counts.contacted}</h2>
+          </div>
+
+          <div className="card">
+            <div className="muted">
+              Confirmed
+            </div>
+
+            <h2>{counts.confirmed}</h2>
+          </div>
+
+          <div className="card">
+            <div className="muted">
+              Cancelled
+            </div>
+
+            <h2>{counts.cancelled}</h2>
+          </div>
         </div>
 
         <div
@@ -385,9 +515,7 @@ export default async function AdminPage({
               </div>
 
               <div className="field">
-                <label>
-                  Status
-                </label>
+                <label>Status</label>
 
                 <select
                   name="status"
@@ -469,7 +597,8 @@ export default async function AdminPage({
               </h3>
 
               <p className="muted">
-                Try another search or status filter.
+                Try another search or
+                status filter.
               </p>
             </div>
           ) : (
