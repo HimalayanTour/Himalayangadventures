@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { createHash } from "crypto";
 
 export const runtime = "nodejs";
@@ -16,10 +17,31 @@ type Booking = {
   created_at: string;
 };
 
+const allowedStatuses = [
+  "new",
+  "contacted",
+  "confirmed",
+  "cancelled",
+];
+
 function makeAdminToken(password: string) {
   return createHash("sha256")
     .update(password)
     .digest("hex");
+}
+
+async function isAdminLoggedIn() {
+  const adminPassword = process.env.ADMIN_PASSWORD;
+
+  if (!adminPassword) {
+    return false;
+  }
+
+  const cookieStore = await cookies();
+  const session =
+    cookieStore.get("admin_session")?.value;
+
+  return session === makeAdminToken(adminPassword);
 }
 
 async function loginAdmin(formData: FormData) {
@@ -29,8 +51,7 @@ async function loginAdmin(formData: FormData) {
     formData.get("password") || ""
   );
 
-  const adminPassword =
-    process.env.ADMIN_PASSWORD;
+  const adminPassword = process.env.ADMIN_PASSWORD;
 
   if (
     !adminPassword ||
@@ -60,72 +81,119 @@ async function logoutAdmin() {
   "use server";
 
   const cookieStore = await cookies();
-
   cookieStore.delete("admin_session");
 
   redirect("/admin");
 }
 
-async function isAdminLoggedIn() {
-  const adminPassword =
-    process.env.ADMIN_PASSWORD;
-
-  if (!adminPassword) {
-    return false;
-  }
-
-  const cookieStore = await cookies();
-
-  const session =
-    cookieStore.get("admin_session")?.value;
-
-  return (
-    session === makeAdminToken(adminPassword)
-  );
-}
-
-async function getBookings(): Promise<Booking[]> {
+async function getDb() {
   const supabaseUrl =
     process.env.NEXT_PUBLIC_SUPABASE_URL;
 
   const supabaseServiceKey =
     process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (
-    !supabaseUrl ||
-    !supabaseServiceKey
-  ) {
-    return [];
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error(
+      "Supabase environment variables are missing."
+    );
   }
 
   const { createClient } = await import(
     "@supabase/supabase-js"
   );
 
-  const db = createClient(
+  return createClient(
     supabaseUrl,
     supabaseServiceKey
   );
+}
 
-  const { data, error } = await db
-    .from("bookings")
-    .select(
-      "id,tour_slug,name,email,dates,travelers,message,status,created_at"
-    )
-    .order("created_at", {
-      ascending: false,
-    });
+async function getBookings(): Promise<Booking[]> {
+  try {
+    const db = await getDb();
 
-  if (error) {
+    const { data, error } = await db
+      .from("bookings")
+      .select(
+        "id,tour_slug,name,email,dates,travelers,message,status,created_at"
+      )
+      .order("created_at", {
+        ascending: false,
+      });
+
+    if (error) {
+      console.error(
+        "Admin bookings error:",
+        error
+      );
+
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
     console.error(
-      "Admin bookings error:",
+      "Admin database error:",
       error
     );
 
     return [];
   }
+}
 
-  return data || [];
+async function updateBookingStatus(
+  formData: FormData
+) {
+  "use server";
+
+  const loggedIn = await isAdminLoggedIn();
+
+  if (!loggedIn) {
+    redirect("/admin");
+  }
+
+  const bookingId = String(
+    formData.get("bookingId") || ""
+  );
+
+  const newStatus = String(
+    formData.get("status") || ""
+  );
+
+  if (
+    !bookingId ||
+    !allowedStatuses.includes(newStatus)
+  ) {
+    return;
+  }
+
+  try {
+    const db = await getDb();
+
+    const { error } = await db
+      .from("bookings")
+      .update({
+        status: newStatus,
+      })
+      .eq("id", bookingId);
+
+    if (error) {
+      console.error(
+        "Booking status update error:",
+        error
+      );
+
+      return;
+    }
+
+    revalidatePath("/admin");
+  } catch (error) {
+    console.error(
+      "Status update failed:",
+      error
+    );
+  }
 }
 
 export default async function AdminPage({
@@ -241,8 +309,8 @@ export default async function AdminPage({
           </h1>
 
           <p className="muted">
-            Latest customer booking
-            requests from Supabase.
+            Manage customer booking
+            requests and their status.
           </p>
 
           <form action={logoutAdmin}>
@@ -342,6 +410,68 @@ export default async function AdminPage({
                       booking.created_at
                     ).toLocaleString()}
                   </p>
+
+                  <div
+                    style={{
+                      marginTop: 18,
+                    }}
+                  >
+                    <strong>
+                      Change status
+                    </strong>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: 8,
+                        marginTop: 10,
+                      }}
+                    >
+                      {allowedStatuses.map(
+                        (status) => (
+                          <form
+                            action={
+                              updateBookingStatus
+                            }
+                            key={status}
+                          >
+                            <input
+                              type="hidden"
+                              name="bookingId"
+                              value={
+                                booking.id
+                              }
+                            />
+
+                            <input
+                              type="hidden"
+                              name="status"
+                              value={status}
+                            />
+
+                            <button
+                              className="btn"
+                              type="submit"
+                              disabled={
+                                booking.status ===
+                                status
+                              }
+                              style={{
+                                opacity:
+                                  booking.status ===
+                                  status
+                                    ? 0.5
+                                    : 1,
+                              }}
+                            >
+                              {status}
+                            </button>
+                          </form>
+                        )
+                      )}
+                    </div>
+                  </div>
                 </div>
               )
             )
