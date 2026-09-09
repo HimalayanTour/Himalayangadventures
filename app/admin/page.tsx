@@ -1339,7 +1339,7 @@ export default async function AdminPage({
               justifyContent:
                 "center",
               alignItems: "center",
-              gap: 12,
+              gap: 10,
               marginTop: 28,
               flexWrap: "wrap",
             }}
@@ -1371,10 +1371,48 @@ export default async function AdminPage({
               </span>
             )}
 
-            <span className="pill">
-              Page {page} of{" "}
-              {totalPages}
-            </span>
+            {Array.from(
+              {
+                length:
+                  totalPages,
+              },
+              (_, index) =>
+                index + 1
+            ).map(
+              (pageNumber) => (
+                <a
+                  key={
+                    pageNumber
+                  }
+                  href={buildAdminUrl({
+                    status,
+                    notesOnly,
+                    sort,
+                    search,
+                    page:
+                      pageNumber,
+                  })}
+                  className="btn"
+                  style={{
+                    opacity:
+                      pageNumber ===
+                      page
+                        ? 0.55
+                        : 1,
+                    pointerEvents:
+                      pageNumber ===
+                      page
+                        ? "none"
+                        : "auto",
+                    minWidth: 44,
+                    textAlign:
+                      "center",
+                  }}
+                >
+                  {pageNumber}
+                </a>
+              )
+            )}
 
             {page <
             totalPages ? (
