@@ -33,6 +33,13 @@ const allowedStatuses = [
   "cancelled",
 ];
 
+const allowedSorts = [
+  "newest",
+  "oldest",
+  "name",
+  "travelers",
+];
+
 function makeAdminToken(password: string) {
   return createHash("sha256")
     .update(password)
@@ -40,7 +47,8 @@ function makeAdminToken(password: string) {
 }
 
 async function isAdminLoggedIn() {
-  const adminPassword = process.env.ADMIN_PASSWORD;
+  const adminPassword =
+    process.env.ADMIN_PASSWORD;
 
   if (!adminPassword) {
     return false;
@@ -49,19 +57,27 @@ async function isAdminLoggedIn() {
   const cookieStore = await cookies();
 
   const session =
-    cookieStore.get("admin_session")?.value;
+    cookieStore.get(
+      "admin_session"
+    )?.value;
 
-  return session === makeAdminToken(adminPassword);
+  return (
+    session ===
+    makeAdminToken(adminPassword)
+  );
 }
 
-async function loginAdmin(formData: FormData) {
+async function loginAdmin(
+  formData: FormData
+) {
   "use server";
 
   const enteredPassword = String(
     formData.get("password") || ""
   );
 
-  const adminPassword = process.env.ADMIN_PASSWORD;
+  const adminPassword =
+    process.env.ADMIN_PASSWORD;
 
   if (
     !adminPassword ||
@@ -92,27 +108,35 @@ async function logoutAdmin() {
 
   const cookieStore = await cookies();
 
-  cookieStore.delete("admin_session");
+  cookieStore.delete(
+    "admin_session"
+  );
 
   redirect("/admin");
 }
 
 async function getDb() {
   const supabaseUrl =
-    process.env.NEXT_PUBLIC_SUPABASE_URL;
+    process.env
+      .NEXT_PUBLIC_SUPABASE_URL;
 
   const supabaseServiceKey =
-    process.env.SUPABASE_SERVICE_ROLE_KEY;
+    process.env
+      .SUPABASE_SERVICE_ROLE_KEY;
 
-  if (!supabaseUrl || !supabaseServiceKey) {
+  if (
+    !supabaseUrl ||
+    !supabaseServiceKey
+  ) {
     throw new Error(
       "Supabase environment variables are missing."
     );
   }
 
-  const { createClient } = await import(
-    "@supabase/supabase-js"
-  );
+  const { createClient } =
+    await import(
+      "@supabase/supabase-js"
+    );
 
   return createClient(
     supabaseUrl,
@@ -120,7 +144,8 @@ async function getDb() {
   );
 }
 
-async function getBookingCounts(): Promise<BookingCounts> {
+async function getBookingCounts():
+Promise<BookingCounts> {
   try {
     const db = await getDb();
 
@@ -152,7 +177,10 @@ async function getBookingCounts(): Promise<BookingCounts> {
           count: "exact",
           head: true,
         })
-        .eq("status", "contacted"),
+        .eq(
+          "status",
+          "contacted"
+        ),
 
       db
         .from("bookings")
@@ -160,7 +188,10 @@ async function getBookingCounts(): Promise<BookingCounts> {
           count: "exact",
           head: true,
         })
-        .eq("status", "confirmed"),
+        .eq(
+          "status",
+          "confirmed"
+        ),
 
       db
         .from("bookings")
@@ -168,15 +199,23 @@ async function getBookingCounts(): Promise<BookingCounts> {
           count: "exact",
           head: true,
         })
-        .eq("status", "cancelled"),
+        .eq(
+          "status",
+          "cancelled"
+        ),
     ]);
 
     return {
-      total: totalResult.count || 0,
-      new: newResult.count || 0,
-      contacted: contactedResult.count || 0,
-      confirmed: confirmedResult.count || 0,
-      cancelled: cancelledResult.count || 0,
+      total:
+        totalResult.count || 0,
+      new:
+        newResult.count || 0,
+      contacted:
+        contactedResult.count || 0,
+      confirmed:
+        confirmedResult.count || 0,
+      cancelled:
+        cancelledResult.count || 0,
     };
   } catch (error) {
     console.error(
@@ -197,7 +236,8 @@ async function getBookingCounts(): Promise<BookingCounts> {
 async function getBookings(
   search: string,
   status: string,
-  notesOnly: boolean
+  notesOnly: boolean,
+  sort: string
 ): Promise<Booking[]> {
   try {
     const db = await getDb();
@@ -206,27 +246,39 @@ async function getBookings(
       .from("bookings")
       .select(
         "id,tour_slug,name,email,dates,travelers,message,status,admin_notes,created_at"
-      )
-      .order("created_at", {
-        ascending: false,
-      });
+      );
 
     if (
       status &&
-      allowedStatuses.includes(status)
+      allowedStatuses.includes(
+        status
+      )
     ) {
-      query = query.eq("status", status);
+      query = query.eq(
+        "status",
+        status
+      );
     }
 
     if (notesOnly) {
       query = query
-        .not("admin_notes", "is", null)
-        .neq("admin_notes", "");
+        .not(
+          "admin_notes",
+          "is",
+          null
+        )
+        .neq(
+          "admin_notes",
+          ""
+        );
     }
 
     if (search) {
       const safeSearch = search
-        .replace(/[%_,()]/g, " ")
+        .replace(
+          /[%_,()]/g,
+          " "
+        )
         .trim();
 
       if (safeSearch) {
@@ -236,7 +288,43 @@ async function getBookings(
       }
     }
 
-    const { data, error } = await query;
+    if (sort === "oldest") {
+      query = query.order(
+        "created_at",
+        {
+          ascending: true,
+        }
+      );
+    } else if (
+      sort === "name"
+    ) {
+      query = query.order(
+        "name",
+        {
+          ascending: true,
+        }
+      );
+    } else if (
+      sort === "travelers"
+    ) {
+      query = query.order(
+        "travelers",
+        {
+          ascending: false,
+          nullsFirst: false,
+        }
+      );
+    } else {
+      query = query.order(
+        "created_at",
+        {
+          ascending: false,
+        }
+      );
+    }
+
+    const { data, error } =
+      await query;
 
     if (error) {
       console.error(
@@ -263,23 +351,30 @@ async function updateBookingStatus(
 ) {
   "use server";
 
-  const loggedIn = await isAdminLoggedIn();
+  const loggedIn =
+    await isAdminLoggedIn();
 
   if (!loggedIn) {
     redirect("/admin");
   }
 
   const bookingId = String(
-    formData.get("bookingId") || ""
+    formData.get(
+      "bookingId"
+    ) || ""
   );
 
   const newStatus = String(
-    formData.get("status") || ""
+    formData.get(
+      "status"
+    ) || ""
   );
 
   if (
     !bookingId ||
-    !allowedStatuses.includes(newStatus)
+    !allowedStatuses.includes(
+      newStatus
+    )
   ) {
     return;
   }
@@ -287,12 +382,16 @@ async function updateBookingStatus(
   try {
     const db = await getDb();
 
-    const { error } = await db
-      .from("bookings")
-      .update({
-        status: newStatus,
-      })
-      .eq("id", bookingId);
+    const { error } =
+      await db
+        .from("bookings")
+        .update({
+          status: newStatus,
+        })
+        .eq(
+          "id",
+          bookingId
+        );
 
     if (error) {
       console.error(
@@ -303,7 +402,9 @@ async function updateBookingStatus(
       return;
     }
 
-    revalidatePath("/admin");
+    revalidatePath(
+      "/admin"
+    );
   } catch (error) {
     console.error(
       "Status update failed:",
@@ -312,7 +413,9 @@ async function updateBookingStatus(
   }
 }
 
-function countCardStyle(active: boolean) {
+function countCardStyle(
+  active: boolean
+) {
   return {
     textDecoration: "none",
     color: "inherit",
@@ -329,19 +432,48 @@ function countCardStyle(active: boolean) {
   };
 }
 
-function statusLink(
-  status: string,
-  notesOnly: boolean
-) {
-  if (!status) {
-    return notesOnly
-      ? "/admin?notes=1"
-      : "/admin";
+function buildAdminUrl({
+  status,
+  notesOnly,
+  sort,
+}: {
+  status?: string;
+  notesOnly: boolean;
+  sort: string;
+}) {
+  const params =
+    new URLSearchParams();
+
+  if (status) {
+    params.set(
+      "status",
+      status
+    );
   }
 
-  return notesOnly
-    ? `/admin?status=${status}&notes=1`
-    : `/admin?status=${status}`;
+  if (notesOnly) {
+    params.set(
+      "notes",
+      "1"
+    );
+  }
+
+  if (
+    sort &&
+    sort !== "newest"
+  ) {
+    params.set(
+      "sort",
+      sort
+    );
+  }
+
+  const qs =
+    params.toString();
+
+  return qs
+    ? `/admin?${qs}`
+    : "/admin";
 }
 
 export default async function AdminPage({
@@ -352,9 +484,11 @@ export default async function AdminPage({
     q?: string;
     status?: string;
     notes?: string;
+    sort?: string;
   }>;
 }) {
-  const params = await searchParams;
+  const params =
+    await searchParams;
 
   const adminPassword =
     process.env.ADMIN_PASSWORD;
@@ -369,7 +503,8 @@ export default async function AdminPage({
             </h1>
 
             <p className="muted">
-              ADMIN_PASSWORD is missing in Vercel.
+              ADMIN_PASSWORD is
+              missing in Vercel.
             </p>
           </div>
         </div>
@@ -399,8 +534,9 @@ export default async function AdminPage({
             </h1>
 
             <p className="muted">
-              Enter your admin password
-              to view booking requests.
+              Enter your admin
+              password to view
+              booking requests.
             </p>
           </div>
 
@@ -417,7 +553,8 @@ export default async function AdminPage({
                 name="password"
                 type="password"
                 required
-                autoComplete="current-password"
+                autoComplete=
+                  "current-password"
               />
             </div>
 
@@ -446,20 +583,37 @@ export default async function AdminPage({
   }
 
   const search =
-    String(params.q || "").trim();
+    String(
+      params.q || ""
+    ).trim();
 
   const status =
-    String(params.status || "").trim();
+    String(
+      params.status || ""
+    ).trim();
 
   const notesOnly =
     params.notes === "1";
+
+  const requestedSort =
+    String(
+      params.sort || "newest"
+    );
+
+  const sort =
+    allowedSorts.includes(
+      requestedSort
+    )
+      ? requestedSort
+      : "newest";
 
   const [bookings, counts] =
     await Promise.all([
       getBookings(
         search,
         status,
-        notesOnly
+        notesOnly,
+        sort
       ),
       getBookingCounts(),
     ]);
@@ -477,11 +631,14 @@ export default async function AdminPage({
           </h1>
 
           <p className="muted">
-            Search, filter and manage
-            customer booking requests.
+            Search, filter, sort
+            and manage customer
+            booking requests.
           </p>
 
-          <form action={logoutAdmin}>
+          <form
+            action={logoutAdmin}
+          >
             <button
               className="btn"
               type="submit"
@@ -500,9 +657,14 @@ export default async function AdminPage({
           }}
         >
           <a
-            href={statusLink("", notesOnly)}
+            href={buildAdminUrl({
+              notesOnly,
+              sort,
+            })}
             className="card"
-            style={countCardStyle(!status)}
+            style={countCardStyle(
+              !status
+            )}
           >
             <div className="muted">
               Total
@@ -514,10 +676,11 @@ export default async function AdminPage({
           </a>
 
           <a
-            href={statusLink(
-              "new",
-              notesOnly
-            )}
+            href={buildAdminUrl({
+              status: "new",
+              notesOnly,
+              sort,
+            })}
             className="card"
             style={countCardStyle(
               status === "new"
@@ -533,13 +696,16 @@ export default async function AdminPage({
           </a>
 
           <a
-            href={statusLink(
-              "contacted",
-              notesOnly
-            )}
+            href={buildAdminUrl({
+              status:
+                "contacted",
+              notesOnly,
+              sort,
+            })}
             className="card"
             style={countCardStyle(
-              status === "contacted"
+              status ===
+                "contacted"
             )}
           >
             <div className="muted">
@@ -552,13 +718,16 @@ export default async function AdminPage({
           </a>
 
           <a
-            href={statusLink(
-              "confirmed",
-              notesOnly
-            )}
+            href={buildAdminUrl({
+              status:
+                "confirmed",
+              notesOnly,
+              sort,
+            })}
             className="card"
             style={countCardStyle(
-              status === "confirmed"
+              status ===
+                "confirmed"
             )}
           >
             <div className="muted">
@@ -571,13 +740,16 @@ export default async function AdminPage({
           </a>
 
           <a
-            href={statusLink(
-              "cancelled",
-              notesOnly
-            )}
+            href={buildAdminUrl({
+              status:
+                "cancelled",
+              notesOnly,
+              sort,
+            })}
             className="card"
             style={countCardStyle(
-              status === "cancelled"
+              status ===
+                "cancelled"
             )}
           >
             <div className="muted">
@@ -601,7 +773,7 @@ export default async function AdminPage({
               style={{
                 display: "grid",
                 gridTemplateColumns:
-                  "2fr 1fr auto",
+                  "2fr 1fr 1fr auto",
                 gap: 12,
                 alignItems: "end",
               }}
@@ -613,8 +785,11 @@ export default async function AdminPage({
 
                 <input
                   name="q"
-                  defaultValue={search}
-                  placeholder="Name, email or tour"
+                  defaultValue={
+                    search
+                  }
+                  placeholder=
+                    "Name, email or tour"
                 />
               </div>
 
@@ -625,7 +800,9 @@ export default async function AdminPage({
 
                 <select
                   name="status"
-                  defaultValue={status}
+                  defaultValue={
+                    status
+                  }
                   style={{
                     width: "100%",
                     padding: 14,
@@ -640,16 +817,64 @@ export default async function AdminPage({
                     New
                   </option>
 
-                  <option value="contacted">
+                  <option value=
+                    "contacted"
+                  >
                     Contacted
                   </option>
 
-                  <option value="confirmed">
+                  <option value=
+                    "confirmed"
+                  >
                     Confirmed
                   </option>
 
-                  <option value="cancelled">
+                  <option value=
+                    "cancelled"
+                  >
                     Cancelled
+                  </option>
+                </select>
+              </div>
+
+              <div className="field">
+                <label>
+                  Sort
+                </label>
+
+                <select
+                  name="sort"
+                  defaultValue={
+                    sort
+                  }
+                  style={{
+                    width: "100%",
+                    padding: 14,
+                    borderRadius: 12,
+                  }}
+                >
+                  <option
+                    value="newest"
+                  >
+                    Newest first
+                  </option>
+
+                  <option
+                    value="oldest"
+                  >
+                    Oldest first
+                  </option>
+
+                  <option
+                    value="name"
+                  >
+                    Name A–Z
+                  </option>
+
+                  <option
+                    value="travelers"
+                  >
+                    Most travelers
                   </option>
                 </select>
               </div>
@@ -665,17 +890,21 @@ export default async function AdminPage({
             <label
               style={{
                 display: "flex",
-                alignItems: "center",
+                alignItems:
+                  "center",
                 gap: 10,
                 marginTop: 16,
-                cursor: "pointer",
+                cursor:
+                  "pointer",
               }}
             >
               <input
                 type="checkbox"
                 name="notes"
                 value="1"
-                defaultChecked={notesOnly}
+                defaultChecked={
+                  notesOnly
+                }
                 style={{
                   width: 18,
                   height: 18,
@@ -687,14 +916,18 @@ export default async function AdminPage({
               </strong>
 
               <span className="muted">
-                Show only bookings with private admin notes
+                Show only bookings
+                with private admin
+                notes
               </span>
             </label>
           </form>
 
           {(search ||
             status ||
-            notesOnly) && (
+            notesOnly ||
+            sort !==
+              "newest") && (
             <div
               style={{
                 marginTop: 14,
@@ -716,8 +949,11 @@ export default async function AdminPage({
             marginBottom: 18,
           }}
         >
-          Showing {bookings.length} booking
-          {bookings.length === 1 ? "" : "s"}
+          Showing{" "}
+          {bookings.length} booking
+          {bookings.length === 1
+            ? ""
+            : "s"}
 
           {notesOnly
             ? " with admin notes"
@@ -738,170 +974,196 @@ export default async function AdminPage({
               </h3>
 
               <p className="muted">
-                Try another search or
-                status filter.
+                Try another search,
+                status filter or sort.
               </p>
             </div>
           ) : (
-            bookings.map((booking) => (
-              <div
-                className="card"
-                key={booking.id}
-              >
+            bookings.map(
+              (booking) => (
                 <div
-                  style={{
-                    display: "flex",
-                    gap: 8,
-                    flexWrap: "wrap",
-                    alignItems: "center",
-                  }}
+                  className="card"
+                  key={booking.id}
                 >
-                  <span className="pill">
-                    {booking.status || "new"}
-                  </span>
-
-                  {booking.admin_notes?.trim() ? (
-                    <span className="pill">
-                      Has notes
-                    </span>
-                  ) : null}
-                </div>
-
-                <h3
-                  style={{
-                    marginTop: 14,
-                  }}
-                >
-                  {booking.name}
-                </h3>
-
-                <p>
-                  <strong>
-                    Tour:
-                  </strong>{" "}
-                  {booking.tour_slug ||
-                    "Not specified"}
-                </p>
-
-                <p>
-                  <strong>
-                    Email:
-                  </strong>{" "}
-                  <a
-                    href={`mailto:${booking.email}`}
-                  >
-                    {booking.email}
-                  </a>
-                </p>
-
-                <p>
-                  <strong>
-                    Dates:
-                  </strong>{" "}
-                  {booking.dates ||
-                    "Not specified"}
-                </p>
-
-                <p>
-                  <strong>
-                    Travelers:
-                  </strong>{" "}
-                  {booking.travelers || 1}
-                </p>
-
-                <p>
-                  <strong>
-                    Message:
-                  </strong>
-
-                  <br />
-
-                  {booking.message ||
-                    "No message"}
-                </p>
-
-                <a
-                  href={`/admin/bookings/${booking.id}`}
-                  className="btn"
-                  style={{
-                    display: "inline-block",
-                    marginTop: 14,
-                    marginBottom: 14,
-                  }}
-                >
-                  View booking
-                </a>
-
-                <p className="muted">
-                  Received:{" "}
-                  {new Date(
-                    booking.created_at
-                  ).toLocaleString()}
-                </p>
-
-                <div
-                  style={{
-                    marginTop: 18,
-                  }}
-                >
-                  <strong>
-                    Change status
-                  </strong>
-
                   <div
                     style={{
                       display: "flex",
-                      flexWrap: "wrap",
                       gap: 8,
-                      marginTop: 10,
+                      flexWrap:
+                        "wrap",
+                      alignItems:
+                        "center",
                     }}
                   >
-                    {allowedStatuses.map(
-                      (bookingStatus) => (
-                        <form
-                          action={
-                            updateBookingStatus
-                          }
-                          key={bookingStatus}
-                        >
-                          <input
-                            type="hidden"
-                            name="bookingId"
-                            value={booking.id}
-                          />
+                    <span className="pill">
+                      {booking.status ||
+                        "new"}
+                    </span>
 
-                          <input
-                            type="hidden"
-                            name="status"
-                            value={
+                    {booking.admin_notes
+                      ?.trim() ? (
+                      <span className="pill">
+                        Has notes
+                      </span>
+                    ) : null}
+                  </div>
+
+                  <h3
+                    style={{
+                      marginTop: 14,
+                    }}
+                  >
+                    {booking.name}
+                  </h3>
+
+                  <p>
+                    <strong>
+                      Tour:
+                    </strong>{" "}
+                    {booking.tour_slug ||
+                      "Not specified"}
+                  </p>
+
+                  <p>
+                    <strong>
+                      Email:
+                    </strong>{" "}
+                    <a
+                      href={`mailto:${booking.email}`}
+                    >
+                      {
+                        booking.email
+                      }
+                    </a>
+                  </p>
+
+                  <p>
+                    <strong>
+                      Dates:
+                    </strong>{" "}
+                    {booking.dates ||
+                      "Not specified"}
+                  </p>
+
+                  <p>
+                    <strong>
+                      Travelers:
+                    </strong>{" "}
+                    {booking.travelers ||
+                      1}
+                  </p>
+
+                  <p>
+                    <strong>
+                      Message:
+                    </strong>
+
+                    <br />
+
+                    {booking.message ||
+                      "No message"}
+                  </p>
+
+                  <a
+                    href={`/admin/bookings/${booking.id}`}
+                    className="btn"
+                    style={{
+                      display:
+                        "inline-block",
+                      marginTop: 14,
+                      marginBottom:
+                        14,
+                    }}
+                  >
+                    View booking
+                  </a>
+
+                  <p className="muted">
+                    Received:{" "}
+                    {new Date(
+                      booking.created_at
+                    ).toLocaleString()}
+                  </p>
+
+                  <div
+                    style={{
+                      marginTop: 18,
+                    }}
+                  >
+                    <strong>
+                      Change status
+                    </strong>
+
+                    <div
+                      style={{
+                        display:
+                          "flex",
+                        flexWrap:
+                          "wrap",
+                        gap: 8,
+                        marginTop:
+                          10,
+                      }}
+                    >
+                      {allowedStatuses.map(
+                        (
+                          bookingStatus
+                        ) => (
+                          <form
+                            action={
+                              updateBookingStatus
+                            }
+                            key={
                               bookingStatus
                             }
-                          />
+                          >
+                            <input
+                              type="hidden"
+                              name=
+                                "bookingId"
+                              value={
+                                booking.id
+                              }
+                            />
 
-                          <button
-                            className="btn"
-                            type="submit"
-                            disabled={
-                              booking.status ===
-                              bookingStatus
-                            }
-                            style={{
-                              opacity:
+                            <input
+                              type="hidden"
+                              name=
+                                "status"
+                              value={
+                                bookingStatus
+                              }
+                            />
+
+                            <button
+                              className=
+                                "btn"
+                              type=
+                                "submit"
+                              disabled={
                                 booking.status ===
                                 bookingStatus
-                                  ? 0.5
-                                  : 1,
-                            }}
-                          >
-                            {bookingStatus}
-                          </button>
-                        </form>
-                      )
-                    )}
+                              }
+                              style={{
+                                opacity:
+                                  booking.status ===
+                                  bookingStatus
+                                    ? 0.5
+                                    : 1,
+                              }}
+                            >
+                              {
+                                bookingStatus
+                              }
+                            </button>
+                          </form>
+                        )
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))
+              )
+            )
           )}
         </div>
       </div>
