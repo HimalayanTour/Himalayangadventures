@@ -5,6 +5,8 @@ import { createHash } from "crypto";
 
 export const runtime = "nodejs";
 
+const PAGE_SIZE = 10;
+
 type Booking = {
   id: string;
   tour_slug: string | null;
@@ -54,7 +56,8 @@ async function isAdminLoggedIn() {
     return false;
   }
 
-  const cookieStore = await cookies();
+  const cookieStore =
+    await cookies();
 
   const session =
     cookieStore.get(
@@ -63,7 +66,9 @@ async function isAdminLoggedIn() {
 
   return (
     session ===
-    makeAdminToken(adminPassword)
+    makeAdminToken(
+      adminPassword
+    )
   );
 }
 
@@ -72,31 +77,41 @@ async function loginAdmin(
 ) {
   "use server";
 
-  const enteredPassword = String(
-    formData.get("password") || ""
-  );
+  const enteredPassword =
+    String(
+      formData.get(
+        "password"
+      ) || ""
+    );
 
   const adminPassword =
     process.env.ADMIN_PASSWORD;
 
   if (
     !adminPassword ||
-    enteredPassword !== adminPassword
+    enteredPassword !==
+      adminPassword
   ) {
-    redirect("/admin?error=1");
+    redirect(
+      "/admin?error=1"
+    );
   }
 
-  const cookieStore = await cookies();
+  const cookieStore =
+    await cookies();
 
   cookieStore.set(
     "admin_session",
-    makeAdminToken(adminPassword),
+    makeAdminToken(
+      adminPassword
+    ),
     {
       httpOnly: true,
       secure: true,
       sameSite: "strict",
       path: "/",
-      maxAge: 60 * 60 * 8,
+      maxAge:
+        60 * 60 * 8,
     }
   );
 
@@ -106,7 +121,8 @@ async function loginAdmin(
 async function logoutAdmin() {
   "use server";
 
-  const cookieStore = await cookies();
+  const cookieStore =
+    await cookies();
 
   cookieStore.delete(
     "admin_session"
@@ -169,7 +185,10 @@ Promise<BookingCounts> {
           count: "exact",
           head: true,
         })
-        .eq("status", "new"),
+        .eq(
+          "status",
+          "new"
+        ),
 
       db
         .from("bookings")
@@ -237,15 +256,23 @@ async function getBookings(
   search: string,
   status: string,
   notesOnly: boolean,
-  sort: string
-): Promise<Booking[]> {
+  sort: string,
+  page: number
+): Promise<{
+  bookings: Booking[];
+  totalFiltered: number;
+}> {
   try {
-    const db = await getDb();
+    const db =
+      await getDb();
 
     let query = db
       .from("bookings")
       .select(
-        "id,tour_slug,name,email,dates,travelers,message,status,admin_notes,created_at"
+        "id,tour_slug,name,email,dates,travelers,message,status,admin_notes,created_at",
+        {
+          count: "exact",
+        }
       );
 
     if (
@@ -254,10 +281,11 @@ async function getBookings(
         status
       )
     ) {
-      query = query.eq(
-        "status",
-        status
-      );
+      query =
+        query.eq(
+          "status",
+          status
+        );
     }
 
     if (notesOnly) {
@@ -274,57 +302,84 @@ async function getBookings(
     }
 
     if (search) {
-      const safeSearch = search
-        .replace(
-          /[%_,()]/g,
-          " "
-        )
-        .trim();
+      const safeSearch =
+        search
+          .replace(
+            /[%_,()]/g,
+            " "
+          )
+          .trim();
 
       if (safeSearch) {
-        query = query.or(
-          `name.ilike.%${safeSearch}%,email.ilike.%${safeSearch}%,tour_slug.ilike.%${safeSearch}%`
-        );
+        query =
+          query.or(
+            `name.ilike.%${safeSearch}%,email.ilike.%${safeSearch}%,tour_slug.ilike.%${safeSearch}%`
+          );
       }
     }
 
-    if (sort === "oldest") {
-      query = query.order(
-        "created_at",
-        {
-          ascending: true,
-        }
-      );
+    if (
+      sort === "oldest"
+    ) {
+      query =
+        query.order(
+          "created_at",
+          {
+            ascending: true,
+          }
+        );
     } else if (
       sort === "name"
     ) {
-      query = query.order(
-        "name",
-        {
-          ascending: true,
-        }
-      );
+      query =
+        query.order(
+          "name",
+          {
+            ascending: true,
+          }
+        );
     } else if (
-      sort === "travelers"
+      sort ===
+      "travelers"
     ) {
-      query = query.order(
-        "travelers",
-        {
-          ascending: false,
-          nullsFirst: false,
-        }
-      );
+      query =
+        query.order(
+          "travelers",
+          {
+            ascending: false,
+            nullsFirst: false,
+          }
+        );
     } else {
-      query = query.order(
-        "created_at",
-        {
-          ascending: false,
-        }
-      );
+      query =
+        query.order(
+          "created_at",
+          {
+            ascending: false,
+          }
+        );
     }
 
-    const { data, error } =
-      await query;
+    const from =
+      (page - 1) *
+      PAGE_SIZE;
+
+    const to =
+      from +
+      PAGE_SIZE -
+      1;
+
+    query =
+      query.range(
+        from,
+        to
+      );
+
+    const {
+      data,
+      error,
+      count,
+    } = await query;
 
     if (error) {
       console.error(
@@ -332,17 +387,28 @@ async function getBookings(
         error
       );
 
-      return [];
+      return {
+        bookings: [],
+        totalFiltered: 0,
+      };
     }
 
-    return data || [];
+    return {
+      bookings:
+        data || [],
+      totalFiltered:
+        count || 0,
+    };
   } catch (error) {
     console.error(
       "Admin database error:",
       error
     );
 
-    return [];
+    return {
+      bookings: [],
+      totalFiltered: 0,
+    };
   }
 }
 
@@ -358,17 +424,19 @@ async function updateBookingStatus(
     redirect("/admin");
   }
 
-  const bookingId = String(
-    formData.get(
-      "bookingId"
-    ) || ""
-  );
+  const bookingId =
+    String(
+      formData.get(
+        "bookingId"
+      ) || ""
+    );
 
-  const newStatus = String(
-    formData.get(
-      "status"
-    ) || ""
-  );
+  const newStatus =
+    String(
+      formData.get(
+        "status"
+      ) || ""
+    );
 
   if (
     !bookingId ||
@@ -380,13 +448,15 @@ async function updateBookingStatus(
   }
 
   try {
-    const db = await getDb();
+    const db =
+      await getDb();
 
     const { error } =
       await db
         .from("bookings")
         .update({
-          status: newStatus,
+          status:
+            newStatus,
         })
         .eq(
           "id",
@@ -436,13 +506,24 @@ function buildAdminUrl({
   status,
   notesOnly,
   sort,
+  search,
+  page,
 }: {
   status?: string;
   notesOnly: boolean;
   sort: string;
+  search?: string;
+  page?: number;
 }) {
   const params =
     new URLSearchParams();
+
+  if (search) {
+    params.set(
+      "q",
+      search
+    );
+  }
 
   if (status) {
     params.set(
@@ -468,6 +549,16 @@ function buildAdminUrl({
     );
   }
 
+  if (
+    page &&
+    page > 1
+  ) {
+    params.set(
+      "page",
+      String(page)
+    );
+  }
+
   const qs =
     params.toString();
 
@@ -485,6 +576,7 @@ export default async function AdminPage({
     status?: string;
     notes?: string;
     sort?: string;
+    page?: string;
   }>;
 }) {
   const params =
@@ -607,16 +699,65 @@ export default async function AdminPage({
       ? requestedSort
       : "newest";
 
-  const [bookings, counts] =
-    await Promise.all([
-      getBookings(
-        search,
+  const requestedPage =
+    Number(
+      params.page || "1"
+    );
+
+  const page =
+    Number.isFinite(
+      requestedPage
+    ) &&
+    requestedPage > 0
+      ? Math.floor(
+          requestedPage
+        )
+      : 1;
+
+  const [
+    bookingResult,
+    counts,
+  ] = await Promise.all([
+    getBookings(
+      search,
+      status,
+      notesOnly,
+      sort,
+      page
+    ),
+    getBookingCounts(),
+  ]);
+
+  const bookings =
+    bookingResult.bookings;
+
+  const totalFiltered =
+    bookingResult.totalFiltered;
+
+  const totalPages =
+    Math.max(
+      1,
+      Math.ceil(
+        totalFiltered /
+          PAGE_SIZE
+      )
+    );
+
+  if (
+    page > totalPages &&
+    totalFiltered > 0
+  ) {
+    redirect(
+      buildAdminUrl({
         status,
         notesOnly,
-        sort
-      ),
-      getBookingCounts(),
-    ]);
+        sort,
+        search,
+        page:
+          totalPages,
+      })
+    );
+  }
 
   return (
     <section className="section">
@@ -631,9 +772,10 @@ export default async function AdminPage({
           </h1>
 
           <p className="muted">
-            Search, filter, sort
-            and manage customer
-            booking requests.
+            Search, filter, sort,
+            paginate and manage
+            customer booking
+            requests.
           </p>
 
           <form
@@ -943,22 +1085,45 @@ export default async function AdminPage({
           )}
         </div>
 
-        <p
-          className="muted"
+        <div
           style={{
+            display: "flex",
+            justifyContent:
+              "space-between",
+            alignItems: "center",
+            gap: 16,
+            flexWrap: "wrap",
             marginBottom: 18,
           }}
         >
-          Showing{" "}
-          {bookings.length} booking
-          {bookings.length === 1
-            ? ""
-            : "s"}
+          <p
+            className="muted"
+            style={{
+              margin: 0,
+            }}
+          >
+            Showing{" "}
+            {bookings.length} of{" "}
+            {totalFiltered} booking
+            {totalFiltered === 1
+              ? ""
+              : "s"}
 
-          {notesOnly
-            ? " with admin notes"
-            : ""}
-        </p>
+            {notesOnly
+              ? " with admin notes"
+              : ""}
+          </p>
+
+          <p
+            className="muted"
+            style={{
+              margin: 0,
+            }}
+          >
+            Page {page} of{" "}
+            {totalPages}
+          </p>
+        </div>
 
         <div
           className="grid"
@@ -1166,6 +1331,80 @@ export default async function AdminPage({
             )
           )}
         </div>
+
+        {totalPages > 1 ? (
+          <div
+            style={{
+              display: "flex",
+              justifyContent:
+                "center",
+              alignItems: "center",
+              gap: 12,
+              marginTop: 28,
+              flexWrap: "wrap",
+            }}
+          >
+            {page > 1 ? (
+              <a
+                className="btn"
+                href={buildAdminUrl({
+                  status,
+                  notesOnly,
+                  sort,
+                  search,
+                  page:
+                    page - 1,
+                })}
+              >
+                ← Previous
+              </a>
+            ) : (
+              <span
+                className="btn"
+                style={{
+                  opacity: 0.5,
+                  pointerEvents:
+                    "none",
+                }}
+              >
+                ← Previous
+              </span>
+            )}
+
+            <span className="pill">
+              Page {page} of{" "}
+              {totalPages}
+            </span>
+
+            {page <
+            totalPages ? (
+              <a
+                className="btn"
+                href={buildAdminUrl({
+                  status,
+                  notesOnly,
+                  sort,
+                  search,
+                  page:
+                    page + 1,
+                })}
+              >
+                Next →
+              </a>
+            ) : (
+              <span
+                className="btn"
+                style={{
+                  opacity: 0.5,
+                  pointerEvents:
+                    "none",
+                }}
+              >
+                Next →
+              </span>
+            )}
+          </div>
+        ) : null}
       </div>
     </section>
   );
