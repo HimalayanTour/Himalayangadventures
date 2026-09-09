@@ -46,6 +46,7 @@ async function isAdminLoggedIn() {
   }
 
   const cookieStore = await cookies();
+
   const session =
     cookieStore.get("admin_session")?.value;
 
@@ -89,6 +90,7 @@ async function logoutAdmin() {
   "use server";
 
   const cookieStore = await cookies();
+
   cookieStore.delete("admin_session");
 
   redirect("/admin");
@@ -176,7 +178,10 @@ async function getBookingCounts(): Promise<BookingCounts> {
       cancelled: cancelledResult.count || 0,
     };
   } catch (error) {
-    console.error("Booking count error:", error);
+    console.error(
+      "Booking count error:",
+      error
+    );
 
     return {
       total: 0,
@@ -335,7 +340,10 @@ export default async function AdminPage({
       <section className="section">
         <div className="container">
           <div className="card">
-            <h1>Admin is not configured</h1>
+            <h1>
+              Admin is not configured
+            </h1>
+
             <p className="muted">
               ADMIN_PASSWORD is missing in Vercel.
             </p>
@@ -431,7 +439,9 @@ export default async function AdminPage({
             ADMIN DASHBOARD
           </div>
 
-          <h1>Booking requests</h1>
+          <h1>
+            Booking requests
+          </h1>
 
           <p className="muted">
             Search, filter and manage
@@ -464,7 +474,10 @@ export default async function AdminPage({
             <div className="muted">
               Total
             </div>
-            <h2>{counts.total}</h2>
+
+            <h2>
+              {counts.total}
+            </h2>
           </a>
 
           <a
@@ -477,7 +490,10 @@ export default async function AdminPage({
             <div className="muted">
               New
             </div>
-            <h2>{counts.new}</h2>
+
+            <h2>
+              {counts.new}
+            </h2>
           </a>
 
           <a
@@ -490,7 +506,10 @@ export default async function AdminPage({
             <div className="muted">
               Contacted
             </div>
-            <h2>{counts.contacted}</h2>
+
+            <h2>
+              {counts.contacted}
+            </h2>
           </a>
 
           <a
@@ -503,7 +522,10 @@ export default async function AdminPage({
             <div className="muted">
               Confirmed
             </div>
-            <h2>{counts.confirmed}</h2>
+
+            <h2>
+              {counts.confirmed}
+            </h2>
           </a>
 
           <a
@@ -516,7 +538,10 @@ export default async function AdminPage({
             <div className="muted">
               Cancelled
             </div>
-            <h2>{counts.cancelled}</h2>
+
+            <h2>
+              {counts.cancelled}
+            </h2>
           </a>
         </div>
 
@@ -549,7 +574,9 @@ export default async function AdminPage({
               </div>
 
               <div className="field">
-                <label>Status</label>
+                <label>
+                  Status
+                </label>
 
                 <select
                   name="status"
@@ -631,7 +658,8 @@ export default async function AdminPage({
               </h3>
 
               <p className="muted">
-                Try another search or status filter.
+                Try another search or
+                status filter.
               </p>
             </div>
           ) : (
@@ -653,13 +681,17 @@ export default async function AdminPage({
                 </h3>
 
                 <p>
-                  <strong>Tour:</strong>{" "}
+                  <strong>
+                    Tour:
+                  </strong>{" "}
                   {booking.tour_slug ||
                     "Not specified"}
                 </p>
 
                 <p>
-                  <strong>Email:</strong>{" "}
+                  <strong>
+                    Email:
+                  </strong>{" "}
                   <a
                     href={`mailto:${booking.email}`}
                   >
@@ -668,7 +700,9 @@ export default async function AdminPage({
                 </p>
 
                 <p>
-                  <strong>Dates:</strong>{" "}
+                  <strong>
+                    Dates:
+                  </strong>{" "}
                   {booking.dates ||
                     "Not specified"}
                 </p>
@@ -684,11 +718,24 @@ export default async function AdminPage({
                   <strong>
                     Message:
                   </strong>
+
                   <br />
 
                   {booking.message ||
                     "No message"}
                 </p>
+
+                <a
+                  href={`/admin/bookings/${booking.id}`}
+                  className="btn"
+                  style={{
+                    display: "inline-block",
+                    marginTop: 14,
+                    marginBottom: 14,
+                  }}
+                >
+                  View booking
+                </a>
 
                 <p className="muted">
                   Received:{" "}
@@ -765,4 +812,4 @@ export default async function AdminPage({
       </div>
     </section>
   );
-}
+}#
