@@ -196,7 +196,8 @@ async function getBookingCounts(): Promise<BookingCounts> {
 
 async function getBookings(
   search: string,
-  status: string
+  status: string,
+  notesOnly: boolean
 ): Promise<Booking[]> {
   try {
     const db = await getDb();
@@ -215,6 +216,12 @@ async function getBookings(
       allowedStatuses.includes(status)
     ) {
       query = query.eq("status", status);
+    }
+
+    if (notesOnly) {
+      query = query
+        .not("admin_notes", "is", null)
+        .neq("admin_notes", "");
     }
 
     if (search) {
@@ -322,6 +329,21 @@ function countCardStyle(active: boolean) {
   };
 }
 
+function statusLink(
+  status: string,
+  notesOnly: boolean
+) {
+  if (!status) {
+    return notesOnly
+      ? "/admin?notes=1"
+      : "/admin";
+  }
+
+  return notesOnly
+    ? `/admin?status=${status}&notes=1`
+    : `/admin?status=${status}`;
+}
+
 export default async function AdminPage({
   searchParams,
 }: {
@@ -329,6 +351,7 @@ export default async function AdminPage({
     error?: string;
     q?: string;
     status?: string;
+    notes?: string;
   }>;
 }) {
   const params = await searchParams;
@@ -428,9 +451,16 @@ export default async function AdminPage({
   const status =
     String(params.status || "").trim();
 
+  const notesOnly =
+    params.notes === "1";
+
   const [bookings, counts] =
     await Promise.all([
-      getBookings(search, status),
+      getBookings(
+        search,
+        status,
+        notesOnly
+      ),
       getBookingCounts(),
     ]);
 
@@ -470,7 +500,7 @@ export default async function AdminPage({
           }}
         >
           <a
-            href="/admin"
+            href={statusLink("", notesOnly)}
             className="card"
             style={countCardStyle(!status)}
           >
@@ -484,7 +514,10 @@ export default async function AdminPage({
           </a>
 
           <a
-            href="/admin?status=new"
+            href={statusLink(
+              "new",
+              notesOnly
+            )}
             className="card"
             style={countCardStyle(
               status === "new"
@@ -500,7 +533,10 @@ export default async function AdminPage({
           </a>
 
           <a
-            href="/admin?status=contacted"
+            href={statusLink(
+              "contacted",
+              notesOnly
+            )}
             className="card"
             style={countCardStyle(
               status === "contacted"
@@ -516,7 +552,10 @@ export default async function AdminPage({
           </a>
 
           <a
-            href="/admin?status=confirmed"
+            href={statusLink(
+              "confirmed",
+              notesOnly
+            )}
             className="card"
             style={countCardStyle(
               status === "confirmed"
@@ -532,7 +571,10 @@ export default async function AdminPage({
           </a>
 
           <a
-            href="/admin?status=cancelled"
+            href={statusLink(
+              "cancelled",
+              notesOnly
+            )}
             className="card"
             style={countCardStyle(
               status === "cancelled"
@@ -619,9 +661,40 @@ export default async function AdminPage({
                 Search
               </button>
             </div>
+
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                marginTop: 16,
+                cursor: "pointer",
+              }}
+            >
+              <input
+                type="checkbox"
+                name="notes"
+                value="1"
+                defaultChecked={notesOnly}
+                style={{
+                  width: 18,
+                  height: 18,
+                }}
+              />
+
+              <strong>
+                Notes only
+              </strong>
+
+              <span className="muted">
+                Show only bookings with private admin notes
+              </span>
+            </label>
           </form>
 
-          {(search || status) && (
+          {(search ||
+            status ||
+            notesOnly) && (
             <div
               style={{
                 marginTop: 14,
@@ -645,6 +718,10 @@ export default async function AdminPage({
         >
           Showing {bookings.length} booking
           {bookings.length === 1 ? "" : "s"}
+
+          {notesOnly
+            ? " with admin notes"
+            : ""}
         </p>
 
         <div
