@@ -38,6 +38,7 @@ async function isAdminLoggedIn() {
   }
 
   const cookieStore = await cookies();
+
   const session =
     cookieStore.get("admin_session")?.value;
 
@@ -81,6 +82,7 @@ async function logoutAdmin() {
   "use server";
 
   const cookieStore = await cookies();
+
   cookieStore.delete("admin_session");
 
   redirect("/admin");
@@ -109,11 +111,14 @@ async function getDb() {
   );
 }
 
-async function getBookings(): Promise<Booking[]> {
+async function getBookings(
+  search: string,
+  status: string
+): Promise<Booking[]> {
   try {
     const db = await getDb();
 
-    const { data, error } = await db
+    let query = db
       .from("bookings")
       .select(
         "id,tour_slug,name,email,dates,travelers,message,status,created_at"
@@ -121,6 +126,27 @@ async function getBookings(): Promise<Booking[]> {
       .order("created_at", {
         ascending: false,
       });
+
+    if (
+      status &&
+      allowedStatuses.includes(status)
+    ) {
+      query = query.eq("status", status);
+    }
+
+    if (search) {
+      const safeSearch = search
+        .replace(/[%_,()]/g, " ")
+        .trim();
+
+      if (safeSearch) {
+        query = query.or(
+          `name.ilike.%${safeSearch}%,email.ilike.%${safeSearch}%,tour_slug.ilike.%${safeSearch}%`
+        );
+      }
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error(
@@ -201,6 +227,8 @@ export default async function AdminPage({
 }: {
   searchParams: Promise<{
     error?: string;
+    q?: string;
+    status?: string;
   }>;
 }) {
   const params = await searchParams;
@@ -218,8 +246,7 @@ export default async function AdminPage({
             </h1>
 
             <p className="muted">
-              ADMIN_PASSWORD is missing
-              in Vercel.
+              ADMIN_PASSWORD is missing in Vercel.
             </p>
           </div>
         </div>
@@ -293,8 +320,14 @@ export default async function AdminPage({
     );
   }
 
+  const search =
+    String(params.q || "").trim();
+
+  const status =
+    String(params.status || "").trim();
+
   const bookings =
-    await getBookings();
+    await getBookings(search, status);
 
   return (
     <section className="section">
@@ -309,8 +342,8 @@ export default async function AdminPage({
           </h1>
 
           <p className="muted">
-            Manage customer booking
-            requests and their status.
+            Search, filter and manage
+            customer booking requests.
           </p>
 
           <form action={logoutAdmin}>
@@ -324,6 +357,105 @@ export default async function AdminPage({
         </div>
 
         <div
+          className="card"
+          style={{
+            marginBottom: 24,
+          }}
+        >
+          <form method="GET">
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns:
+                  "2fr 1fr auto",
+                gap: 12,
+                alignItems: "end",
+              }}
+            >
+              <div className="field">
+                <label>
+                  Search bookings
+                </label>
+
+                <input
+                  name="q"
+                  defaultValue={search}
+                  placeholder="Name, email or tour"
+                />
+              </div>
+
+              <div className="field">
+                <label>
+                  Status
+                </label>
+
+                <select
+                  name="status"
+                  defaultValue={status}
+                  style={{
+                    width: "100%",
+                    padding: 14,
+                    borderRadius: 12,
+                  }}
+                >
+                  <option value="">
+                    All statuses
+                  </option>
+
+                  <option value="new">
+                    New
+                  </option>
+
+                  <option value="contacted">
+                    Contacted
+                  </option>
+
+                  <option value="confirmed">
+                    Confirmed
+                  </option>
+
+                  <option value="cancelled">
+                    Cancelled
+                  </option>
+                </select>
+              </div>
+
+              <button
+                className="btn"
+                type="submit"
+              >
+                Search
+              </button>
+            </div>
+          </form>
+
+          {(search || status) && (
+            <div
+              style={{
+                marginTop: 14,
+              }}
+            >
+              <a
+                href="/admin"
+                className="btn"
+              >
+                Clear filters
+              </a>
+            </div>
+          )}
+        </div>
+
+        <p
+          className="muted"
+          style={{
+            marginBottom: 18,
+          }}
+        >
+          Showing {bookings.length} booking
+          {bookings.length === 1 ? "" : "s"}
+        </p>
+
+        <div
           className="grid"
           style={{
             gridTemplateColumns:
@@ -332,149 +464,140 @@ export default async function AdminPage({
         >
           {bookings.length === 0 ? (
             <div className="card">
-              <h3>No bookings yet</h3>
+              <h3>
+                No bookings found
+              </h3>
 
               <p className="muted">
-                New booking requests
-                will appear here.
+                Try another search or status filter.
               </p>
             </div>
           ) : (
-            bookings.map(
-              (booking) => (
-                <div
-                  className="card"
-                  key={booking.id}
+            bookings.map((booking) => (
+              <div
+                className="card"
+                key={booking.id}
+              >
+                <span className="pill">
+                  {booking.status || "new"}
+                </span>
+
+                <h3
+                  style={{
+                    marginTop: 14,
+                  }}
                 >
-                  <span className="pill">
-                    {booking.status ||
-                      "new"}
-                  </span>
+                  {booking.name}
+                </h3>
 
-                  <h3
-                    style={{
-                      marginTop: 14,
-                    }}
+                <p>
+                  <strong>Tour:</strong>{" "}
+                  {booking.tour_slug ||
+                    "Not specified"}
+                </p>
+
+                <p>
+                  <strong>Email:</strong>{" "}
+                  <a
+                    href={`mailto:${booking.email}`}
                   >
-                    {booking.name}
-                  </h3>
+                    {booking.email}
+                  </a>
+                </p>
 
-                  <p>
-                    <strong>
-                      Tour:
-                    </strong>{" "}
-                    {booking.tour_slug ||
-                      "Not specified"}
-                  </p>
+                <p>
+                  <strong>Dates:</strong>{" "}
+                  {booking.dates ||
+                    "Not specified"}
+                </p>
 
-                  <p>
-                    <strong>
-                      Email:
-                    </strong>{" "}
-                    <a
-                      href={`mailto:${booking.email}`}
-                    >
-                      {booking.email}
-                    </a>
-                  </p>
+                <p>
+                  <strong>
+                    Travelers:
+                  </strong>{" "}
+                  {booking.travelers || 1}
+                </p>
 
-                  <p>
-                    <strong>
-                      Dates:
-                    </strong>{" "}
-                    {booking.dates ||
-                      "Not specified"}
-                  </p>
+                <p>
+                  <strong>
+                    Message:
+                  </strong>
+                  <br />
 
-                  <p>
-                    <strong>
-                      Travelers:
-                    </strong>{" "}
-                    {booking.travelers ||
-                      1}
-                  </p>
+                  {booking.message ||
+                    "No message"}
+                </p>
 
-                  <p>
-                    <strong>
-                      Message:
-                    </strong>
-                    <br />
+                <p className="muted">
+                  Received:{" "}
+                  {new Date(
+                    booking.created_at
+                  ).toLocaleString()}
+                </p>
 
-                    {booking.message ||
-                      "No message"}
-                  </p>
-
-                  <p className="muted">
-                    Received:{" "}
-                    {new Date(
-                      booking.created_at
-                    ).toLocaleString()}
-                  </p>
+                <div
+                  style={{
+                    marginTop: 18,
+                  }}
+                >
+                  <strong>
+                    Change status
+                  </strong>
 
                   <div
                     style={{
-                      marginTop: 18,
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: 8,
+                      marginTop: 10,
                     }}
                   >
-                    <strong>
-                      Change status
-                    </strong>
+                    {allowedStatuses.map(
+                      (bookingStatus) => (
+                        <form
+                          action={
+                            updateBookingStatus
+                          }
+                          key={bookingStatus}
+                        >
+                          <input
+                            type="hidden"
+                            name="bookingId"
+                            value={booking.id}
+                          />
 
-                    <div
-                      style={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        gap: 8,
-                        marginTop: 10,
-                      }}
-                    >
-                      {allowedStatuses.map(
-                        (status) => (
-                          <form
-                            action={
-                              updateBookingStatus
+                          <input
+                            type="hidden"
+                            name="status"
+                            value={
+                              bookingStatus
                             }
-                            key={status}
-                          >
-                            <input
-                              type="hidden"
-                              name="bookingId"
-                              value={
-                                booking.id
-                              }
-                            />
+                          />
 
-                            <input
-                              type="hidden"
-                              name="status"
-                              value={status}
-                            />
-
-                            <button
-                              className="btn"
-                              type="submit"
-                              disabled={
+                          <button
+                            className="btn"
+                            type="submit"
+                            disabled={
+                              booking.status ===
+                              bookingStatus
+                            }
+                            style={{
+                              opacity:
                                 booking.status ===
-                                status
-                              }
-                              style={{
-                                opacity:
-                                  booking.status ===
-                                  status
-                                    ? 0.5
-                                    : 1,
-                              }}
-                            >
-                              {status}
-                            </button>
-                          </form>
-                        )
-                      )}
-                    </div>
+                                bookingStatus
+                                  ? 0.5
+                                  : 1,
+                            }}
+                          >
+                            {bookingStatus}
+                          </button>
+                        </form>
+                      )
+                    )}
                   </div>
                 </div>
-              )
-            )
+              </div>
+            ))
           )}
         </div>
       </div>
