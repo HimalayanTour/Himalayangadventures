@@ -370,7 +370,9 @@ export default async function AdminPage({
               PRIVATE AREA
             </div>
 
-            <h1>Admin login</h1>
+            <h1>
+              Admin login
+            </h1>
 
             <p className="muted">
               Enter your admin password
@@ -812,4 +814,4 @@ export default async function AdminPage({
       </div>
     </section>
   );
-}#
+}
