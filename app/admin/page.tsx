@@ -49,69 +49,49 @@ function makeAdminToken(password: string) {
 }
 
 async function isAdminLoggedIn() {
-  const adminPassword =
-    process.env.ADMIN_PASSWORD;
+  const adminPassword = process.env.ADMIN_PASSWORD;
 
   if (!adminPassword) {
     return false;
   }
 
-  const cookieStore =
-    await cookies();
-
+  const cookieStore = await cookies();
   const session =
-    cookieStore.get(
-      "admin_session"
-    )?.value;
+    cookieStore.get("admin_session")?.value;
 
   return (
-    session ===
-    makeAdminToken(
-      adminPassword
-    )
+    session === makeAdminToken(adminPassword)
   );
 }
 
-async function loginAdmin(
-  formData: FormData
-) {
+async function loginAdmin(formData: FormData) {
   "use server";
 
-  const enteredPassword =
-    String(
-      formData.get(
-        "password"
-      ) || ""
-    );
+  const enteredPassword = String(
+    formData.get("password") || ""
+  );
 
   const adminPassword =
     process.env.ADMIN_PASSWORD;
 
   if (
     !adminPassword ||
-    enteredPassword !==
-      adminPassword
+    enteredPassword !== adminPassword
   ) {
-    redirect(
-      "/admin?error=1"
-    );
+    redirect("/admin?error=1");
   }
 
-  const cookieStore =
-    await cookies();
+  const cookieStore = await cookies();
 
   cookieStore.set(
     "admin_session",
-    makeAdminToken(
-      adminPassword
-    ),
+    makeAdminToken(adminPassword),
     {
       httpOnly: true,
       secure: true,
       sameSite: "strict",
       path: "/",
-      maxAge:
-        60 * 60 * 8,
+      maxAge: 60 * 60 * 8,
     }
   );
 
@@ -121,38 +101,29 @@ async function loginAdmin(
 async function logoutAdmin() {
   "use server";
 
-  const cookieStore =
-    await cookies();
+  const cookieStore = await cookies();
 
-  cookieStore.delete(
-    "admin_session"
-  );
+  cookieStore.delete("admin_session");
 
   redirect("/admin");
 }
 
 async function getDb() {
   const supabaseUrl =
-    process.env
-      .NEXT_PUBLIC_SUPABASE_URL;
+    process.env.NEXT_PUBLIC_SUPABASE_URL;
 
   const supabaseServiceKey =
-    process.env
-      .SUPABASE_SERVICE_ROLE_KEY;
+    process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (
-    !supabaseUrl ||
-    !supabaseServiceKey
-  ) {
+  if (!supabaseUrl || !supabaseServiceKey) {
     throw new Error(
       "Supabase environment variables are missing."
     );
   }
 
-  const { createClient } =
-    await import(
-      "@supabase/supabase-js"
-    );
+  const { createClient } = await import(
+    "@supabase/supabase-js"
+  );
 
   return createClient(
     supabaseUrl,
@@ -160,8 +131,7 @@ async function getDb() {
   );
 }
 
-async function getBookingCounts():
-Promise<BookingCounts> {
+async function getBookingCounts(): Promise<BookingCounts> {
   try {
     const db = await getDb();
 
@@ -185,10 +155,7 @@ Promise<BookingCounts> {
           count: "exact",
           head: true,
         })
-        .eq(
-          "status",
-          "new"
-        ),
+        .eq("status", "new"),
 
       db
         .from("bookings")
@@ -196,10 +163,7 @@ Promise<BookingCounts> {
           count: "exact",
           head: true,
         })
-        .eq(
-          "status",
-          "contacted"
-        ),
+        .eq("status", "contacted"),
 
       db
         .from("bookings")
@@ -207,10 +171,7 @@ Promise<BookingCounts> {
           count: "exact",
           head: true,
         })
-        .eq(
-          "status",
-          "confirmed"
-        ),
+        .eq("status", "confirmed"),
 
       db
         .from("bookings")
@@ -218,23 +179,15 @@ Promise<BookingCounts> {
           count: "exact",
           head: true,
         })
-        .eq(
-          "status",
-          "cancelled"
-        ),
+        .eq("status", "cancelled"),
     ]);
 
     return {
-      total:
-        totalResult.count || 0,
-      new:
-        newResult.count || 0,
-      contacted:
-        contactedResult.count || 0,
-      confirmed:
-        confirmedResult.count || 0,
-      cancelled:
-        cancelledResult.count || 0,
+      total: totalResult.count || 0,
+      new: newResult.count || 0,
+      contacted: contactedResult.count || 0,
+      confirmed: confirmedResult.count || 0,
+      cancelled: cancelledResult.count || 0,
     };
   } catch (error) {
     console.error(
@@ -263,8 +216,7 @@ async function getBookings(
   totalFiltered: number;
 }> {
   try {
-    const db =
-      await getDb();
+    const db = await getDb();
 
     let query = db
       .from("bookings")
@@ -277,103 +229,52 @@ async function getBookings(
 
     if (
       status &&
-      allowedStatuses.includes(
-        status
-      )
+      allowedStatuses.includes(status)
     ) {
-      query =
-        query.eq(
-          "status",
-          status
-        );
+      query = query.eq("status", status);
     }
 
     if (notesOnly) {
       query = query
-        .not(
-          "admin_notes",
-          "is",
-          null
-        )
-        .neq(
-          "admin_notes",
-          ""
-        );
+        .not("admin_notes", "is", null)
+        .neq("admin_notes", "");
     }
 
     if (search) {
-      const safeSearch =
-        search
-          .replace(
-            /[%_,()]/g,
-            " "
-          )
-          .trim();
+      const safeSearch = search
+        .replace(/[%_,()]/g, " ")
+        .trim();
 
       if (safeSearch) {
-        query =
-          query.or(
-            `name.ilike.%${safeSearch}%,email.ilike.%${safeSearch}%,tour_slug.ilike.%${safeSearch}%`
-          );
+        query = query.or(
+          `name.ilike.%${safeSearch}%,email.ilike.%${safeSearch}%,tour_slug.ilike.%${safeSearch}%`
+        );
       }
     }
 
-    if (
-      sort === "oldest"
-    ) {
-      query =
-        query.order(
-          "created_at",
-          {
-            ascending: true,
-          }
-        );
-    } else if (
-      sort === "name"
-    ) {
-      query =
-        query.order(
-          "name",
-          {
-            ascending: true,
-          }
-        );
-    } else if (
-      sort ===
-      "travelers"
-    ) {
-      query =
-        query.order(
-          "travelers",
-          {
-            ascending: false,
-            nullsFirst: false,
-          }
-        );
+    if (sort === "oldest") {
+      query = query.order("created_at", {
+        ascending: true,
+      });
+    } else if (sort === "name") {
+      query = query.order("name", {
+        ascending: true,
+      });
+    } else if (sort === "travelers") {
+      query = query.order("travelers", {
+        ascending: false,
+        nullsFirst: false,
+      });
     } else {
-      query =
-        query.order(
-          "created_at",
-          {
-            ascending: false,
-          }
-        );
+      query = query.order("created_at", {
+        ascending: false,
+      });
     }
 
-    const from =
-      (page - 1) *
-      PAGE_SIZE;
+    const from = (page - 1) * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
 
-    const to =
-      from +
-      PAGE_SIZE -
-      1;
-
-    query =
-      query.range(
-        from,
-        to
-      );
+    query = query.range(from, to);
 
     const {
       data,
@@ -394,10 +295,8 @@ async function getBookings(
     }
 
     return {
-      bookings:
-        data || [],
-      totalFiltered:
-        count || 0,
+      bookings: data || [],
+      totalFiltered: count || 0,
     };
   } catch (error) {
     console.error(
@@ -424,44 +323,30 @@ async function updateBookingStatus(
     redirect("/admin");
   }
 
-  const bookingId =
-    String(
-      formData.get(
-        "bookingId"
-      ) || ""
-    );
+  const bookingId = String(
+    formData.get("bookingId") || ""
+  );
 
-  const newStatus =
-    String(
-      formData.get(
-        "status"
-      ) || ""
-    );
+  const newStatus = String(
+    formData.get("status") || ""
+  );
 
   if (
     !bookingId ||
-    !allowedStatuses.includes(
-      newStatus
-    )
+    !allowedStatuses.includes(newStatus)
   ) {
     return;
   }
 
   try {
-    const db =
-      await getDb();
+    const db = await getDb();
 
-    const { error } =
-      await db
-        .from("bookings")
-        .update({
-          status:
-            newStatus,
-        })
-        .eq(
-          "id",
-          bookingId
-        );
+    const { error } = await db
+      .from("bookings")
+      .update({
+        status: newStatus,
+      })
+      .eq("id", bookingId);
 
     if (error) {
       console.error(
@@ -472,9 +357,7 @@ async function updateBookingStatus(
       return;
     }
 
-    revalidatePath(
-      "/admin"
-    );
+    revalidatePath("/admin");
   } catch (error) {
     console.error(
       "Status update failed:",
@@ -483,9 +366,7 @@ async function updateBookingStatus(
   }
 }
 
-function countCardStyle(
-  active: boolean
-) {
+function countCardStyle(active: boolean) {
   return {
     textDecoration: "none",
     color: "inherit",
@@ -519,52 +400,67 @@ function buildAdminUrl({
     new URLSearchParams();
 
   if (search) {
-    params.set(
-      "q",
-      search
-    );
+    params.set("q", search);
   }
 
   if (status) {
-    params.set(
-      "status",
-      status
-    );
+    params.set("status", status);
   }
 
   if (notesOnly) {
-    params.set(
-      "notes",
-      "1"
-    );
+    params.set("notes", "1");
   }
 
-  if (
-    sort &&
-    sort !== "newest"
-  ) {
-    params.set(
-      "sort",
-      sort
-    );
+  if (sort && sort !== "newest") {
+    params.set("sort", sort);
   }
 
-  if (
-    page &&
-    page > 1
-  ) {
-    params.set(
-      "page",
-      String(page)
-    );
+  if (page && page > 1) {
+    params.set("page", String(page));
   }
 
-  const qs =
-    params.toString();
+  const qs = params.toString();
 
   return qs
     ? `/admin?${qs}`
     : "/admin";
+}
+
+function buildExportUrl({
+  search,
+  status,
+  notesOnly,
+  sort,
+}: {
+  search: string;
+  status: string;
+  notesOnly: boolean;
+  sort: string;
+}) {
+  const params =
+    new URLSearchParams();
+
+  if (search) {
+    params.set("q", search);
+  }
+
+  if (status) {
+    params.set("status", status);
+  }
+
+  if (notesOnly) {
+    params.set("notes", "1");
+  }
+
+  if (sort && sort !== "newest") {
+    params.set("sort", sort);
+  }
+
+  const qs = params.toString();
+
+  return qs
+    ? `/api/admin/bookings/export?${qs}`
+    : "/api/admin/bookings/export";
 }
 
 export default async function AdminPage({
@@ -579,8 +475,7 @@ export default async function AdminPage({
     page?: string;
   }>;
 }) {
-  const params =
-    await searchParams;
+  const params = await searchParams;
 
   const adminPassword =
     process.env.ADMIN_PASSWORD;
@@ -595,8 +490,7 @@ export default async function AdminPage({
             </h1>
 
             <p className="muted">
-              ADMIN_PASSWORD is
-              missing in Vercel.
+              ADMIN_PASSWORD is missing in Vercel.
             </p>
           </div>
         </div>
@@ -626,9 +520,7 @@ export default async function AdminPage({
             </h1>
 
             <p className="muted">
-              Enter your admin
-              password to view
-              booking requests.
+              Enter your admin password to view booking requests.
             </p>
           </div>
 
@@ -645,8 +537,7 @@ export default async function AdminPage({
                 name="password"
                 type="password"
                 required
-                autoComplete=
-                  "current-password"
+                autoComplete="current-password"
               />
             </div>
 
@@ -675,14 +566,10 @@ export default async function AdminPage({
   }
 
   const search =
-    String(
-      params.q || ""
-    ).trim();
+    String(params.q || "").trim();
 
   const status =
-    String(
-      params.status || ""
-    ).trim();
+    String(params.status || "").trim();
 
   const notesOnly =
     params.notes === "1";
@@ -705,13 +592,9 @@ export default async function AdminPage({
     );
 
   const page =
-    Number.isFinite(
-      requestedPage
-    ) &&
+    Number.isFinite(requestedPage) &&
     requestedPage > 0
-      ? Math.floor(
-          requestedPage
-        )
+      ? Math.floor(requestedPage)
       : 1;
 
   const [
@@ -738,8 +621,7 @@ export default async function AdminPage({
     Math.max(
       1,
       Math.ceil(
-        totalFiltered /
-          PAGE_SIZE
+        totalFiltered / PAGE_SIZE
       )
     );
 
@@ -753,11 +635,18 @@ export default async function AdminPage({
         notesOnly,
         sort,
         search,
-        page:
-          totalPages,
+        page: totalPages,
       })
     );
   }
+
+  const exportUrl =
+    buildExportUrl({
+      search,
+      status,
+      notesOnly,
+      sort,
+    });
 
   return (
     <section className="section">
@@ -772,15 +661,10 @@ export default async function AdminPage({
           </h1>
 
           <p className="muted">
-            Search, filter, sort,
-            paginate and manage
-            customer booking
-            requests.
+            Search, filter, sort, export and manage customer booking requests.
           </p>
 
-          <form
-            action={logoutAdmin}
-          >
+          <form action={logoutAdmin}>
             <button
               className="btn"
               type="submit"
@@ -839,15 +723,13 @@ export default async function AdminPage({
 
           <a
             href={buildAdminUrl({
-              status:
-                "contacted",
+              status: "contacted",
               notesOnly,
               sort,
             })}
             className="card"
             style={countCardStyle(
-              status ===
-                "contacted"
+              status === "contacted"
             )}
           >
             <div className="muted">
@@ -861,15 +743,13 @@ export default async function AdminPage({
 
           <a
             href={buildAdminUrl({
-              status:
-                "confirmed",
+              status: "confirmed",
               notesOnly,
               sort,
             })}
             className="card"
             style={countCardStyle(
-              status ===
-                "confirmed"
+              status === "confirmed"
             )}
           >
             <div className="muted">
@@ -883,15 +763,13 @@ export default async function AdminPage({
 
           <a
             href={buildAdminUrl({
-              status:
-                "cancelled",
+              status: "cancelled",
               notesOnly,
               sort,
             })}
             className="card"
             style={countCardStyle(
-              status ===
-                "cancelled"
+              status === "cancelled"
             )}
           >
             <div className="muted">
@@ -927,11 +805,8 @@ export default async function AdminPage({
 
                 <input
                   name="q"
-                  defaultValue={
-                    search
-                  }
-                  placeholder=
-                    "Name, email or tour"
+                  defaultValue={search}
+                  placeholder="Name, email or tour"
                 />
               </div>
 
@@ -942,9 +817,7 @@ export default async function AdminPage({
 
                 <select
                   name="status"
-                  defaultValue={
-                    status
-                  }
+                  defaultValue={status}
                   style={{
                     width: "100%",
                     padding: 14,
@@ -959,21 +832,15 @@ export default async function AdminPage({
                     New
                   </option>
 
-                  <option value=
-                    "contacted"
-                  >
+                  <option value="contacted">
                     Contacted
                   </option>
 
-                  <option value=
-                    "confirmed"
-                  >
+                  <option value="confirmed">
                     Confirmed
                   </option>
 
-                  <option value=
-                    "cancelled"
-                  >
+                  <option value="cancelled">
                     Cancelled
                   </option>
                 </select>
@@ -986,36 +853,26 @@ export default async function AdminPage({
 
                 <select
                   name="sort"
-                  defaultValue={
-                    sort
-                  }
+                  defaultValue={sort}
                   style={{
                     width: "100%",
                     padding: 14,
                     borderRadius: 12,
                   }}
                 >
-                  <option
-                    value="newest"
-                  >
+                  <option value="newest">
                     Newest first
                   </option>
 
-                  <option
-                    value="oldest"
-                  >
+                  <option value="oldest">
                     Oldest first
                   </option>
 
-                  <option
-                    value="name"
-                  >
+                  <option value="name">
                     Name A–Z
                   </option>
 
-                  <option
-                    value="travelers"
-                  >
+                  <option value="travelers">
                     Most travelers
                   </option>
                 </select>
@@ -1032,12 +889,10 @@ export default async function AdminPage({
             <label
               style={{
                 display: "flex",
-                alignItems:
-                  "center",
+                alignItems: "center",
                 gap: 10,
                 marginTop: 16,
-                cursor:
-                  "pointer",
+                cursor: "pointer",
               }}
             >
               <input
@@ -1058,31 +913,38 @@ export default async function AdminPage({
               </strong>
 
               <span className="muted">
-                Show only bookings
-                with private admin
-                notes
+                Show only bookings with private admin notes
               </span>
             </label>
           </form>
 
-          {(search ||
-            status ||
-            notesOnly ||
-            sort !==
-              "newest") && (
-            <div
-              style={{
-                marginTop: 14,
-              }}
-            >
+          <div
+            style={{
+              marginTop: 14,
+              display: "flex",
+              gap: 10,
+              flexWrap: "wrap",
+            }}
+          >
+            {(search ||
+              status ||
+              notesOnly ||
+              sort !== "newest") && (
               <a
                 href="/admin"
                 className="btn"
               >
                 Clear filters
               </a>
-            </div>
-          )}
+            )}
+
+            <a
+              href={exportUrl}
+              className="btn"
+            >
+              Export CSV
+            </a>
+          </div>
         </div>
 
         <div
@@ -1154,8 +1016,7 @@ export default async function AdminPage({
                     style={{
                       display: "flex",
                       gap: 8,
-                      flexWrap:
-                        "wrap",
+                      flexWrap: "wrap",
                       alignItems:
                         "center",
                     }}
@@ -1165,8 +1026,7 @@ export default async function AdminPage({
                         "new"}
                     </span>
 
-                    {booking.admin_notes
-                      ?.trim() ? (
+                    {booking.admin_notes?.trim() ? (
                       <span className="pill">
                         Has notes
                       </span>
@@ -1196,9 +1056,7 @@ export default async function AdminPage({
                     <a
                       href={`mailto:${booking.email}`}
                     >
-                      {
-                        booking.email
-                      }
+                      {booking.email}
                     </a>
                   </p>
 
@@ -1261,13 +1119,10 @@ export default async function AdminPage({
 
                     <div
                       style={{
-                        display:
-                          "flex",
-                        flexWrap:
-                          "wrap",
+                        display: "flex",
+                        flexWrap: "wrap",
                         gap: 8,
-                        marginTop:
-                          10,
+                        marginTop: 10,
                       }}
                     >
                       {allowedStatuses.map(
@@ -1284,8 +1139,7 @@ export default async function AdminPage({
                           >
                             <input
                               type="hidden"
-                              name=
-                                "bookingId"
+                              name="bookingId"
                               value={
                                 booking.id
                               }
@@ -1293,18 +1147,15 @@ export default async function AdminPage({
 
                             <input
                               type="hidden"
-                              name=
-                                "status"
+                              name="status"
                               value={
                                 bookingStatus
                               }
                             />
 
                             <button
-                              className=
-                                "btn"
-                              type=
-                                "submit"
+                              className="btn"
+                              type="submit"
                               disabled={
                                 booking.status ===
                                 bookingStatus
@@ -1381,9 +1232,7 @@ export default async function AdminPage({
             ).map(
               (pageNumber) => (
                 <a
-                  key={
-                    pageNumber
-                  }
+                  key={pageNumber}
                   href={buildAdminUrl({
                     status,
                     notesOnly,
@@ -1414,8 +1263,7 @@ export default async function AdminPage({
               )
             )}
 
-            {page <
-            totalPages ? (
+            {page < totalPages ? (
               <a
                 className="btn"
                 href={buildAdminUrl({
