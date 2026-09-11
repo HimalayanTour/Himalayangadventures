@@ -13,10 +13,14 @@ export default function BookingForm({
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>
+  ) {
     event.preventDefault();
 
-    if (sending || sent) return;
+    if (sending || sent) {
+      return;
+    }
 
     setSending(true);
     setStatusMessage("");
@@ -24,57 +28,70 @@ export default function BookingForm({
     const form = event.currentTarget;
     const formData = new FormData(form);
 
-    const name = String(formData.get("name") || "").trim();
-    const email = String(formData.get("email") || "").trim();
-    const phone = String(formData.get("phone") || "").trim();
-    const country = String(formData.get("country") || "").trim();
-    const dates = String(formData.get("dates") || "").trim();
-    const tripStyle = String(formData.get("tripStyle") || "").trim();
+    const name = String(
+      formData.get("name") || ""
+    ).trim();
+
+    const email = String(
+      formData.get("email") || ""
+    ).trim();
+
+    const phone = String(
+      formData.get("phone") || ""
+    ).trim();
+
+    const country = String(
+      formData.get("country") || ""
+    ).trim();
+
+    const dates = String(
+      formData.get("dates") || ""
+    ).trim();
+
+    const tripStyle = String(
+      formData.get("tripStyle") || ""
+    ).trim();
+
     const accommodation = String(
       formData.get("accommodation") || ""
     ).trim();
-    const customerMessage = String(
-      formData.get("customerMessage") || ""
+
+    const message = String(
+      formData.get("message") || ""
     ).trim();
 
     const travelers = Math.max(
       1,
-      Number(formData.get("travelers")) || 1
+      Number(
+        formData.get("travelers")
+      ) || 1
     );
-
-    /*
-      We are saving the new fields inside the existing
-      Supabase "message" column for now.
-
-      This means we do not need to change the database yet.
-    */
-    const fullMessage = [
-      `Phone / WhatsApp: ${phone || "Not provided"}`,
-      `Country: ${country || "Not provided"}`,
-      `Trip style: ${tripStyle || "Not specified"}`,
-      `Accommodation: ${accommodation || "Not specified"}`,
-      "",
-      "Customer message:",
-      customerMessage || "No additional message.",
-    ].join("\n");
 
     const body = {
       tourSlug,
       name,
       email,
+      phone,
+      country,
       dates,
       travelers,
-      message: fullMessage,
+      tripStyle,
+      accommodation,
+      message,
     };
 
     try {
-      const response = await fetch("/api/bookings", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-      });
+      const response = await fetch(
+        "/api/bookings",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify(body),
+        }
+      );
 
       let result: {
         message?: string;
@@ -82,7 +99,8 @@ export default function BookingForm({
       } = {};
 
       try {
-        result = await response.json();
+        result =
+          await response.json();
       } catch {
         result = {};
       }
@@ -92,6 +110,7 @@ export default function BookingForm({
           result.error ||
             "Could not send your booking request. Please try again."
         );
+
         return;
       }
 
@@ -101,8 +120,13 @@ export default function BookingForm({
         result.message ||
           "Thank you! Your booking request has been received. Our Himalayan travel team will contact you soon."
       );
+
+      form.reset();
     } catch (error) {
-      console.error("Booking form error:", error);
+      console.error(
+        "Booking form error:",
+        error
+      );
 
       setStatusMessage(
         "Something went wrong. Please try again."
@@ -113,10 +137,19 @@ export default function BookingForm({
   }
 
   return (
-    <form className="card" onSubmit={handleSubmit}>
-      <span className="pill">BOOKING REQUEST</span>
+    <form
+      className="card"
+      onSubmit={handleSubmit}
+    >
+      <span className="pill">
+        BOOKING REQUEST
+      </span>
 
-      <h3 style={{ marginTop: 14 }}>
+      <h3
+        style={{
+          marginTop: 14,
+        }}
+      >
         Start your Himalayan journey
       </h3>
 
@@ -127,9 +160,10 @@ export default function BookingForm({
           lineHeight: 1.6,
         }}
       >
-        Tell us about your travel plans and our Himalayan
-        travel team will help create the right journey for
-        you.
+        Tell us about your travel plans
+        and our Himalayan travel team
+        will help create the right
+        journey for you.
       </p>
 
       <div className="field">
@@ -327,7 +361,7 @@ export default function BookingForm({
 
         <textarea
           id="booking-message"
-          name="customerMessage"
+          name="message"
           rows={6}
           disabled={sent}
           placeholder="Tell us about your interests, fitness level, preferred pace, special requirements or anything else we should know."
@@ -369,8 +403,8 @@ export default function BookingForm({
           lineHeight: 1.5,
         }}
       >
-        No payment is required when submitting this booking
-        request.
+        No payment is required when
+        submitting this booking request.
       </p>
     </form>
   );
