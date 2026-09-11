@@ -34,6 +34,11 @@ type Booking = {
   status: string | null;
   admin_notes: string | null;
   created_at: string;
+
+  phone: string | null;
+  country: string | null;
+  trip_style: string | null;
+  accommodation: string | null;
 };
 
 type ParsedMessage = {
@@ -255,10 +260,8 @@ function parseBookingMessage(
     );
 
   /*
-    Older bookings did not have
-    structured booking details.
-
-    We keep their original message.
+    Older bookings may contain only
+    the customer's original message.
   */
   if (!hasStructuredData) {
     return {
@@ -671,7 +674,11 @@ export default async function AdminPage({
         message,
         status,
         admin_notes,
-        created_at
+        created_at,
+        phone,
+        country,
+        trip_style,
+        accommodation
       `,
       {
         count: "exact",
@@ -708,7 +715,15 @@ export default async function AdminPage({
 
     if (safeSearch) {
       query = query.or(
-        `name.ilike.%${safeSearch}%,email.ilike.%${safeSearch}%,tour_slug.ilike.%${safeSearch}%`
+        [
+          `name.ilike.%${safeSearch}%`,
+          `email.ilike.%${safeSearch}%`,
+          `tour_slug.ilike.%${safeSearch}%`,
+          `phone.ilike.%${safeSearch}%`,
+          `country.ilike.%${safeSearch}%`,
+          `trip_style.ilike.%${safeSearch}%`,
+          `accommodation.ilike.%${safeSearch}%`,
+        ].join(",")
       );
     }
   }
@@ -789,11 +804,6 @@ export default async function AdminPage({
       )
     );
 
-  /*
-    If someone manually enters a page
-    number higher than the last page,
-    send them back to the final page.
-  */
   if (
     requestedPage >
       totalPages &&
@@ -1089,7 +1099,7 @@ export default async function AdminPage({
                 defaultValue={
                   search
                 }
-                placeholder="Name, email or tour"
+                placeholder="Name, email, country or tour"
               />
             </div>
 
@@ -1258,10 +1268,37 @@ export default async function AdminPage({
         >
           {bookings.map(
             (booking) => {
-              const parsed =
+              const legacy =
                 parseBookingMessage(
                   booking.message
                 );
+
+              /*
+                New bookings use the
+                real Supabase columns.
+
+                Older bookings fall
+                back to the data stored
+                in message.
+              */
+              const phone =
+                booking.phone?.trim() ||
+                legacy.phone;
+
+              const country =
+                booking.country?.trim() ||
+                legacy.country;
+
+              const tripStyle =
+                booking.trip_style?.trim() ||
+                legacy.tripStyle;
+
+              const accommodation =
+                booking.accommodation?.trim() ||
+                legacy.accommodation;
+
+              const customerMessage =
+                legacy.customerMessage;
 
               const bookingStatus =
                 booking.status ||
@@ -1363,7 +1400,7 @@ export default async function AdminPage({
                       </div>
 
                       <strong>
-                        {parsed.country}
+                        {country}
                       </strong>
                     </div>
 
@@ -1377,7 +1414,7 @@ export default async function AdminPage({
                       </div>
 
                       <strong>
-                        {parsed.tripStyle}
+                        {tripStyle}
                       </strong>
                     </div>
 
@@ -1391,9 +1428,7 @@ export default async function AdminPage({
                       </div>
 
                       <strong>
-                        {
-                          parsed.accommodation
-                        }
+                        {accommodation}
                       </strong>
                     </div>
 
@@ -1407,7 +1442,7 @@ export default async function AdminPage({
                       </div>
 
                       <strong>
-                        {parsed.phone}
+                        {phone}
                       </strong>
                     </div>
                   </div>
@@ -1433,9 +1468,7 @@ export default async function AdminPage({
                           "pre-wrap",
                       }}
                     >
-                      {
-                        parsed.customerMessage
-                      }
+                      {customerMessage}
                     </div>
                   </div>
 
