@@ -1,132 +1,377 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
-export async function POST(req: Request) {
+type BookingBody = {
+  tourSlug?: unknown;
+  name?: unknown;
+  email?: unknown;
+  dates?: unknown;
+  travelers?: unknown;
+  message?: unknown;
+
+  // These will also be supported directly
+  // when we update the form later.
+  phone?: unknown;
+  country?: unknown;
+  tripStyle?: unknown;
+  accommodation?: unknown;
+};
+
+type ParsedMessage = {
+  phone: string | null;
+  country: string | null;
+  tripStyle: string | null;
+  accommodation: string | null;
+};
+
+function getDb() {
+  const url =
+    process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+  const serviceKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!url || !serviceKey) {
+    throw new Error(
+      "Supabase environment variables are missing."
+    );
+  }
+
+  return createClient(url, serviceKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  });
+}
+
+function cleanText(
+  value: unknown,
+  maxLength = 2000
+) {
+  if (typeof value !== "string") {
+    return "";
+  }
+
+  return value.trim().slice(0, maxLength);
+}
+
+function cleanOptionalText(
+  value: unknown,
+  maxLength = 500
+) {
+  const text = cleanText(
+    value,
+    maxLength
+  );
+
+  return text || null;
+}
+
+function parseStructuredMessage(
+  message: string
+): ParsedMessage {
+  if (!message) {
+    return {
+      phone: null,
+      country: null,
+      tripStyle: null,
+      accommodation: null,
+    };
+  }
+
+  const lines =
+    message.split("\n");
+
+  let phone: string | null =
+    null;
+
+  let country: string | null =
+    null;
+
+  let tripStyle: string | null =
+    null;
+
+  let accommodation:
+    | string
+    | null = null;
+
+  for (const line of lines) {
+    const trimmed =
+      line.trim();
+
+    if (
+      trimmed.startsWith(
+        "Phone / WhatsApp:"
+      )
+    ) {
+      const value = trimmed
+        .replace(
+          "Phone / WhatsApp:",
+          ""
+        )
+        .trim();
+
+      if (
+        value &&
+        value !==
+          "Not provided"
+      ) {
+        phone =
+          value.slice(0, 100);
+      }
+
+      continue;
+    }
+
+    if (
+      trimmed.startsWith(
+        "Country:"
+      )
+    ) {
+      const value = trimmed
+        .replace(
+          "Country:",
+          ""
+        )
+        .trim();
+
+      if (
+        value &&
+        value !==
+          "Not provided"
+      ) {
+        country =
+          value.slice(0, 100);
+      }
+
+      continue;
+    }
+
+    if (
+      trimmed.startsWith(
+        "Trip style:"
+      )
+    ) {
+      const value = trimmed
+        .replace(
+          "Trip style:",
+          ""
+        )
+        .trim();
+
+      if (
+        value &&
+        value !==
+          "Not specified"
+      ) {
+        tripStyle =
+          value.slice(0, 100);
+      }
+
+      continue;
+    }
+
+    if (
+      trimmed.startsWith(
+        "Accommodation:"
+      )
+    ) {
+      const value = trimmed
+        .replace(
+          "Accommodation:",
+          ""
+        )
+        .trim();
+
+      if (
+        value &&
+        value !==
+          "Not specified"
+      ) {
+        accommodation =
+          value.slice(0, 100);
+      }
+    }
+  }
+
+  return {
+    phone,
+    country,
+    tripStyle,
+    accommodation,
+  };
+}
+
+function isValidEmail(
+  email: string
+) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+    email
+  );
+}
+
+export async function POST(
+  request: Request
+) {
   try {
-    const body = await req.json();
+    let body: BookingBody;
 
-    // 1. Check required information
-    if (!body.name || !body.email) {
+    try {
+      body =
+        (await request.json()) as BookingBody;
+    } catch {
       return NextResponse.json(
-        { error: "Name and email are required" },
-        { status: 400 }
+        {
+          error:
+            "Invalid booking request.",
+        },
+        {
+          status: 400,
+        }
       );
     }
 
-    // 2. Environment variables
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseServiceKey =
-      process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-    const resendApiKey = process.env.RESEND_API_KEY;
-    const bookingNotificationEmail =
-      process.env.BOOKING_NOTIFICATION_EMAIL;
-
-    if (!supabaseUrl || !supabaseServiceKey) {
-      return NextResponse.json(
-        { error: "Database connection is not configured." },
-        { status: 500 }
-      );
-    }
-
-    // 3. Connect to Supabase
-    const { createClient } = await import(
-      "@supabase/supabase-js"
+    const name = cleanText(
+      body.name,
+      150
     );
 
-    const db = createClient(
-      supabaseUrl,
-      supabaseServiceKey
-    );
+    const email = cleanText(
+      body.email,
+      254
+    ).toLowerCase();
 
-    // Clean booking values
-    const name = String(body.name).trim();
-    const email = String(body.email)
-      .trim()
-      .toLowerCase();
-
-    const tourSlug = body.tourSlug
-      ? String(body.tourSlug)
-      : null;
-
-    const dates = body.dates
-      ? String(body.dates).trim()
-      : null;
-
-    const travelers = Number(body.travelers || 1);
-
-    const message = body.message
-      ? String(body.message).trim()
-      : null;
-
-    // 4. DUPLICATE PROTECTION
-    // Check if same person already sent the same booking
-    // during the last 10 minutes.
-    const tenMinutesAgo = new Date(
-      Date.now() - 10 * 60 * 1000
-    ).toISOString();
-
-    let duplicateQuery = db
-      .from("bookings")
-      .select("id")
-      .eq("email", email)
-      .eq("name", name)
-      .gte("created_at", tenMinutesAgo)
-      .limit(1);
-
-    if (tourSlug) {
-      duplicateQuery = duplicateQuery.eq(
-        "tour_slug",
-        tourSlug
+    const tourSlug =
+      cleanOptionalText(
+        body.tourSlug,
+        200
       );
-    } else {
-      duplicateQuery = duplicateQuery.is(
-        "tour_slug",
-        null
-      );
-    }
 
-    if (dates) {
-      duplicateQuery = duplicateQuery.eq(
-        "dates",
-        dates
+    const dates =
+      cleanOptionalText(
+        body.dates,
+        300
       );
-    } else {
-      duplicateQuery = duplicateQuery.is(
-        "dates",
-        null
+
+    const message =
+      cleanOptionalText(
+        body.message,
+        5000
       );
-    }
 
-    const {
-      data: duplicateBookings,
-      error: duplicateError,
-    } = await duplicateQuery;
-
-    if (duplicateError) {
-      console.error(
-        "Duplicate check error:",
-        duplicateError
+    if (!name) {
+      return NextResponse.json(
+        {
+          error:
+            "Please enter your name.",
+        },
+        {
+          status: 400,
+        }
       );
     }
 
     if (
-      duplicateBookings &&
-      duplicateBookings.length > 0
+      !email ||
+      !isValidEmail(email)
     ) {
-      console.log("Duplicate booking blocked.");
-
-      return NextResponse.json({
-        message:
-          "We already received this booking request. You do not need to send it again.",
-        duplicate: true,
-        emailSent: false,
-      });
+      return NextResponse.json(
+        {
+          error:
+            "Please enter a valid email address.",
+        },
+        {
+          status: 400,
+        }
+      );
     }
 
-    // 5. Save new booking
-    const { error: bookingError } = await db
+    let travelers =
+      Number(body.travelers);
+
+    if (
+      !Number.isFinite(
+        travelers
+      )
+    ) {
+      travelers = 1;
+    }
+
+    travelers =
+      Math.floor(travelers);
+
+    if (
+      travelers < 1 ||
+      travelers > 50
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Number of travelers must be between 1 and 50.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    /*
+      The current booking form still
+      stores these details inside the
+      message.
+
+      We read them here so they can
+      also be saved into the new real
+      database columns.
+    */
+    const parsed =
+      parseStructuredMessage(
+        message || ""
+      );
+
+    /*
+      Direct fields are preferred.
+
+      If the form has not yet been
+      upgraded to send them directly,
+      we use the values extracted from
+      the existing message.
+    */
+    const phone =
+      cleanOptionalText(
+        body.phone,
+        100
+      ) || parsed.phone;
+
+    const country =
+      cleanOptionalText(
+        body.country,
+        100
+      ) || parsed.country;
+
+    const tripStyle =
+      cleanOptionalText(
+        body.tripStyle,
+        100
+      ) || parsed.tripStyle;
+
+    const accommodation =
+      cleanOptionalText(
+        body.accommodation,
+        100
+      ) ||
+      parsed.accommodation;
+
+    const db = getDb();
+
+    const {
+      data,
+      error,
+    } = await db
       .from("bookings")
       .insert({
         tour_slug: tourSlug,
@@ -135,115 +380,56 @@ export async function POST(req: Request) {
         dates,
         travelers,
         message,
+
+        phone,
+        country,
+        trip_style:
+          tripStyle,
+        accommodation,
+
         status: "new",
-      });
+      })
+      .select("id")
+      .single();
 
-    if (bookingError) {
+    if (error) {
       console.error(
-        "Supabase booking error:",
-        bookingError
+        "Supabase booking insert error:",
+        error
       );
 
-      throw bookingError;
-    }
-
-    console.log("New booking saved.");
-
-    // 6. If Resend is not configured,
-    // keep the booking but skip email
-    if (!resendApiKey || !bookingNotificationEmail) {
-      return NextResponse.json({
-        message:
-          "Booking request received. Our team will contact you.",
-        emailSent: false,
-      });
-    }
-
-    // 7. Send notification email
-    const emailResponse = await fetch(
-      "https://api.resend.com/emails",
-      {
-        method: "POST",
-
-        headers: {
-          Authorization: `Bearer ${resendApiKey}`,
-          "Content-Type": "application/json",
+      return NextResponse.json(
+        {
+          error:
+            "Could not save your booking request. Please try again.",
         },
-
-        body: JSON.stringify({
-          from:
-            "Himalayan Adventures <onboarding@resend.dev>",
-
-          to: [bookingNotificationEmail],
-
-          reply_to: email,
-
-          subject: `New booking request: ${
-            tourSlug || "Himalayan Journey"
-          }`,
-
-          text: `
-NEW HIMALAYAN ADVENTURES BOOKING
-
-Tour:
-${tourSlug || "Not specified"}
-
-Name:
-${name}
-
-Customer email:
-${email}
-
-Preferred dates:
-${dates || "Not specified"}
-
-Travelers:
-${travelers}
-
-Message:
-${message || "No message"}
-
---------------------------
-Himalayan Adventures
-          `.trim(),
-        }),
-      }
-    );
-
-    const resendResult =
-      await emailResponse.text();
-
-    console.log("Resend result:", {
-      status: emailResponse.status,
-      ok: emailResponse.ok,
-    });
-
-    if (!emailResponse.ok) {
-      console.error(
-        "Resend email failed:",
-        resendResult
+        {
+          status: 500,
+        }
       );
-
-      return NextResponse.json({
-        message:
-          "Booking saved, but email notification failed.",
-        emailSent: false,
-      });
     }
-
-    // 8. Success
-    return NextResponse.json({
-      message:
-        "Booking request received. Our team will contact you.",
-      emailSent: true,
-      duplicate: false,
-    });
-  } catch (error) {
-    console.error("Booking API error:", error);
 
     return NextResponse.json(
       {
-        error: "Could not save booking.",
+        ok: true,
+        id: data.id,
+        message:
+          "Booking request received. Our team will contact you.",
+      },
+      {
+        status: 201,
+      }
+    );
+  } catch (error) {
+    console.error(
+      "Booking API error:",
+      error
+    );
+
+    return NextResponse.json(
+      {
+        error:
+          "Something went wrong. Please try again.",
       },
       {
         status: 500,
