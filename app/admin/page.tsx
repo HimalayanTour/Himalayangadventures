@@ -32,8 +32,8 @@ type Booking = {
   travelers: number | null;
   message: string | null;
   status: string | null;
-  created_at: string;
   admin_notes: string | null;
+  created_at: string;
 };
 
 type ParsedMessage = {
@@ -42,6 +42,15 @@ type ParsedMessage = {
   tripStyle: string;
   accommodation: string;
   customerMessage: string;
+};
+
+type SearchParams = {
+  q?: string;
+  status?: string;
+  sort?: string;
+  notes?: string;
+  page?: string;
+  loginError?: string;
 };
 
 function makeAdminToken(password: string) {
@@ -119,7 +128,9 @@ async function loginAdmin(
     makeAdminToken(adminPassword),
     {
       httpOnly: true,
-      secure: true,
+      secure:
+        process.env.NODE_ENV ===
+        "production",
       sameSite: "strict",
       path: "/",
       maxAge: 60 * 60 * 8,
@@ -159,16 +170,22 @@ async function updateBookingStatus(
     formData.get("status") || ""
   );
 
-  const returnTo = String(
+  let returnTo = String(
     formData.get("returnTo") ||
       "/admin"
   );
 
   if (
+    !returnTo.startsWith("/admin")
+  ) {
+    returnTo = "/admin";
+  }
+
+  if (
     !id ||
     !allowedStatuses.includes(status)
   ) {
-    return;
+    redirect(returnTo);
   }
 
   const db = getDb();
@@ -187,16 +204,11 @@ async function updateBookingStatus(
   }
 
   revalidatePath("/admin");
-
   revalidatePath(
     `/admin/bookings/${id}`
   );
 
-  redirect(
-    returnTo.startsWith("/admin")
-      ? returnTo
-      : "/admin"
-  );
+  redirect(returnTo);
 }
 
 function formatTourName(
@@ -238,8 +250,16 @@ function parseBookingMessage(
     ) ||
     text.includes("Country:") ||
     text.includes("Trip style:") ||
-    text.includes("Accommodation:");
+    text.includes(
+      "Accommodation:"
+    );
 
+  /*
+    Older bookings did not have
+    structured booking details.
+
+    We keep their original message.
+  */
   if (!hasStructuredData) {
     return {
       phone: "Not provided",
@@ -258,10 +278,10 @@ function parseBookingMessage(
   let accommodation =
     "Not specified";
 
-  const customerMessageLines: string[] =
-    [];
+  let readingMessage = false;
 
-  let readingCustomerMessage = false;
+  const customerLines: string[] =
+    [];
 
   for (const line of lines) {
     const trimmed = line.trim();
@@ -294,11 +314,16 @@ function parseBookingMessage(
     }
 
     if (
-      trimmed.startsWith("Trip style:")
+      trimmed.startsWith(
+        "Trip style:"
+      )
     ) {
       tripStyle =
         trimmed
-          .replace("Trip style:", "")
+          .replace(
+            "Trip style:",
+            ""
+          )
           .trim() || "Not specified";
 
       continue;
@@ -321,14 +346,15 @@ function parseBookingMessage(
     }
 
     if (
-      trimmed === "Customer message:"
+      trimmed ===
+      "Customer message:"
     ) {
-      readingCustomerMessage = true;
+      readingMessage = true;
       continue;
     }
 
-    if (readingCustomerMessage) {
-      customerMessageLines.push(line);
+    if (readingMessage) {
+      customerLines.push(line);
     }
   }
 
@@ -338,7 +364,7 @@ function parseBookingMessage(
     tripStyle,
     accommodation,
     customerMessage:
-      customerMessageLines
+      customerLines
         .join("\n")
         .trim() ||
       "No additional message.",
@@ -366,7 +392,10 @@ function buildAdminUrl({
   }
 
   if (status) {
-    params.set("status", status);
+    params.set(
+      "status",
+      status
+    );
   }
 
   if (notesOnly) {
@@ -387,10 +416,10 @@ function buildAdminUrl({
     );
   }
 
-  const query = params.toString();
+  const qs = params.toString();
 
-  return query
-    ? `/admin?${query}`
+  return qs
+    ? `/admin?${qs}`
     : "/admin";
 }
 
@@ -413,7 +442,10 @@ function buildExportUrl({
   }
 
   if (status) {
-    params.set("status", status);
+    params.set(
+      "status",
+      status
+    );
   }
 
   if (notesOnly) {
@@ -427,26 +459,19 @@ function buildExportUrl({
     params.set("sort", sort);
   }
 
-  const query = params.toString();
+  const qs = params.toString();
 
-  return query
-    ? `/api/admin/bookings/export?${query}`
+  return qs
+    ? `/api/admin/bookings/export?${qs}`
     : "/api/admin/bookings/export";
 }
 
 export default async function AdminPage({
   searchParams,
 }: {
-  searchParams?: Promise<{
-    q?: string;
-    status?: string;
-    notes?: string;
-    sort?: string;
-    page?: string;
-    loginError?: string;
-  }>;
+  searchParams?: Promise<SearchParams>;
 }) {
-  const query =
+  const params =
     searchParams
       ? await searchParams
       : {};
@@ -459,9 +484,9 @@ export default async function AdminPage({
       <main
         className="container"
         style={{
-          paddingTop: 70,
-          paddingBottom: 90,
-          maxWidth: 620,
+          maxWidth: 560,
+          paddingTop: 80,
+          paddingBottom: 80,
         }}
       >
         <section className="card">
@@ -474,33 +499,29 @@ export default async function AdminPage({
               marginTop: 16,
             }}
           >
-            Admin login
+            Admin dashboard
           </h1>
 
           <p className="muted">
-            Sign in to manage Himalayan26
-            booking requests.
+            Enter your admin password
+            to manage customer booking
+            requests.
           </p>
 
-          {query.loginError ===
+          {params.loginError ===
             "1" && (
             <div
               className="notice"
               style={{
-                marginTop: 18,
-                marginBottom: 18,
+                marginTop: 20,
+                marginBottom: 20,
               }}
             >
               Incorrect admin password.
             </div>
           )}
 
-          <form
-            action={loginAdmin}
-            style={{
-              marginTop: 24,
-            }}
-          >
+          <form action={loginAdmin}>
             <div className="field">
               <label htmlFor="password">
                 Admin password
@@ -517,8 +538,11 @@ export default async function AdminPage({
             </div>
 
             <button
-              type="submit"
               className="btn"
+              type="submit"
+              style={{
+                width: "100%",
+              }}
             >
               Sign in
             </button>
@@ -529,13 +553,13 @@ export default async function AdminPage({
   }
 
   const search = String(
-    query.q || ""
+    params.q || ""
   ).trim();
 
   const requestedStatus =
     String(
-      query.status || ""
-    ).trim();
+      params.status || ""
+    );
 
   const status =
     allowedStatuses.includes(
@@ -544,12 +568,10 @@ export default async function AdminPage({
       ? requestedStatus
       : "";
 
-  const notesOnly =
-    query.notes === "1";
-
-  const requestedSort = String(
-    query.sort || "newest"
-  );
+  const requestedSort =
+    String(
+      params.sort || "newest"
+    );
 
   const sort =
     allowedSorts.includes(
@@ -558,19 +580,85 @@ export default async function AdminPage({
       ? requestedSort
       : "newest";
 
-  const requestedPage =
-    Number(query.page || "1");
+  const notesOnly =
+    params.notes === "1";
 
-  const currentPage =
-    Number.isFinite(
-      requestedPage
-    ) && requestedPage > 0
-      ? Math.floor(requestedPage)
-      : 1;
+  const requestedPage =
+    Math.max(
+      1,
+      Number(params.page) || 1
+    );
 
   const db = getDb();
 
-  const { data, error } = await db
+  const [
+    totalResult,
+    newResult,
+    contactedResult,
+    confirmedResult,
+    cancelledResult,
+  ] = await Promise.all([
+    db
+      .from("bookings")
+      .select("id", {
+        count: "exact",
+        head: true,
+      }),
+
+    db
+      .from("bookings")
+      .select("id", {
+        count: "exact",
+        head: true,
+      })
+      .eq("status", "new"),
+
+    db
+      .from("bookings")
+      .select("id", {
+        count: "exact",
+        head: true,
+      })
+      .eq(
+        "status",
+        "contacted"
+      ),
+
+    db
+      .from("bookings")
+      .select("id", {
+        count: "exact",
+        head: true,
+      })
+      .eq(
+        "status",
+        "confirmed"
+      ),
+
+    db
+      .from("bookings")
+      .select("id", {
+        count: "exact",
+        head: true,
+      })
+      .eq(
+        "status",
+        "cancelled"
+      ),
+  ]);
+
+  const counts = {
+    total: totalResult.count || 0,
+    new: newResult.count || 0,
+    contacted:
+      contactedResult.count || 0,
+    confirmed:
+      confirmedResult.count || 0,
+    cancelled:
+      cancelledResult.count || 0,
+  };
+
+  let query = db
     .from("bookings")
     .select(
       `
@@ -582,10 +670,103 @@ export default async function AdminPage({
         travelers,
         message,
         status,
-        created_at,
-        admin_notes
-      `
+        admin_notes,
+        created_at
+      `,
+      {
+        count: "exact",
+      }
     );
+
+  if (status) {
+    query = query.eq(
+      "status",
+      status
+    );
+  }
+
+  if (notesOnly) {
+    query = query
+      .not(
+        "admin_notes",
+        "is",
+        null
+      )
+      .neq(
+        "admin_notes",
+        ""
+      );
+  }
+
+  if (search) {
+    const safeSearch = search
+      .replace(
+        /[,%()]/g,
+        " "
+      )
+      .trim();
+
+    if (safeSearch) {
+      query = query.or(
+        `name.ilike.%${safeSearch}%,email.ilike.%${safeSearch}%,tour_slug.ilike.%${safeSearch}%`
+      );
+    }
+  }
+
+  if (sort === "oldest") {
+    query = query.order(
+      "created_at",
+      {
+        ascending: true,
+      }
+    );
+  } else if (
+    sort === "name"
+  ) {
+    query = query
+      .order("name", {
+        ascending: true,
+      })
+      .order("created_at", {
+        ascending: false,
+      });
+  } else if (
+    sort === "travelers"
+  ) {
+    query = query
+      .order("travelers", {
+        ascending: false,
+        nullsFirst: false,
+      })
+      .order("created_at", {
+        ascending: false,
+      });
+  } else {
+    query = query.order(
+      "created_at",
+      {
+        ascending: false,
+      }
+    );
+  }
+
+  const start =
+    (requestedPage - 1) *
+    PAGE_SIZE;
+
+  const end =
+    start +
+    PAGE_SIZE -
+    1;
+
+  const {
+    data,
+    error,
+    count,
+  } = await query.range(
+    start,
+    end
+  );
 
   if (error) {
     throw new Error(
@@ -593,148 +774,55 @@ export default async function AdminPage({
     );
   }
 
-  const allBookings =
+  const bookings =
     (data || []) as Booking[];
 
-  const counts = {
-    total: allBookings.length,
-    new: allBookings.filter(
-      (booking) =>
-        (booking.status || "new") ===
-        "new"
-    ).length,
-    contacted: allBookings.filter(
-      (booking) =>
-        booking.status ===
-        "contacted"
-    ).length,
-    confirmed: allBookings.filter(
-      (booking) =>
-        booking.status ===
-        "confirmed"
-    ).length,
-    cancelled: allBookings.filter(
-      (booking) =>
-        booking.status ===
-        "cancelled"
-    ).length,
-  };
+  const filteredTotal =
+    count || 0;
 
-  let filteredBookings =
-    [...allBookings];
-
-  if (status) {
-    filteredBookings =
-      filteredBookings.filter(
-        (booking) =>
-          (booking.status || "new") ===
-          status
-      );
-  }
-
-  if (notesOnly) {
-    filteredBookings =
-      filteredBookings.filter(
-        (booking) =>
-          Boolean(
-            booking.admin_notes?.trim()
-          )
-      );
-  }
-
-  if (search) {
-    const needle =
-      search.toLowerCase();
-
-    filteredBookings =
-      filteredBookings.filter(
-        (booking) => {
-          const tour =
-            booking.tour_slug || "";
-
-          return (
-            booking.name
-              .toLowerCase()
-              .includes(needle) ||
-            booking.email
-              .toLowerCase()
-              .includes(needle) ||
-            tour
-              .toLowerCase()
-              .includes(needle)
-          );
-        }
-      );
-  }
-
-  if (sort === "oldest") {
-    filteredBookings.sort(
-      (a, b) =>
-        new Date(
-          a.created_at
-        ).getTime() -
-        new Date(
-          b.created_at
-        ).getTime()
+  const totalPages =
+    Math.max(
+      1,
+      Math.ceil(
+        filteredTotal /
+          PAGE_SIZE
+      )
     );
-  } else if (sort === "name") {
-    filteredBookings.sort(
-      (a, b) =>
-        a.name.localeCompare(
-          b.name
-        )
-    );
-  } else if (
-    sort === "travelers"
+
+  /*
+    If someone manually enters a page
+    number higher than the last page,
+    send them back to the final page.
+  */
+  if (
+    requestedPage >
+      totalPages &&
+    filteredTotal > 0
   ) {
-    filteredBookings.sort(
-      (a, b) =>
-        (b.travelers || 0) -
-        (a.travelers || 0)
-    );
-  } else {
-    filteredBookings.sort(
-      (a, b) =>
-        new Date(
-          b.created_at
-        ).getTime() -
-        new Date(
-          a.created_at
-        ).getTime()
+    redirect(
+      buildAdminUrl({
+        search,
+        status,
+        notesOnly,
+        sort,
+        page: totalPages,
+      })
     );
   }
 
-  const totalFiltered =
-    filteredBookings.length;
-
-  const totalPages = Math.max(
-    1,
-    Math.ceil(
-      totalFiltered / PAGE_SIZE
-    )
-  );
-
-  const safePage = Math.min(
-    currentPage,
-    totalPages
-  );
-
-  const start =
-    (safePage - 1) * PAGE_SIZE;
-
-  const pageBookings =
-    filteredBookings.slice(
-      start,
-      start + PAGE_SIZE
+  const currentPage =
+    Math.min(
+      requestedPage,
+      totalPages
     );
 
-  const returnTo =
+  const currentUrl =
     buildAdminUrl({
       search,
       status,
       notesOnly,
       sort,
-      page: safePage,
+      page: currentPage,
     });
 
   const exportUrl =
@@ -745,22 +833,26 @@ export default async function AdminPage({
       sort,
     });
 
-  const statCardStyle = {
-    padding: "18px",
-    borderRadius: "16px",
-    border:
-      "1px solid rgba(255,255,255,0.12)",
-    background:
-      "rgba(255,255,255,0.035)",
+  const statCardStyle = (
+    active: boolean
+  ) => ({
+    display: "block",
     textDecoration: "none",
-    color: "inherit",
-  };
+    padding: "20px",
+    borderRadius: "18px",
+    border: active
+      ? "2px solid rgba(103, 232, 202, 0.75)"
+      : "1px solid rgba(255,255,255,0.12)",
+    background: active
+      ? "rgba(103, 232, 202, 0.10)"
+      : "rgba(255,255,255,0.035)",
+  });
 
-  const miniBoxStyle = {
-    padding: "11px 12px",
+  const detailBoxStyle = {
+    padding: "10px 12px",
     borderRadius: "12px",
     border:
-      "1px solid rgba(255,255,255,0.1)",
+      "1px solid rgba(255,255,255,0.10)",
     background:
       "rgba(255,255,255,0.025)",
   };
@@ -770,7 +862,7 @@ export default async function AdminPage({
       className="container"
       style={{
         paddingTop: 42,
-        paddingBottom: 90,
+        paddingBottom: 80,
       }}
     >
       <div
@@ -778,10 +870,10 @@ export default async function AdminPage({
           display: "flex",
           justifyContent:
             "space-between",
-          alignItems: "center",
           gap: 16,
+          alignItems: "center",
           flexWrap: "wrap",
-          marginBottom: 30,
+          marginBottom: 28,
         }}
       >
         <div>
@@ -792,7 +884,7 @@ export default async function AdminPage({
           <h1
             style={{
               marginTop: 14,
-              marginBottom: 8,
+              marginBottom: 6,
             }}
           >
             Booking dashboard
@@ -804,15 +896,17 @@ export default async function AdminPage({
               margin: 0,
             }}
           >
-            Manage customer booking
-            requests and trip enquiries.
+            Manage Himalayan tour
+            booking requests.
           </p>
         </div>
 
-        <form action={logoutAdmin}>
+        <form
+          action={logoutAdmin}
+        >
           <button
-            type="submit"
             className="btn"
+            type="submit"
           >
             Log out
           </button>
@@ -824,8 +918,8 @@ export default async function AdminPage({
           display: "grid",
           gridTemplateColumns:
             "repeat(auto-fit, minmax(150px, 1fr))",
-          gap: 12,
-          marginBottom: 24,
+          gap: 14,
+          marginBottom: 28,
         }}
       >
         <a
@@ -834,14 +928,11 @@ export default async function AdminPage({
             status: "",
             notesOnly,
             sort,
+            page: 1,
           })}
-          style={{
-            ...statCardStyle,
-            outline:
-              !status
-                ? "2px solid rgba(97,220,190,0.8)"
-                : "none",
-          }}
+          style={statCardStyle(
+            !status
+          )}
         >
           <div className="muted">
             Total
@@ -849,9 +940,8 @@ export default async function AdminPage({
 
           <div
             style={{
-              fontSize: 30,
+              fontSize: 32,
               fontWeight: 800,
-              marginTop: 4,
             }}
           >
             {counts.total}
@@ -864,14 +954,11 @@ export default async function AdminPage({
             status: "new",
             notesOnly,
             sort,
+            page: 1,
           })}
-          style={{
-            ...statCardStyle,
-            outline:
-              status === "new"
-                ? "2px solid rgba(97,220,190,0.8)"
-                : "none",
-          }}
+          style={statCardStyle(
+            status === "new"
+          )}
         >
           <div className="muted">
             New
@@ -879,9 +966,8 @@ export default async function AdminPage({
 
           <div
             style={{
-              fontSize: 30,
+              fontSize: 32,
               fontWeight: 800,
-              marginTop: 4,
             }}
           >
             {counts.new}
@@ -891,17 +977,16 @@ export default async function AdminPage({
         <a
           href={buildAdminUrl({
             search,
-            status: "contacted",
+            status:
+              "contacted",
             notesOnly,
             sort,
+            page: 1,
           })}
-          style={{
-            ...statCardStyle,
-            outline:
-              status === "contacted"
-                ? "2px solid rgba(97,220,190,0.8)"
-                : "none",
-          }}
+          style={statCardStyle(
+            status ===
+              "contacted"
+          )}
         >
           <div className="muted">
             Contacted
@@ -909,9 +994,8 @@ export default async function AdminPage({
 
           <div
             style={{
-              fontSize: 30,
+              fontSize: 32,
               fontWeight: 800,
-              marginTop: 4,
             }}
           >
             {counts.contacted}
@@ -921,17 +1005,16 @@ export default async function AdminPage({
         <a
           href={buildAdminUrl({
             search,
-            status: "confirmed",
+            status:
+              "confirmed",
             notesOnly,
             sort,
+            page: 1,
           })}
-          style={{
-            ...statCardStyle,
-            outline:
-              status === "confirmed"
-                ? "2px solid rgba(97,220,190,0.8)"
-                : "none",
-          }}
+          style={statCardStyle(
+            status ===
+              "confirmed"
+          )}
         >
           <div className="muted">
             Confirmed
@@ -939,9 +1022,8 @@ export default async function AdminPage({
 
           <div
             style={{
-              fontSize: 30,
+              fontSize: 32,
               fontWeight: 800,
-              marginTop: 4,
             }}
           >
             {counts.confirmed}
@@ -951,17 +1033,16 @@ export default async function AdminPage({
         <a
           href={buildAdminUrl({
             search,
-            status: "cancelled",
+            status:
+              "cancelled",
             notesOnly,
             sort,
+            page: 1,
           })}
-          style={{
-            ...statCardStyle,
-            outline:
-              status === "cancelled"
-                ? "2px solid rgba(97,220,190,0.8)"
-                : "none",
-          }}
+          style={statCardStyle(
+            status ===
+              "cancelled"
+          )}
         >
           <div className="muted">
             Cancelled
@@ -969,4 +1050,610 @@ export default async function AdminPage({
 
           <div
             style={{
-              font
+              fontSize: 32,
+              fontWeight: 800,
+            }}
+          >
+            {counts.cancelled}
+          </div>
+        </a>
+      </section>
+
+      <section
+        className="card"
+        style={{
+          marginBottom: 26,
+        }}
+      >
+        <form
+          method="get"
+          action="/admin"
+        >
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns:
+                "repeat(auto-fit, minmax(190px, 1fr))",
+              gap: 14,
+              alignItems: "end",
+            }}
+          >
+            <div className="field">
+              <label htmlFor="q">
+                Search
+              </label>
+
+              <input
+                id="q"
+                name="q"
+                defaultValue={
+                  search
+                }
+                placeholder="Name, email or tour"
+              />
+            </div>
+
+            <div className="field">
+              <label htmlFor="status">
+                Status
+              </label>
+
+              <select
+                id="status"
+                name="status"
+                defaultValue={
+                  status
+                }
+              >
+                <option value="">
+                  All statuses
+                </option>
+
+                <option value="new">
+                  New
+                </option>
+
+                <option value="contacted">
+                  Contacted
+                </option>
+
+                <option value="confirmed">
+                  Confirmed
+                </option>
+
+                <option value="cancelled">
+                  Cancelled
+                </option>
+              </select>
+            </div>
+
+            <div className="field">
+              <label htmlFor="sort">
+                Sort
+              </label>
+
+              <select
+                id="sort"
+                name="sort"
+                defaultValue={
+                  sort
+                }
+              >
+                <option value="newest">
+                  Newest first
+                </option>
+
+                <option value="oldest">
+                  Oldest first
+                </option>
+
+                <option value="name">
+                  Name A–Z
+                </option>
+
+                <option value="travelers">
+                  Most travelers
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <label
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 9,
+              marginTop: 10,
+              marginBottom: 18,
+              cursor: "pointer",
+            }}
+          >
+            <input
+              type="checkbox"
+              name="notes"
+              value="1"
+              defaultChecked={
+                notesOnly
+              }
+            />
+
+            <span>
+              Notes only
+            </span>
+          </label>
+
+          <div
+            style={{
+              display: "flex",
+              gap: 10,
+              flexWrap: "wrap",
+            }}
+          >
+            <button
+              className="btn"
+              type="submit"
+            >
+              Apply filters
+            </button>
+
+            <a
+              href="/admin"
+              className="btn"
+            >
+              Clear filters
+            </a>
+
+            <a
+              href={exportUrl}
+              className="btn"
+            >
+              Export CSV
+            </a>
+          </div>
+        </form>
+      </section>
+
+      <div
+        style={{
+          display: "flex",
+          justifyContent:
+            "space-between",
+          alignItems: "center",
+          gap: 12,
+          flexWrap: "wrap",
+          marginBottom: 18,
+        }}
+      >
+        <div className="muted">
+          Showing{" "}
+          {bookings.length} of{" "}
+          {filteredTotal} bookings
+        </div>
+
+        <div className="muted">
+          Page {currentPage} of{" "}
+          {totalPages}
+        </div>
+      </div>
+
+      {bookings.length === 0 ? (
+        <section className="card">
+          <h2>
+            No bookings found
+          </h2>
+
+          <p className="muted">
+            Try changing your search
+            or filters.
+          </p>
+        </section>
+      ) : (
+        <section
+          style={{
+            display: "grid",
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(320px, 1fr))",
+            gap: 16,
+          }}
+        >
+          {bookings.map(
+            (booking) => {
+              const parsed =
+                parseBookingMessage(
+                  booking.message
+                );
+
+              const bookingStatus =
+                booking.status ||
+                "new";
+
+              const tourName =
+                formatTourName(
+                  booking.tour_slug
+                );
+
+              return (
+                <article
+                  key={booking.id}
+                  className="card"
+                >
+                  <div
+                    style={{
+                      display:
+                        "flex",
+                      gap: 8,
+                      flexWrap:
+                        "wrap",
+                      marginBottom: 14,
+                    }}
+                  >
+                    <span className="pill">
+                      {bookingStatus}
+                    </span>
+
+                    {booking.admin_notes ? (
+                      <span className="pill">
+                        Has notes
+                      </span>
+                    ) : null}
+                  </div>
+
+                  <h2
+                    style={{
+                      marginBottom: 16,
+                    }}
+                  >
+                    {booking.name}
+                  </h2>
+
+                  <div
+                    style={{
+                      display:
+                        "grid",
+                      gap: 9,
+                    }}
+                  >
+                    <div>
+                      <strong>
+                        Tour:
+                      </strong>{" "}
+                      {tourName}
+                    </div>
+
+                    <div>
+                      <strong>
+                        Email:
+                      </strong>{" "}
+                      {booking.email}
+                    </div>
+
+                    <div>
+                      <strong>
+                        Dates:
+                      </strong>{" "}
+                      {booking.dates ||
+                        "Not specified"}
+                    </div>
+
+                    <div>
+                      <strong>
+                        Travelers:
+                      </strong>{" "}
+                      {booking.travelers ??
+                        "Not specified"}
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns:
+                        "repeat(2, minmax(0, 1fr))",
+                      gap: 8,
+                      marginTop: 16,
+                    }}
+                  >
+                    <div
+                      style={
+                        detailBoxStyle
+                      }
+                    >
+                      <div className="muted">
+                        Country
+                      </div>
+
+                      <strong>
+                        {parsed.country}
+                      </strong>
+                    </div>
+
+                    <div
+                      style={
+                        detailBoxStyle
+                      }
+                    >
+                      <div className="muted">
+                        Trip style
+                      </div>
+
+                      <strong>
+                        {parsed.tripStyle}
+                      </strong>
+                    </div>
+
+                    <div
+                      style={
+                        detailBoxStyle
+                      }
+                    >
+                      <div className="muted">
+                        Accommodation
+                      </div>
+
+                      <strong>
+                        {
+                          parsed.accommodation
+                        }
+                      </strong>
+                    </div>
+
+                    <div
+                      style={
+                        detailBoxStyle
+                      }
+                    >
+                      <div className="muted">
+                        Phone / WhatsApp
+                      </div>
+
+                      <strong>
+                        {parsed.phone}
+                      </strong>
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 16,
+                    }}
+                  >
+                    <div
+                      className="muted"
+                      style={{
+                        marginBottom: 6,
+                      }}
+                    >
+                      Customer message
+                    </div>
+
+                    <div
+                      style={{
+                        ...detailBoxStyle,
+                        whiteSpace:
+                          "pre-wrap",
+                      }}
+                    >
+                      {
+                        parsed.customerMessage
+                      }
+                    </div>
+                  </div>
+
+                  <a
+                    href={`/admin/bookings/${booking.id}`}
+                    className="btn"
+                    style={{
+                      display:
+                        "inline-block",
+                      marginTop: 18,
+                    }}
+                  >
+                    View booking
+                  </a>
+
+                  <p
+                    className="muted"
+                    style={{
+                      marginTop: 18,
+                      marginBottom: 12,
+                    }}
+                  >
+                    Received:{" "}
+                    {new Date(
+                      booking.created_at
+                    ).toLocaleString()}
+                  </p>
+
+                  <div
+                    style={{
+                      fontWeight: 700,
+                      marginBottom: 9,
+                    }}
+                  >
+                    Change status
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 8,
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    {allowedStatuses.map(
+                      (
+                        nextStatus
+                      ) => (
+                        <form
+                          key={
+                            nextStatus
+                          }
+                          action={
+                            updateBookingStatus
+                          }
+                        >
+                          <input
+                            type="hidden"
+                            name="id"
+                            value={
+                              booking.id
+                            }
+                          />
+
+                          <input
+                            type="hidden"
+                            name="status"
+                            value={
+                              nextStatus
+                            }
+                          />
+
+                          <input
+                            type="hidden"
+                            name="returnTo"
+                            value={
+                              currentUrl
+                            }
+                          />
+
+                          <button
+                            className="btn"
+                            type="submit"
+                            disabled={
+                              bookingStatus ===
+                              nextStatus
+                            }
+                            style={{
+                              opacity:
+                                bookingStatus ===
+                                nextStatus
+                                  ? 0.55
+                                  : 1,
+                            }}
+                          >
+                            {
+                              nextStatus
+                            }
+                          </button>
+                        </form>
+                      )
+                    )}
+                  </div>
+                </article>
+              );
+            }
+          )}
+        </section>
+      )}
+
+      {filteredTotal > 0 && (
+        <nav
+          style={{
+            display: "flex",
+            justifyContent:
+              "center",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 8,
+            marginTop: 30,
+          }}
+        >
+          {currentPage > 1 ? (
+            <a
+              href={buildAdminUrl({
+                search,
+                status,
+                notesOnly,
+                sort,
+                page:
+                  currentPage -
+                  1,
+              })}
+              className="btn"
+            >
+              ← Previous
+            </a>
+          ) : (
+            <span
+              className="btn"
+              style={{
+                opacity: 0.45,
+                pointerEvents:
+                  "none",
+              }}
+            >
+              ← Previous
+            </span>
+          )}
+
+          {Array.from(
+            {
+              length:
+                totalPages,
+            },
+            (_, index) =>
+              index + 1
+          ).map(
+            (pageNumber) => (
+              <a
+                key={pageNumber}
+                href={buildAdminUrl({
+                  search,
+                  status,
+                  notesOnly,
+                  sort,
+                  page:
+                    pageNumber,
+                })}
+                className="btn"
+                style={{
+                  opacity:
+                    currentPage ===
+                    pageNumber
+                      ? 0.55
+                      : 1,
+                  pointerEvents:
+                    currentPage ===
+                    pageNumber
+                      ? "none"
+                      : "auto",
+                }}
+              >
+                {pageNumber}
+              </a>
+            )
+          )}
+
+          {currentPage <
+          totalPages ? (
+            <a
+              href={buildAdminUrl({
+                search,
+                status,
+                notesOnly,
+                sort,
+                page:
+                  currentPage +
+                  1,
+              })}
+              className="btn"
+            >
+              Next →
+            </a>
+          ) : (
+            <span
+              className="btn"
+              style={{
+                opacity: 0.45,
+                pointerEvents:
+                  "none",
+              }}
+            >
+              Next →
+            </span>
+          )}
+        </nav>
+      )}
+    </main>
+  );
+}
