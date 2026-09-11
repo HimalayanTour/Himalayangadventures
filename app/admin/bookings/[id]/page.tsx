@@ -18,6 +18,11 @@ type Booking = {
   status: string | null;
   admin_notes: string | null;
   created_at: string;
+
+  phone: string | null;
+  country: string | null;
+  trip_style: string | null;
+  accommodation: string | null;
 };
 
 type ParsedMessage = {
@@ -59,7 +64,8 @@ async function isAdminLoggedIn() {
   }
 
   return (
-    session === makeAdminToken(adminPassword)
+    session ===
+    makeAdminToken(adminPassword)
   );
 }
 
@@ -76,12 +82,16 @@ function getDb() {
     );
   }
 
-  return createClient(url, serviceKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-  });
+  return createClient(
+    url,
+    serviceKey,
+    {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+    }
+  );
 }
 
 function formatTourName(
@@ -104,7 +114,8 @@ function formatTourName(
 function parseBookingMessage(
   message: string | null
 ): ParsedMessage {
-  const text = message?.trim() || "";
+  const text =
+    message?.trim() || "";
 
   if (!text) {
     return {
@@ -117,28 +128,18 @@ function parseBookingMessage(
     };
   }
 
-  /*
-    New booking form messages look like:
-
-    Phone / WhatsApp: ...
-    Country: ...
-    Trip style: ...
-    Accommodation: ...
-
-    Customer message:
-    ...
-
-    Older bookings did not use this format.
-    Those are displayed normally as the
-    customer message.
-  */
-
   const hasStructuredData =
-    text.includes("Phone / WhatsApp:") ||
+    text.includes(
+      "Phone / WhatsApp:"
+    ) ||
     text.includes("Country:") ||
     text.includes("Trip style:") ||
     text.includes("Accommodation:");
 
+  /*
+    Older bookings may contain
+    only a normal customer message.
+  */
   if (!hasStructuredData) {
     return {
       phone: "Not provided",
@@ -154,12 +155,14 @@ function parseBookingMessage(
   let phone = "Not provided";
   let country = "Not provided";
   let tripStyle = "Not specified";
-  let accommodation = "Not specified";
+  let accommodation =
+    "Not specified";
 
-  const customerMessageLines: string[] =
-    [];
+  let readingCustomerMessage =
+    false;
 
-  let readingCustomerMessage = false;
+  const customerMessageLines:
+    string[] = [];
 
   for (const line of lines) {
     const trimmed = line.trim();
@@ -175,29 +178,42 @@ function parseBookingMessage(
             "Phone / WhatsApp:",
             ""
           )
-          .trim() || "Not provided";
+          .trim() ||
+        "Not provided";
 
       continue;
     }
 
     if (
-      trimmed.startsWith("Country:")
+      trimmed.startsWith(
+        "Country:"
+      )
     ) {
       country =
         trimmed
-          .replace("Country:", "")
-          .trim() || "Not provided";
+          .replace(
+            "Country:",
+            ""
+          )
+          .trim() ||
+        "Not provided";
 
       continue;
     }
 
     if (
-      trimmed.startsWith("Trip style:")
+      trimmed.startsWith(
+        "Trip style:"
+      )
     ) {
       tripStyle =
         trimmed
-          .replace("Trip style:", "")
-          .trim() || "Not specified";
+          .replace(
+            "Trip style:",
+            ""
+          )
+          .trim() ||
+        "Not specified";
 
       continue;
     }
@@ -213,35 +229,41 @@ function parseBookingMessage(
             "Accommodation:",
             ""
           )
-          .trim() || "Not specified";
+          .trim() ||
+        "Not specified";
 
       continue;
     }
 
     if (
-      trimmed === "Customer message:"
+      trimmed ===
+      "Customer message:"
     ) {
-      readingCustomerMessage = true;
+      readingCustomerMessage =
+        true;
+
       continue;
     }
 
-    if (readingCustomerMessage) {
-      customerMessageLines.push(line);
+    if (
+      readingCustomerMessage
+    ) {
+      customerMessageLines.push(
+        line
+      );
     }
   }
-
-  const customerMessage =
-    customerMessageLines
-      .join("\n")
-      .trim() ||
-    "No additional message.";
 
   return {
     phone,
     country,
     tripStyle,
     accommodation,
-    customerMessage,
+    customerMessage:
+      customerMessageLines
+        .join("\n")
+        .trim() ||
+      "No additional message.",
   };
 }
 
@@ -254,7 +276,9 @@ function makeEmailLink(
     email
   )}?subject=${encodeURIComponent(
     subject
-  )}&body=${encodeURIComponent(body)}`;
+  )}&body=${encodeURIComponent(
+    body
+  )}`;
 }
 
 async function updateBookingStatus(
@@ -279,7 +303,9 @@ async function updateBookingStatus(
 
   if (
     !id ||
-    !allowedStatuses.includes(status)
+    !allowedStatuses.includes(
+      status
+    )
   ) {
     return;
   }
@@ -300,6 +326,7 @@ async function updateBookingStatus(
   }
 
   revalidatePath("/admin");
+
   revalidatePath(
     `/admin/bookings/${id}`
   );
@@ -326,7 +353,9 @@ async function saveAdminNotes(
   );
 
   const notes = String(
-    formData.get("admin_notes") || ""
+    formData.get(
+      "admin_notes"
+    ) || ""
   ).trim();
 
   if (!id) {
@@ -338,7 +367,8 @@ async function saveAdminNotes(
   const { error } = await db
     .from("bookings")
     .update({
-      admin_notes: notes || null,
+      admin_notes:
+        notes || null,
     })
     .eq("id", id);
 
@@ -349,6 +379,7 @@ async function saveAdminNotes(
   }
 
   revalidatePath("/admin");
+
   revalidatePath(
     `/admin/bookings/${id}`
   );
@@ -399,7 +430,11 @@ export default async function BookingPage({
         message,
         status,
         admin_notes,
-        created_at
+        created_at,
+        phone,
+        country,
+        trip_style,
+        accommodation
       `
     )
     .eq("id", id)
@@ -415,12 +450,40 @@ export default async function BookingPage({
     notFound();
   }
 
-  const booking = data as Booking;
+  const booking =
+    data as Booking;
 
-  const parsed =
+  const legacy =
     parseBookingMessage(
       booking.message
     );
+
+  /*
+    New bookings use the real
+    Supabase columns.
+
+    Older bookings fall back to
+    information stored inside
+    message.
+  */
+  const phone =
+    booking.phone?.trim() ||
+    legacy.phone;
+
+  const country =
+    booking.country?.trim() ||
+    legacy.country;
+
+  const tripStyle =
+    booking.trip_style?.trim() ||
+    legacy.tripStyle;
+
+  const accommodation =
+    booking.accommodation?.trim() ||
+    legacy.accommodation;
+
+  const customerMessage =
+    legacy.customerMessage;
 
   const currentStatus =
     booking.status || "new";
@@ -435,6 +498,10 @@ export default async function BookingPage({
       booking.created_at
     ).toLocaleString();
 
+  /*
+    EMAIL TEMPLATES
+  */
+
   const receivedSubject =
     "We received your Himalayan tour booking request";
 
@@ -445,7 +512,10 @@ Thank you for contacting Himalayan26.
 We have received your booking request for ${tourName}.
 
 Preferred dates: ${booking.dates || "Not specified"}
-Travelers: ${booking.travelers || "Not specified"}
+Travelers: ${booking.travelers ?? "Not specified"}
+Country: ${country}
+Trip style: ${tripStyle}
+Accommodation: ${accommodation}
 
 Our team is reviewing your request and will contact you with the next steps.
 
@@ -459,7 +529,7 @@ Himalayan26`;
 
 Thank you for your interest in ${tourName}.
 
-To help us prepare the right journey for you, could you please send us a little more information?
+To help us prepare the right journey for you, could you please send us any missing information about your trip?
 
 • Preferred travel dates
 • Number of travelers
@@ -481,7 +551,9 @@ We are pleased to confirm your Himalayan journey.
 
 Tour: ${tourName}
 Preferred dates: ${booking.dates || "To be confirmed"}
-Travelers: ${booking.travelers || "Not specified"}
+Travelers: ${booking.travelers ?? "Not specified"}
+Trip style: ${tripStyle}
+Accommodation: ${accommodation}
 
 We will contact you with the detailed itinerary, preparation information and payment next steps.
 
@@ -551,7 +623,8 @@ Himalayan26`;
         </a>
       </div>
 
-      {query.statusSaved === "1" && (
+      {query.statusSaved ===
+        "1" && (
         <div
           className="notice"
           style={{
@@ -574,6 +647,8 @@ Himalayan26`;
           successfully.
         </div>
       )}
+
+      {/* CUSTOMER INFORMATION */}
 
       <section
         className="card"
@@ -628,7 +703,7 @@ Himalayan26`;
             </div>
 
             <strong>
-              {parsed.phone}
+              {phone}
             </strong>
           </div>
 
@@ -638,7 +713,7 @@ Himalayan26`;
             </div>
 
             <strong>
-              {parsed.country}
+              {country}
             </strong>
           </div>
 
@@ -680,7 +755,7 @@ Himalayan26`;
             </div>
 
             <strong>
-              {parsed.tripStyle}
+              {tripStyle}
             </strong>
           </div>
 
@@ -690,7 +765,7 @@ Himalayan26`;
             </div>
 
             <strong>
-              {parsed.accommodation}
+              {accommodation}
             </strong>
           </div>
 
@@ -726,10 +801,12 @@ Himalayan26`;
               lineHeight: 1.6,
             }}
           >
-            {parsed.customerMessage}
+            {customerMessage}
           </div>
         </div>
       </section>
+
+      {/* STATUS */}
 
       <section
         className="card"
@@ -811,6 +888,8 @@ Himalayan26`;
         </div>
       </section>
 
+      {/* PRIVATE NOTES */}
+
       <section
         className="card"
         style={{
@@ -830,9 +909,9 @@ Himalayan26`;
         </h2>
 
         <p className="muted">
-          These notes are for your team
-          only and are never shown to
-          customers.
+          These notes are for your
+          team only and are never
+          shown to customers.
         </p>
 
         <form
@@ -848,7 +927,9 @@ Himalayan26`;
           />
 
           <div className="field">
-            <label htmlFor="admin_notes">
+            <label
+              htmlFor="admin_notes"
+            >
               Notes
             </label>
 
@@ -872,6 +953,8 @@ Himalayan26`;
           </button>
         </form>
       </section>
+
+      {/* EMAIL */}
 
       <section
         className="card"
@@ -898,8 +981,8 @@ Himalayan26`;
           }}
         >
           Choose a ready-made email
-          template. Your email app will
-          open with the customer,
+          template. Your email app
+          will open with the customer,
           subject and message already
           filled in.
         </p>
@@ -928,7 +1011,9 @@ Himalayan26`;
             </p>
 
             <a
-              href={receivedEmailLink}
+              href={
+                receivedEmailLink
+              }
               className="btn"
             >
               Open email
@@ -951,7 +1036,9 @@ Himalayan26`;
             </p>
 
             <a
-              href={moreInfoEmailLink}
+              href={
+                moreInfoEmailLink
+              }
               className="btn"
             >
               Open email
@@ -974,7 +1061,9 @@ Himalayan26`;
             </p>
 
             <a
-              href={confirmedEmailLink}
+              href={
+                confirmedEmailLink
+              }
               className="btn"
             >
               Open email
@@ -997,7 +1086,9 @@ Himalayan26`;
             </p>
 
             <a
-              href={customEmailLink}
+              href={
+                customEmailLink
+              }
               className="btn"
             >
               Write email
