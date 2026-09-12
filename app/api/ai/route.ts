@@ -5,17 +5,102 @@ export const dynamic = "force-dynamic";
 
 type AiRequestBody = {
   message?: unknown;
+  liveResearch?: unknown;
 };
 
 function cleanText(
   value: unknown,
-  maxLength = 4000
+  maxLength = 5000
 ) {
   if (typeof value !== "string") {
     return "";
   }
 
   return value.trim().slice(0, maxLength);
+}
+
+function cleanBoolean(value: unknown) {
+  return value === true;
+}
+
+function extractAnswer(result: any) {
+  if (
+    typeof result?.output_text === "string" &&
+    result.output_text.trim()
+  ) {
+    return result.output_text.trim();
+  }
+
+  let answer = "";
+
+  if (Array.isArray(result?.output)) {
+    for (const item of result.output) {
+      if (!Array.isArray(item?.content)) {
+        continue;
+      }
+
+      for (const content of item.content) {
+        if (
+          content?.type === "output_text" &&
+          typeof content?.text === "string"
+        ) {
+          answer += content.text;
+        }
+      }
+    }
+  }
+
+  return answer.trim();
+}
+
+function extractResearchSources(result: any) {
+  const sources: Array<{
+    title: string;
+    url: string;
+  }> = [];
+
+  const seen = new Set<string>();
+
+  if (!Array.isArray(result?.output)) {
+    return sources;
+  }
+
+  for (const item of result.output) {
+    if (
+      item?.type !== "web_search_call"
+    ) {
+      continue;
+    }
+
+    const action = item?.action;
+
+    if (
+      Array.isArray(action?.sources)
+    ) {
+      for (const source of action.sources) {
+        const url =
+          typeof source?.url === "string"
+            ? source.url
+            : "";
+
+        if (!url || seen.has(url)) {
+          continue;
+        }
+
+        seen.add(url);
+
+        sources.push({
+          title:
+            typeof source?.title === "string"
+              ? source.title
+              : url,
+          url,
+        });
+      }
+    }
+  }
+
+  return sources.slice(0, 8);
 }
 
 export async function POST(
@@ -56,8 +141,11 @@ export async function POST(
 
     const message = cleanText(
       body.message,
-      4000
+      5000
     );
+
+    const liveResearch =
+      cleanBoolean(body.liveResearch);
 
     if (!message) {
       return NextResponse.json(
@@ -71,36 +159,22 @@ export async function POST(
       );
     }
 
-    const systemPrompt = `
-You are Himalayan26 AI Trip Planner.
+    const currentDate =
+      new Date().toISOString();
 
-You help travelers plan Himalayan journeys in:
+    const instructions = `
+You are Himalayan26 AI Trip Planner and Himalayan travel research assistant.
+
+Current server date:
+${currentDate}
+
+You specialize in:
 - Nepal
 - Bhutan
 - Tibet
 - Indian Himalaya
 
-Your style:
-- professional
-- warm
-- practical
-- concise
-- safety-conscious
-- never overpromise
-- never invent permits, prices, weather, or availability as confirmed facts
-
-When useful, structure the answer with:
-1. Recommended journey
-2. Suggested duration
-3. Best season
-4. Difficulty
-5. Suggested route
-6. Accommodation style
-7. Important preparation
-8. Safety notes
-9. Next step
-
-Known Himalayan26 tours include:
+Known Himalayan26 tours:
 - Everest Base Camp — Nepal — 14 days — Challenging
 - Annapurna Classic — Nepal — 10 days — Moderate
 - Langtang Valley — Nepal — 8 days — Moderate
@@ -111,14 +185,115 @@ Known Himalayan26 tours include:
 - Ladakh High Altitude — India — 10 days — Moderate
 - Kailash Mansarovar Journey — Tibet — 15 days — Moderate
 
-Important rules:
-- If the traveler gives too little information, ask 1–3 useful follow-up questions.
-- If discussing altitude, trekking difficulty, permits, visas, border restrictions, or current conditions, clearly state that final details must be verified before booking.
-- Do not claim live weather or live availability unless the website separately provides it.
-- Do not provide medical diagnosis.
-- Encourage proper acclimatization for high-altitude trips.
-- If the user appears ready to book, recommend using the booking form.
+Your job is to create useful, professional Himalayan travel plans.
+
+When LIVE WEB RESEARCH is enabled:
+- Search the web for information that could have changed.
+- Prioritize official government, tourism authority, park, embassy, weather, transportation, and other authoritative sources.
+- Research relevant current travel advisories.
+- Research entry or visa information when relevant.
+- Research permits and trekking regulations when relevant.
+- Research trail, road, border, airport, or transportation conditions when relevant.
+- Research current or recent weather information when useful.
+- Clearly distinguish confirmed current information from general planning advice.
+- Never claim something is current unless web research supports it.
+- Do not invent permit prices, closures, entry rules, weather, or availability.
+- Mention dates for time-sensitive information whenever possible.
+
+When LIVE WEB RESEARCH is disabled:
+- Do not claim that information is live or current.
+- Clearly explain when changing rules or conditions should be checked before travel.
+
+Output style:
+- professional
+- clear
+- concise but useful
+- easy for travelers to scan
+- no hype
+- no fake certainty
+
+Use this structure when appropriate:
+
+## Recommended journey
+
+A short personalized recommendation.
+
+## Why this trip fits
+
+- bullet points
+
+## Suggested itinerary
+
+Use a Markdown table when helpful:
+
+| Day | Plan |
+|---|---|
+| 1 | ... |
+
+## Best season and conditions
+
+Include current findings only if live research supports them.
+
+## Permits, entry and regulations
+
+State clearly what must still be verified.
+
+## Safety and altitude
+
+Include proper acclimatization guidance.
+Do not provide medical diagnosis.
+
+## Current travel updates
+
+Only include this section when live research is enabled.
+
+## Next step
+
+Encourage the traveler to explore the matching Himalayan26 tour or submit a booking request.
+
+Important:
+- Never pretend Himalayan26 has confirmed availability unless it actually has.
+- Never fabricate prices.
+- Existing listed Himalayan26 tour prices may be treated as website reference prices only if provided in the website context.
+- Government requirements, permits, border restrictions, weather, flight conditions, and trail conditions can change.
 `;
+
+    const input = liveResearch
+      ? `
+LIVE WEB RESEARCH: ENABLED.
+
+Use web search for current information relevant to this request.
+
+Traveler request:
+${message}
+`
+      : `
+LIVE WEB RESEARCH: DISABLED.
+
+Answer from general planning knowledge only and clearly flag anything time-sensitive for verification.
+
+Traveler request:
+${message}
+`;
+
+    const requestBody: Record<
+      string,
+      unknown
+    > = {
+      model: "gpt-5.6-luna",
+      instructions,
+      input,
+      max_output_tokens: 1800,
+    };
+
+    if (liveResearch) {
+      requestBody.tools = [
+        {
+          type: "web_search",
+          search_context_size: "medium",
+        },
+      ];
+    }
 
     const response = await fetch(
       "https://api.openai.com/v1/responses",
@@ -130,13 +305,9 @@ Important rules:
           "Content-Type":
             "application/json",
         },
-        body: JSON.stringify({
-          model: "gpt-5.6-luna",
-          instructions:
-            systemPrompt,
-          input: message,
-          max_output_tokens: 1200,
-        }),
+        body: JSON.stringify(
+          requestBody
+        ),
       }
     );
 
@@ -164,50 +335,8 @@ Important rules:
       );
     }
 
-    let answer = "";
-
-    if (
-      typeof result.output_text ===
-      "string"
-    ) {
-      answer =
-        result.output_text.trim();
-    }
-
-    if (
-      !answer &&
-      Array.isArray(
-        result.output
-      )
-    ) {
-      for (const item of result.output) {
-        if (
-          !Array.isArray(
-            item?.content
-          )
-        ) {
-          continue;
-        }
-
-        for (
-          const content of
-            item.content
-        ) {
-          if (
-            content?.type ===
-              "output_text" &&
-            typeof content.text ===
-              "string"
-          ) {
-            answer +=
-              content.text;
-          }
-        }
-      }
-
-      answer =
-        answer.trim();
-    }
+    const answer =
+      extractAnswer(result);
 
     if (!answer) {
       return NextResponse.json(
@@ -221,9 +350,18 @@ Important rules:
       );
     }
 
+    const sources =
+      liveResearch
+        ? extractResearchSources(
+            result
+          )
+        : [];
+
     return NextResponse.json({
       ok: true,
       answer,
+      liveResearch,
+      sources,
     });
   } catch (error) {
     console.error(
