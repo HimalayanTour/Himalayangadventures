@@ -8,14 +8,8 @@ type AiRequestBody = {
   liveResearch?: unknown;
 };
 
-function cleanText(
-  value: unknown,
-  maxLength = 5000
-) {
-  if (typeof value !== "string") {
-    return "";
-  }
-
+function cleanText(value: unknown, maxLength = 3500) {
+  if (typeof value !== "string") return "";
   return value.trim().slice(0, maxLength);
 }
 
@@ -35,9 +29,7 @@ function extractAnswer(result: any) {
 
   if (Array.isArray(result?.output)) {
     for (const item of result.output) {
-      if (!Array.isArray(item?.content)) {
-        continue;
-      }
+      if (!Array.isArray(item?.content)) continue;
 
       for (const content of item.content) {
         if (
@@ -66,46 +58,41 @@ function extractResearchSources(result: any) {
   }
 
   for (const item of result.output) {
-    if (
-      item?.type !== "web_search_call"
-    ) {
-      continue;
-    }
+    if (item?.type !== "web_search_call") continue;
 
-    const action = item?.action;
+    const sourceList =
+      Array.isArray(item?.action?.sources)
+        ? item.action.sources
+        : [];
 
-    if (
-      Array.isArray(action?.sources)
-    ) {
-      for (const source of action.sources) {
-        const url =
-          typeof source?.url === "string"
-            ? source.url
-            : "";
+    for (const source of sourceList) {
+      const url =
+        typeof source?.url === "string"
+          ? source.url
+          : "";
 
-        if (!url || seen.has(url)) {
-          continue;
-        }
+      if (!url || seen.has(url)) continue;
 
-        seen.add(url);
+      seen.add(url);
 
-        sources.push({
-          title:
-            typeof source?.title === "string"
-              ? source.title
-              : url,
-          url,
-        });
+      sources.push({
+        title:
+          typeof source?.title === "string"
+            ? source.title
+            : url,
+        url,
+      });
+
+      if (sources.length >= 5) {
+        return sources;
       }
     }
   }
 
-  return sources.slice(0, 8);
+  return sources;
 }
 
-export async function POST(
-  request: Request
-) {
+export async function POST(request: Request) {
   try {
     const apiKey =
       process.env.OPENAI_API_KEY;
@@ -116,9 +103,7 @@ export async function POST(
           error:
             "AI Trip Planner is not connected yet. OPENAI_API_KEY is missing.",
         },
-        {
-          status: 503,
-        }
+        { status: 503 }
       );
     }
 
@@ -133,15 +118,13 @@ export async function POST(
           error:
             "Invalid AI request.",
         },
-        {
-          status: 400,
-        }
+        { status: 400 }
       );
     }
 
     const message = cleanText(
       body.message,
-      5000
+      3500
     );
 
     const liveResearch =
@@ -153,26 +136,14 @@ export async function POST(
           error:
             "Please tell the AI Trip Planner what kind of Himalayan journey you want.",
         },
-        {
-          status: 400,
-        }
+        { status: 400 }
       );
     }
 
-    const currentDate =
-      new Date().toISOString();
-
     const instructions = `
-You are Himalayan26 AI Trip Planner and Himalayan travel research assistant.
+You are Himalayan26 AI Trip Planner.
 
-Current server date:
-${currentDate}
-
-You specialize in:
-- Nepal
-- Bhutan
-- Tibet
-- Indian Himalaya
+You plan journeys in Nepal, Bhutan, Tibet and the Indian Himalaya.
 
 Known Himalayan26 tours:
 - Everest Base Camp — Nepal — 14 days — Challenging
@@ -185,92 +156,46 @@ Known Himalayan26 tours:
 - Ladakh High Altitude — India — 10 days — Moderate
 - Kailash Mansarovar Journey — Tibet — 15 days — Moderate
 
-Your job is to create useful, professional Himalayan travel plans.
+Be concise and practical.
 
-When LIVE WEB RESEARCH is enabled:
-- Search the web for information that could have changed.
-- Prioritize official government, tourism authority, park, embassy, weather, transportation, and other authoritative sources.
-- Research relevant current travel advisories.
-- Research entry or visa information when relevant.
-- Research permits and trekking regulations when relevant.
-- Research trail, road, border, airport, or transportation conditions when relevant.
-- Research current or recent weather information when useful.
-- Clearly distinguish confirmed current information from general planning advice.
-- Never claim something is current unless web research supports it.
-- Do not invent permit prices, closures, entry rules, weather, or availability.
-- Mention dates for time-sensitive information whenever possible.
+When live research is enabled:
+- research only information directly relevant to the request
+- prioritize official or authoritative sources
+- check permits, entry rules, current travel updates, and conditions only when relevant
+- do not perform broad background research
+- do not repeat the same fact from multiple sources
+- never invent current conditions
 
-When LIVE WEB RESEARCH is disabled:
-- Do not claim that information is live or current.
-- Clearly explain when changing rules or conditions should be checked before travel.
-
-Output style:
-- professional
-- clear
-- concise but useful
-- easy for travelers to scan
-- no hype
-- no fake certainty
-
-Use this structure when appropriate:
+Use this structure:
 
 ## Recommended journey
 
-A short personalized recommendation.
-
-## Why this trip fits
-
-- bullet points
-
 ## Suggested itinerary
 
-Use a Markdown table when helpful:
+Use a short Markdown table.
 
-| Day | Plan |
-|---|---|
-| 1 | ... |
+## Current permits and travel rules
 
-## Best season and conditions
-
-Include current findings only if live research supports them.
-
-## Permits, entry and regulations
-
-State clearly what must still be verified.
+## Conditions and important updates
 
 ## Safety and altitude
 
-Include proper acclimatization guidance.
-Do not provide medical diagnosis.
-
-## Current travel updates
-
-Only include this section when live research is enabled.
-
 ## Next step
 
-Encourage the traveler to explore the matching Himalayan26 tour or submit a booking request.
-
-Important:
-- Never pretend Himalayan26 has confirmed availability unless it actually has.
-- Never fabricate prices.
-- Existing listed Himalayan26 tour prices may be treated as website reference prices only if provided in the website context.
-- Government requirements, permits, border restrictions, weather, flight conditions, and trail conditions can change.
+Keep the whole answer compact.
 `;
 
     const input = liveResearch
       ? `
-LIVE WEB RESEARCH: ENABLED.
+LIVE RESEARCH IS ENABLED.
 
-Use web search for current information relevant to this request.
+Research only the most important current information needed for this request.
 
 Traveler request:
 ${message}
 `
       : `
-LIVE WEB RESEARCH: DISABLED.
-
-Answer from general planning knowledge only and clearly flag anything time-sensitive for verification.
+LIVE RESEARCH IS DISABLED.
 
 Traveler request:
 ${message}
@@ -283,14 +208,14 @@ ${message}
       model: "gpt-5.6-luna",
       instructions,
       input,
-      max_output_tokens: 1800,
+      max_output_tokens: 850,
     };
 
     if (liveResearch) {
       requestBody.tools = [
         {
           type: "web_search",
-          search_context_size: "medium",
+          search_context_size: "low",
         },
       ];
     }
@@ -300,8 +225,7 @@ ${message}
       {
         method: "POST",
         headers: {
-          Authorization:
-            `Bearer ${apiKey}`,
+          Authorization: `Bearer ${apiKey}`,
           "Content-Type":
             "application/json",
         },
@@ -320,11 +244,28 @@ ${message}
         result
       );
 
+      const errorMessage =
+        result?.error?.message ||
+        "The AI Trip Planner could not respond right now.";
+
+      if (
+        response.status === 429 ||
+        errorMessage
+          .toLowerCase()
+          .includes("rate limit")
+      ) {
+        return NextResponse.json(
+          {
+            error:
+              "Live research is temporarily busy. Please wait a moment and try again.",
+          },
+          { status: 429 }
+        );
+      }
+
       return NextResponse.json(
         {
-          error:
-            result?.error?.message ||
-            "The AI Trip Planner could not respond right now.",
+          error: errorMessage,
         },
         {
           status:
@@ -344,17 +285,13 @@ ${message}
           error:
             "The AI Trip Planner returned an empty response.",
         },
-        {
-          status: 502,
-        }
+        { status: 502 }
       );
     }
 
     const sources =
       liveResearch
-        ? extractResearchSources(
-            result
-          )
+        ? extractResearchSources(result)
         : [];
 
     return NextResponse.json({
@@ -374,9 +311,7 @@ ${message}
         error:
           "Something went wrong with the AI Trip Planner.",
       },
-      {
-        status: 500,
-      }
+      { status: 500 }
     );
   }
 }
