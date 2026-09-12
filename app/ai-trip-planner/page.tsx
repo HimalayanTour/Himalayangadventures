@@ -6,6 +6,11 @@ import {
   useState,
 } from "react";
 
+type ResearchSource = {
+  title: string;
+  url: string;
+};
+
 function formatInline(text: string): ReactNode[] {
   const parts = text.split(/(\*\*.*?\*\*)/g);
 
@@ -65,7 +70,6 @@ function renderAnswer(text: string) {
       continue;
     }
 
-    // Tables
     if (isTableLine(line)) {
       const tableLines: string[] = [];
 
@@ -134,9 +138,7 @@ function renderAnswer(text: string) {
                           cellIndex
                         ) => (
                           <td
-                            key={
-                              cellIndex
-                            }
+                            key={cellIndex}
                             style={{
                               padding:
                                 "12px 14px",
@@ -148,9 +150,7 @@ function renderAnswer(text: string) {
                                 1.6,
                             }}
                           >
-                            {formatInline(
-                              cell
-                            )}
+                            {formatInline(cell)}
                           </td>
                         )
                       )}
@@ -166,7 +166,6 @@ function renderAnswer(text: string) {
       }
     }
 
-    // H1
     if (line.startsWith("# ")) {
       elements.push(
         <h2
@@ -186,7 +185,6 @@ function renderAnswer(text: string) {
       continue;
     }
 
-    // H2
     if (line.startsWith("## ")) {
       elements.push(
         <h3
@@ -206,7 +204,6 @@ function renderAnswer(text: string) {
       continue;
     }
 
-    // H3
     if (line.startsWith("### ")) {
       elements.push(
         <h4
@@ -226,7 +223,6 @@ function renderAnswer(text: string) {
       continue;
     }
 
-    // Bullet lists
     if (
       line.startsWith("- ") ||
       line.startsWith("* ")
@@ -271,7 +267,6 @@ function renderAnswer(text: string) {
       continue;
     }
 
-    // Numbered lists
     if (/^\d+\.\s/.test(line)) {
       const items: string[] = [];
 
@@ -311,7 +306,6 @@ function renderAnswer(text: string) {
       continue;
     }
 
-    // Normal paragraph
     elements.push(
       <p
         key={`p-${index}`}
@@ -338,6 +332,15 @@ export default function AiTripPlannerPage() {
   const [answer, setAnswer] =
     useState("");
 
+  const [sources, setSources] =
+    useState<ResearchSource[]>([]);
+
+  const [liveResearch, setLiveResearch] =
+    useState(true);
+
+  const [usedLiveResearch, setUsedLiveResearch] =
+    useState(false);
+
   const [error, setError] =
     useState("");
 
@@ -361,6 +364,8 @@ export default function AiTripPlannerPage() {
     setLoading(true);
     setError("");
     setAnswer("");
+    setSources([]);
+    setUsedLiveResearch(false);
 
     try {
       const response = await fetch(
@@ -373,6 +378,7 @@ export default function AiTripPlannerPage() {
           },
           body: JSON.stringify({
             message: trimmed,
+            liveResearch,
           }),
         }
       );
@@ -391,6 +397,16 @@ export default function AiTripPlannerPage() {
       setAnswer(
         result?.answer ||
           "No response received."
+      );
+
+      setSources(
+        Array.isArray(result?.sources)
+          ? result.sources
+          : []
+      );
+
+      setUsedLiveResearch(
+        result?.liveResearch === true
       );
     } catch (error) {
       console.error(
@@ -437,28 +453,27 @@ export default function AiTripPlannerPage() {
             fontSize:
               "clamp(40px, 7vw, 76px)",
             lineHeight: 1,
-            maxWidth: 900,
+            maxWidth: 950,
           }}
         >
           Plan your Himalayan journey
-          with AI
+          with AI + live research
         </h1>
 
         <p
           className="muted"
           style={{
-            maxWidth: 760,
+            maxWidth: 780,
             fontSize: 18,
             lineHeight: 1.7,
             marginTop: 18,
           }}
         >
-          Tell us where you want to
-          travel, your dates, group
-          size, fitness level, budget
-          and travel style. Himalayan26
-          AI will help you shape the
-          journey.
+          Create a personalized Himalayan
+          journey and optionally include
+          current web research for travel
+          rules, permits, conditions and
+          recent updates.
         </p>
       </section>
 
@@ -495,9 +510,91 @@ export default function AiTripPlannerPage() {
                   )
                 }
                 rows={10}
-                placeholder="Example: We are two travelers from Japan. We want a 10–14 day Himalayan trip in October 2027 with moderate trekking, local culture, comfortable accommodation and a budget around $2,500 per person."
+                placeholder="Example: Plan a 10-day Nepal trip for two travelers in November. We want moderate trekking, local culture and comfortable accommodation. Include current permits, travel updates and conditions."
                 disabled={loading}
               />
+            </div>
+
+            <div
+              style={{
+                marginTop: 18,
+                marginBottom: 18,
+                padding: 18,
+                borderRadius: 16,
+                border:
+                  "1px solid rgba(255,255,255,0.12)",
+                background:
+                  "rgba(255,255,255,0.035)",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent:
+                    "space-between",
+                  gap: 16,
+                  flexWrap: "wrap",
+                }}
+              >
+                <div>
+                  <strong>
+                    Live web research
+                  </strong>
+
+                  <p
+                    className="muted"
+                    style={{
+                      marginTop: 6,
+                      marginBottom: 0,
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    Search for current
+                    travel information,
+                    permits, conditions
+                    and recent updates.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setLiveResearch(
+                      (current) =>
+                        !current
+                    )
+                  }
+                  disabled={loading}
+                  aria-pressed={
+                    liveResearch
+                  }
+                  style={{
+                    minWidth: 92,
+                    padding:
+                      "11px 16px",
+                    borderRadius: 999,
+                    border:
+                      liveResearch
+                        ? "1px solid rgba(93, 229, 201, 0.7)"
+                        : "1px solid rgba(255,255,255,0.16)",
+                    background:
+                      liveResearch
+                        ? "rgba(93, 229, 201, 0.16)"
+                        : "rgba(255,255,255,0.04)",
+                    color: "inherit",
+                    cursor:
+                      loading
+                        ? "not-allowed"
+                        : "pointer",
+                    fontWeight: 700,
+                  }}
+                >
+                  {liveResearch
+                    ? "ON"
+                    : "OFF"}
+                </button>
+              </div>
             </div>
 
             <button
@@ -509,8 +606,12 @@ export default function AiTripPlannerPage() {
               }}
             >
               {loading
-                ? "Planning your journey..."
-                : "Create my AI trip plan"}
+                ? liveResearch
+                  ? "Researching and planning..."
+                  : "Planning your journey..."
+                : liveResearch
+                  ? "Create plan with live research"
+                  : "Create my AI trip plan"}
             </button>
           </form>
 
@@ -584,9 +685,37 @@ export default function AiTripPlannerPage() {
           minHeight: 260,
         }}
       >
-        <span className="pill">
-          YOUR AI PLAN
-        </span>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            flexWrap: "wrap",
+          }}
+        >
+          <span className="pill">
+            YOUR AI PLAN
+          </span>
+
+          {answer &&
+            usedLiveResearch && (
+              <span
+                style={{
+                  padding:
+                    "7px 12px",
+                  borderRadius: 999,
+                  border:
+                    "1px solid rgba(93,229,201,0.32)",
+                  background:
+                    "rgba(93,229,201,0.10)",
+                  fontSize: 13,
+                  fontWeight: 700,
+                }}
+              >
+                ● Live Research Included
+              </span>
+            )}
+        </div>
 
         <h2>
           Himalayan26 recommendation
@@ -604,9 +733,6 @@ export default function AiTripPlannerPage() {
             >
               Your personalized trip
               plan will appear here.
-              Include as much detail as
-              you can for a better
-              recommendation.
             </p>
           )}
 
@@ -617,8 +743,9 @@ export default function AiTripPlannerPage() {
               marginTop: 18,
             }}
           >
-            AI is preparing your
-            Himalayan journey...
+            {liveResearch
+              ? "Himalayan26 AI is researching current information and preparing your journey..."
+              : "AI is preparing your Himalayan journey..."}
           </div>
         )}
 
@@ -631,6 +758,76 @@ export default function AiTripPlannerPage() {
             }}
           >
             {renderAnswer(answer)}
+          </div>
+        )}
+
+        {sources.length > 0 && (
+          <div
+            style={{
+              marginTop: 34,
+              paddingTop: 24,
+              borderTop:
+                "1px solid rgba(255,255,255,0.10)",
+            }}
+          >
+            <span className="pill">
+              LIVE RESEARCH SOURCES
+            </span>
+
+            <h3
+              style={{
+                marginTop: 14,
+              }}
+            >
+              Sources checked
+            </h3>
+
+            <div
+              style={{
+                display: "grid",
+                gap: 10,
+                marginTop: 14,
+              }}
+            >
+              {sources.map(
+                (source, index) => (
+                  <a
+                    key={`${source.url}-${index}`}
+                    href={source.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: "block",
+                      padding: 14,
+                      borderRadius: 12,
+                      border:
+                        "1px solid rgba(255,255,255,0.10)",
+                      textDecoration:
+                        "none",
+                      color: "inherit",
+                      lineHeight: 1.5,
+                      overflowWrap:
+                        "anywhere",
+                    }}
+                  >
+                    <strong>
+                      {source.title ||
+                        "Research source"}
+                    </strong>
+
+                    <div
+                      className="muted"
+                      style={{
+                        marginTop: 5,
+                        fontSize: 13,
+                      }}
+                    >
+                      {source.url}
+                    </div>
+                  </a>
+                )
+              )}
+            </div>
           </div>
         )}
 
@@ -671,25 +868,25 @@ export default function AiTripPlannerPage() {
         </span>
 
         <h2>
-          AI advice is a starting point
+          Research helps, but conditions
+          can still change
         </h2>
 
         <p
           className="muted"
           style={{
             lineHeight: 1.7,
-            maxWidth: 850,
+            maxWidth: 900,
           }}
         >
-          Final trekking conditions,
-          permits, border requirements,
-          weather, availability,
-          altitude suitability and
-          pricing should always be
-          verified before booking.
-          Himalayan26 combines AI
-          planning with human review
-          before confirming a journey.
+          Himalayan26 AI can research
+          recent information, but final
+          permit requirements, border
+          rules, weather, trail
+          conditions, transportation,
+          availability and pricing must
+          still be verified before a
+          booking is confirmed.
         </p>
       </section>
     </main>
