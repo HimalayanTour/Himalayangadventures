@@ -15,10 +15,7 @@ type ResearchSource = {
 };
 
 function cleanText(value: unknown, maxLength = 2000) {
-  if (typeof value !== "string") {
-    return "";
-  }
-
+  if (typeof value !== "string") return "";
   return value.trim().slice(0, maxLength);
 }
 
@@ -30,16 +27,12 @@ function extractAnswer(result: any) {
     return result.output_text.trim();
   }
 
-  if (!Array.isArray(result?.output)) {
-    return "";
-  }
+  if (!Array.isArray(result?.output)) return "";
 
   let answer = "";
 
   for (const item of result.output) {
-    if (!Array.isArray(item?.content)) {
-      continue;
-    }
+    if (!Array.isArray(item?.content)) continue;
 
     for (const content of item.content) {
       if (
@@ -92,14 +85,10 @@ function extractSources(result: any): ResearchSource[] {
       }
     }
 
-    if (!Array.isArray(item?.content)) {
-      continue;
-    }
+    if (!Array.isArray(item?.content)) continue;
 
     for (const content of item.content) {
-      if (!Array.isArray(content?.annotations)) {
-        continue;
-      }
+      if (!Array.isArray(content?.annotations)) continue;
 
       for (const annotation of content.annotations) {
         if (annotation?.type === "url_citation") {
@@ -132,7 +121,7 @@ async function callOpenAI(
     }
   );
 
-  let result: any = null;
+  let result: any = {};
 
   try {
     result = await response.json();
@@ -140,46 +129,19 @@ async function callOpenAI(
     result = {};
   }
 
-  return {
-    response,
-    result,
-  };
+  return { response, result };
 }
 
-function getApiError(
-  response: Response,
-  result: any
-) {
-  const rawMessage =
-    result?.error?.message ||
-    "The AI Trip Planner could not respond.";
-
-  if (
-    response.status === 429 ||
-    rawMessage.toLowerCase().includes("rate limit")
-  ) {
-    return {
-      status: 429,
-      message:
-        "Live research reached the API rate limit. Please try again later or turn off Live Research.",
-    };
-  }
-
-  return {
-    status:
-      response.status >= 400
-        ? response.status
-        : 500,
-    message: rawMessage,
-  };
-}
-
-const normalInstructions = `
+const plannerInstructions = `
 You are Himalayan26 AI Trip Planner.
 
-Recommend Himalayan journeys in Nepal, Bhutan, Tibet and the Indian Himalaya.
+You create professional Himalayan journeys for:
+- Nepal
+- Bhutan
+- Tibet
+- Indian Himalaya
 
-Available Himalayan26 tours:
+Himalayan26 tours:
 - Everest Base Camp — Nepal — 14 days — Challenging
 - Annapurna Classic — Nepal — 10 days — Moderate
 - Langtang Valley — Nepal — 8 days — Moderate
@@ -190,9 +152,13 @@ Available Himalayan26 tours:
 - Ladakh High Altitude — India — 10 days — Moderate
 - Kailash Mansarovar Journey — Tibet — 15 days — Moderate
 
-Be professional, concise, practical and safety-conscious.
+Be concise, professional, practical and safety-conscious.
 
-Use this structure:
+Never present potentially changing visa, permit, border,
+weather or access information as currently verified unless
+live research was actually performed.
+
+Use:
 
 ## Recommended journey
 
@@ -200,6 +166,8 @@ Use this structure:
 
 | Day | Plan |
 |---|---|
+
+## Travel requirements
 
 ## Safety and altitude
 
@@ -209,27 +177,22 @@ Use this structure:
 const researchInstructions = `
 You are Himalayan26 AI Trip Planner.
 
-Create a concise Himalayan travel plan.
+Create a concise Himalayan trip plan.
 
-Use web search ONLY for current facts that may change, such as:
-- entry or visa rules
-- trekking permits
-- official access restrictions
-- important current travel conditions
+Use web search only for current facts that can change:
+entry rules, permits, official restrictions and important
+current travel conditions.
 
-Prefer official government, embassy, tourism authority and national park sources.
-
-Do not search for general inspiration or basic itinerary information.
+Prefer official government, embassy, tourism authority
+and national park sources.
 
 Do not invent current information.
-If a current fact cannot be verified, clearly say it must be rechecked.
 
-Himalayan26 tours:
-Everest Base Camp, Annapurna Classic, Langtang Valley, Manaslu Circuit,
-Upper Mustang, Bhutan Mountain & Culture, Tibet High Plateau,
-Ladakh High Altitude, Kailash Mansarovar Journey.
-
-Keep the answer compact.
+Himalayan26 tours include Everest Base Camp,
+Annapurna Classic, Langtang Valley, Manaslu Circuit,
+Upper Mustang, Bhutan Mountain & Culture,
+Tibet High Plateau, Ladakh High Altitude and
+Kailash Mansarovar Journey.
 
 Use:
 
@@ -249,18 +212,33 @@ Use:
 ## Next step
 `;
 
+async function createNormalPlan(
+  apiKey: string,
+  message: string
+) {
+  return callOpenAI(apiKey, {
+    model: "gpt-5.6-luna",
+
+    reasoning: {
+      effort: "none",
+    },
+
+    instructions: plannerInstructions,
+
+    input: message,
+
+    max_output_tokens: 1200,
+  });
+}
+
 export async function POST(request: Request) {
   try {
     const apiKey = process.env.OPENAI_API_KEY;
 
     if (!apiKey) {
       return NextResponse.json(
-        {
-          error: "OPENAI_API_KEY is missing.",
-        },
-        {
-          status: 503,
-        }
+        { error: "OPENAI_API_KEY is missing." },
+        { status: 503 }
       );
     }
 
@@ -271,12 +249,8 @@ export async function POST(request: Request) {
         (await request.json()) as AiRequestBody;
     } catch {
       return NextResponse.json(
-        {
-          error: "Invalid AI request.",
-        },
-        {
-          status: 400,
-        }
+        { error: "Invalid AI request." },
+        { status: 400 }
       );
     }
 
@@ -290,34 +264,14 @@ export async function POST(request: Request) {
           error:
             "Please describe the Himalayan journey you want.",
         },
-        {
-          status: 400,
-        }
+        { status: 400 }
       );
     }
 
-    // --------------------------------
     // NORMAL AI
-    // --------------------------------
-
     if (!liveResearch) {
-      const ai = await callOpenAI(
-        apiKey,
-        {
-          model: "gpt-5.6-luna",
-
-          reasoning: {
-            effort: "none",
-          },
-
-          instructions:
-            normalInstructions,
-
-          input: message,
-
-          max_output_tokens: 1200,
-        }
-      );
+      const ai =
+        await createNormalPlan(apiKey, message);
 
       if (!ai.response.ok) {
         console.error(
@@ -325,17 +279,17 @@ export async function POST(request: Request) {
           ai.result
         );
 
-        const error = getApiError(
-          ai.response,
-          ai.result
-        );
-
         return NextResponse.json(
           {
-            error: error.message,
+            error:
+              ai.result?.error?.message ||
+              "The AI Trip Planner could not respond.",
           },
           {
-            status: error.status,
+            status:
+              ai.response.status >= 400
+                ? ai.response.status
+                : 500,
           }
         );
       }
@@ -347,11 +301,9 @@ export async function POST(request: Request) {
         return NextResponse.json(
           {
             error:
-              "The AI could not create a trip plan. Please try again.",
+              "The AI could not create a trip plan.",
           },
-          {
-            status: 502,
-          }
+          { status: 502 }
         );
       }
 
@@ -359,15 +311,12 @@ export async function POST(request: Request) {
         ok: true,
         answer,
         liveResearch: false,
+        researchUnavailable: false,
         sources: [],
       });
     }
 
-    // --------------------------------
-    // LIVE RESEARCH
-    // ONE WEB SEARCH CALL MAXIMUM
-    // --------------------------------
-
+    // TRY LIVE RESEARCH
     const research = await callOpenAI(
       apiKey,
       {
@@ -377,8 +326,7 @@ export async function POST(request: Request) {
           effort: "none",
         },
 
-        instructions:
-          researchInstructions,
+        instructions: researchInstructions,
 
         input: message,
 
@@ -401,23 +349,88 @@ export async function POST(request: Request) {
       }
     );
 
+    // -----------------------------------------
+    // RATE LIMIT FALLBACK
+    // -----------------------------------------
+    if (research.response.status === 429) {
+      console.warn(
+        "Live research rate limited. Using normal AI fallback."
+      );
+
+      const fallback =
+        await createNormalPlan(
+          apiKey,
+          `${message}
+
+Important: Live web research is currently unavailable.
+Do not claim that current permits, visa rules, border
+rules, weather, trail conditions or access restrictions
+were verified live. Clearly tell the traveler that these
+items must be checked with official sources before travel.`
+        );
+
+      if (!fallback.response.ok) {
+        console.error(
+          "Fallback AI request failed:",
+          fallback.result
+        );
+
+        return NextResponse.json(
+          {
+            error:
+              "Live research is currently unavailable and the backup planner could not respond.",
+          },
+          { status: 503 }
+        );
+      }
+
+      const fallbackAnswer =
+        extractAnswer(fallback.result);
+
+      if (!fallbackAnswer) {
+        return NextResponse.json(
+          {
+            error:
+              "The backup trip planner could not create a response.",
+          },
+          { status: 502 }
+        );
+      }
+
+      return NextResponse.json({
+        ok: true,
+        answer: fallbackAnswer,
+
+        // IMPORTANT:
+        // Never tell the frontend research succeeded.
+        liveResearch: false,
+
+        researchUnavailable: true,
+
+        researchMessage:
+          "Live web research is temporarily unavailable. This plan was created without live verification. Please confirm current permits, entry rules and travel conditions with official sources before booking.",
+
+        sources: [],
+      });
+    }
+
     if (!research.response.ok) {
       console.error(
         "OpenAI live research failed:",
         research.result
       );
 
-      const error = getApiError(
-        research.response,
-        research.result
-      );
-
       return NextResponse.json(
         {
-          error: error.message,
+          error:
+            research.result?.error?.message ||
+            "Live research could not respond.",
         },
         {
-          status: error.status,
+          status:
+            research.response.status >= 400
+              ? research.response.status
+              : 500,
         }
       );
     }
@@ -429,35 +442,12 @@ export async function POST(request: Request) {
       extractSources(research.result);
 
     if (!answer) {
-      console.error(
-        "Live research returned no final text:",
-        {
-          status:
-            research.result?.status,
-          incompleteReason:
-            research.result
-              ?.incomplete_details
-              ?.reason || null,
-          outputTypes:
-            Array.isArray(
-              research.result?.output
-            )
-              ? research.result.output.map(
-                  (item: any) =>
-                    item?.type
-                )
-              : [],
-        }
-      );
-
       return NextResponse.json(
         {
           error:
-            "Live research could not finish the trip plan. Please try again or turn off Live Research.",
+            "Live research completed but could not create the final trip plan.",
         },
-        {
-          status: 502,
-        }
+        { status: 502 }
       );
     }
 
@@ -465,6 +455,7 @@ export async function POST(request: Request) {
       ok: true,
       answer,
       liveResearch: true,
+      researchUnavailable: false,
       sources,
     });
   } catch (error) {
@@ -478,9 +469,7 @@ export async function POST(request: Request) {
         error:
           "Something went wrong with the AI Trip Planner.",
       },
-      {
-        status: 500,
-      }
+      { status: 500 }
     );
   }
 }
