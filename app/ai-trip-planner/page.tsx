@@ -12,9 +12,13 @@ type ResearchSource = {
 };
 
 function formatInline(text: string): ReactNode[] {
-  const parts = text.split(/(\*\*.*?\*\*)/g);
+  const pattern =
+    /(\*\*.*?\*\*|\[[^\]]+\]\(https?:\/\/[^\s)]+\))/g;
+
+  const parts = text.split(pattern);
 
   return parts.map((part, index) => {
+    // Bold Markdown
     if (
       part.startsWith("**") &&
       part.endsWith("**")
@@ -23,6 +27,31 @@ function formatInline(text: string): ReactNode[] {
         <strong key={index}>
           {part.slice(2, -2)}
         </strong>
+      );
+    }
+
+    // Markdown links
+    const linkMatch = part.match(
+      /^\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)$/
+    );
+
+    if (linkMatch) {
+      const [, label, url] = linkMatch;
+
+      return (
+        <a
+          key={index}
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            textDecoration: "underline",
+            textUnderlineOffset: 3,
+            fontWeight: 600,
+          }}
+        >
+          {label}
+        </a>
       );
     }
 
@@ -70,6 +99,7 @@ function renderAnswer(text: string) {
       continue;
     }
 
+    // Markdown table
     if (isTableLine(line)) {
       const tableLines: string[] = [];
 
@@ -146,8 +176,7 @@ function renderAnswer(text: string) {
                                 "1px solid rgba(255,255,255,0.08)",
                               verticalAlign:
                                 "top",
-                              lineHeight:
-                                1.6,
+                              lineHeight: 1.6,
                             }}
                           >
                             {formatInline(cell)}
@@ -166,6 +195,7 @@ function renderAnswer(text: string) {
       }
     }
 
+    // H1
     if (line.startsWith("# ")) {
       elements.push(
         <h2
@@ -185,6 +215,7 @@ function renderAnswer(text: string) {
       continue;
     }
 
+    // H2
     if (line.startsWith("## ")) {
       elements.push(
         <h3
@@ -204,6 +235,7 @@ function renderAnswer(text: string) {
       continue;
     }
 
+    // H3
     if (line.startsWith("### ")) {
       elements.push(
         <h4
@@ -223,6 +255,7 @@ function renderAnswer(text: string) {
       continue;
     }
 
+    // Bullet lists
     if (
       line.startsWith("- ") ||
       line.startsWith("* ")
@@ -231,18 +264,17 @@ function renderAnswer(text: string) {
 
       while (
         index < lines.length &&
-        (
+        (lines[index]
+          .trim()
+          .startsWith("- ") ||
           lines[index]
             .trim()
-            .startsWith("- ") ||
-          lines[index]
-            .trim()
-            .startsWith("* ")
-        )
+            .startsWith("* "))
       ) {
         items.push(
           lines[index].trim().slice(2)
         );
+
         index += 1;
       }
 
@@ -256,17 +288,20 @@ function renderAnswer(text: string) {
             lineHeight: 1.75,
           }}
         >
-          {items.map((item, itemIndex) => (
-            <li key={itemIndex}>
-              {formatInline(item)}
-            </li>
-          ))}
+          {items.map(
+            (item, itemIndex) => (
+              <li key={itemIndex}>
+                {formatInline(item)}
+              </li>
+            )
+          )}
         </ul>
       );
 
       continue;
     }
 
+    // Numbered lists
     if (/^\d+\.\s/.test(line)) {
       const items: string[] = [];
 
@@ -295,17 +330,20 @@ function renderAnswer(text: string) {
             lineHeight: 1.75,
           }}
         >
-          {items.map((item, itemIndex) => (
-            <li key={itemIndex}>
-              {formatInline(item)}
-            </li>
-          ))}
+          {items.map(
+            (item, itemIndex) => (
+              <li key={itemIndex}>
+                {formatInline(item)}
+              </li>
+            )
+          )}
         </ol>
       );
 
       continue;
     }
 
+    // Normal paragraph
     elements.push(
       <p
         key={`p-${index}`}
@@ -338,8 +376,10 @@ export default function AiTripPlannerPage() {
   const [liveResearch, setLiveResearch] =
     useState(true);
 
-  const [usedLiveResearch, setUsedLiveResearch] =
-    useState(false);
+  const [
+    usedLiveResearch,
+    setUsedLiveResearch,
+  ] = useState(false);
 
   const [error, setError] =
     useState("");
@@ -437,6 +477,8 @@ export default function AiTripPlannerPage() {
         paddingBottom: 90,
       }}
     >
+      {/* HERO */}
+
       <section
         className="card"
         style={{
@@ -477,6 +519,8 @@ export default function AiTripPlannerPage() {
         </p>
       </section>
 
+      {/* PLANNER + EXAMPLES */}
+
       <div
         style={{
           display: "grid",
@@ -514,6 +558,8 @@ export default function AiTripPlannerPage() {
                 disabled={loading}
               />
             </div>
+
+            {/* LIVE RESEARCH CONTROL */}
 
             <div
               style={{
@@ -576,11 +622,11 @@ export default function AiTripPlannerPage() {
                     borderRadius: 999,
                     border:
                       liveResearch
-                        ? "1px solid rgba(93, 229, 201, 0.7)"
+                        ? "1px solid rgba(93,229,201,0.7)"
                         : "1px solid rgba(255,255,255,0.16)",
                     background:
                       liveResearch
-                        ? "rgba(93, 229, 201, 0.16)"
+                        ? "rgba(93,229,201,0.16)"
                         : "rgba(255,255,255,0.04)",
                     color: "inherit",
                     cursor:
@@ -626,6 +672,8 @@ export default function AiTripPlannerPage() {
             </div>
           )}
         </section>
+
+        {/* EXAMPLES */}
 
         <section className="card">
           <span className="pill">
@@ -677,6 +725,8 @@ export default function AiTripPlannerPage() {
           </div>
         </section>
       </div>
+
+      {/* AI RESULT */}
 
       <section
         className="card"
@@ -731,8 +781,8 @@ export default function AiTripPlannerPage() {
                 maxWidth: 760,
               }}
             >
-              Your personalized trip
-              plan will appear here.
+              Your personalized trip plan
+              will appear here.
             </p>
           )}
 
@@ -761,6 +811,8 @@ export default function AiTripPlannerPage() {
           </div>
         )}
 
+        {/* RESEARCH SOURCES */}
+
         {sources.length > 0 && (
           <div
             style={{
@@ -781,6 +833,17 @@ export default function AiTripPlannerPage() {
             >
               Sources checked
             </h3>
+
+            <p
+              className="muted"
+              style={{
+                lineHeight: 1.6,
+              }}
+            >
+              These sources were used to
+              help research current travel
+              information for your plan.
+            </p>
 
             <div
               style={{
@@ -831,6 +894,8 @@ export default function AiTripPlannerPage() {
           </div>
         )}
 
+        {/* ACTION BUTTONS */}
+
         {answer && (
           <div
             style={{
@@ -856,6 +921,8 @@ export default function AiTripPlannerPage() {
           </div>
         )}
       </section>
+
+      {/* DISCLAIMER */}
 
       <section
         className="card"
