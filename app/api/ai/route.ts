@@ -8,13 +8,20 @@ type AiRequestBody = {
   liveResearch?: unknown;
 };
 
-function cleanText(value: unknown, maxLength = 3500) {
-  if (typeof value !== "string") return "";
-  return value.trim().slice(0, maxLength);
-}
+type ResearchSource = {
+  title: string;
+  url: string;
+};
 
-function cleanBoolean(value: unknown) {
-  return value === true;
+function cleanText(
+  value: unknown,
+  maxLength = 3000
+) {
+  if (typeof value !== "string") {
+    return "";
+  }
+
+  return value.trim().slice(0, maxLength);
 }
 
 function extractAnswer(result: any) {
@@ -27,17 +34,24 @@ function extractAnswer(result: any) {
 
   let answer = "";
 
-  if (Array.isArray(result?.output)) {
-    for (const item of result.output) {
-      if (!Array.isArray(item?.content)) continue;
+  if (!Array.isArray(result?.output)) {
+    return answer;
+  }
 
-      for (const content of item.content) {
-        if (
-          content?.type === "output_text" &&
-          typeof content?.text === "string"
-        ) {
-          answer += content.text;
-        }
+  for (const item of result.output) {
+    if (
+      item?.type !== "message" ||
+      !Array.isArray(item?.content)
+    ) {
+      continue;
+    }
+
+    for (const content of item.content) {
+      if (
+        content?.type === "output_text" &&
+        typeof content?.text === "string"
+      ) {
+        answer += `${content.text}\n`;
       }
     }
   }
@@ -45,54 +59,166 @@ function extractAnswer(result: any) {
   return answer.trim();
 }
 
-function extractResearchSources(result: any) {
-  const sources: Array<{
-    title: string;
-    url: string;
-  }> = [];
-
+function extractSources(
+  ...results: any[]
+): ResearchSource[] {
+  const sources: ResearchSource[] = [];
   const seen = new Set<string>();
 
-  if (!Array.isArray(result?.output)) {
-    return sources;
+  function addSource(
+    url: unknown,
+    title: unknown
+  ) {
+    if (
+      typeof url !== "string" ||
+      !url.startsWith("http") ||
+      seen.has(url)
+    ) {
+      return;
+    }
+
+    seen.add(url);
+
+    sources.push({
+      url,
+      title:
+        typeof title === "string" &&
+        title.trim()
+          ? title.trim()
+          : url,
+    });
   }
 
-  for (const item of result.output) {
-    if (item?.type !== "web_search_call") continue;
+  for (const result of results) {
+    if (!Array.isArray(result?.output)) {
+      continue;
+    }
 
-    const sourceList =
-      Array.isArray(item?.action?.sources)
-        ? item.action.sources
-        : [];
+    for (const item of result.output) {
+      // Sources returned directly from web search
+      if (
+        item?.type === "web_search_call" &&
+        Array.isArray(
+          item?.action?.sources
+        )
+      ) {
+        for (
+          const source of
+            item.action.sources
+        ) {
+          addSource(
+            source?.url,
+            source?.title
+          );
+        }
+      }
 
-    for (const source of sourceList) {
-      const url =
-        typeof source?.url === "string"
-          ? source.url
-          : "";
+      // Sources/citations attached to final text
+      if (
+        item?.type === "message" &&
+        Array.isArray(item?.content)
+      ) {
+        for (const content of item.content) {
+          if (
+            !Array.isArray(
+              content?.annotations
+            )
+          ) {
+            continue;
+          }
 
-      if (!url || seen.has(url)) continue;
+          for (
+            const annotation of
+              content.annotations
+          ) {
+            if (
+              annotation?.type ===
+              "url_citation"
+            ) {
+              addSource(
+                annotation?.url,
+                annotation?.title
+              );
+            }
 
-      seen.add(url);
-
-      sources.push({
-        title:
-          typeof source?.title === "string"
-            ? source.title
-            : url,
-        url,
-      });
-
-      if (sources.length >= 5) {
-        return sources;
+            if (
+              annotation?.type ===
+                "citation" &&
+              annotation?.url
+            ) {
+              addSource(
+                annotation.url,
+                annotation.title
+              );
+            }
+          }
+        }
       }
     }
   }
 
-  return sources;
+  return sources.slice(0, 6);
 }
 
-export async function POST(request: Request) {
+async function callOpenAI(
+  apiKey: string,
+  body: Record<string, unknown>
+) {
+  const response = await fetch(
+    "https://api.openai.com/v1/responses",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type":
+          "application/json",
+      },
+      body: JSON.stringify(body),
+    }
+  );
+
+  const result =
+    await response.json();
+
+  return {
+    response,
+    result,
+  };
+}
+
+function makeApiError(
+  response: Response,
+  result: any
+) {
+  const rawMessage =
+    result?.error?.message ||
+    "The AI Trip Planner could not respond right now.";
+
+  if (
+    response.status === 429 ||
+    rawMessage
+      .toLowerCase()
+      .includes("rate limit")
+  ) {
+    return {
+      message:
+        "Live research is temporarily busy. Please wait about one minute and try again.",
+      status: 429,
+    };
+  }
+
+  return {
+    message: rawMessage,
+    status:
+      response.status >= 400
+        ? response.status
+        : 500,
+  };
+}
+
+export async function POST(
+  request: Request
+) {
   try {
     const apiKey =
       process.env.OPENAI_API_KEY;
@@ -103,7 +229,9 @@ export async function POST(request: Request) {
           error:
             "AI Trip Planner is not connected yet. OPENAI_API_KEY is missing.",
         },
-        { status: 503 }
+        {
+          status: 503,
+        }
       );
     }
 
@@ -118,17 +246,19 @@ export async function POST(request: Request) {
           error:
             "Invalid AI request.",
         },
-        { status: 400 }
+        {
+          status: 400,
+        }
       );
     }
 
     const message = cleanText(
       body.message,
-      3500
+      3000
     );
 
     const liveResearch =
-      cleanBoolean(body.liveResearch);
+      body.liveResearch === true;
 
     if (!message) {
       return NextResponse.json(
@@ -136,14 +266,20 @@ export async function POST(request: Request) {
           error:
             "Please tell the AI Trip Planner what kind of Himalayan journey you want.",
         },
-        { status: 400 }
+        {
+          status: 400,
+        }
       );
     }
 
     const instructions = `
 You are Himalayan26 AI Trip Planner.
 
-You plan journeys in Nepal, Bhutan, Tibet and the Indian Himalaya.
+You specialize in journeys in:
+- Nepal
+- Bhutan
+- Tibet
+- Indian Himalaya
 
 Known Himalayan26 tours:
 - Everest Base Camp — Nepal — 14 days — Challenging
@@ -156,148 +292,303 @@ Known Himalayan26 tours:
 - Ladakh High Altitude — India — 10 days — Moderate
 - Kailash Mansarovar Journey — Tibet — 15 days — Moderate
 
-Be concise and practical.
+Write for travelers, not developers.
 
-When live research is enabled:
-- research only information directly relevant to the request
-- prioritize official or authoritative sources
-- check permits, entry rules, current travel updates, and conditions only when relevant
-- do not perform broad background research
-- do not repeat the same fact from multiple sources
-- never invent current conditions
+Be professional, practical and concise.
 
-Use this structure:
+When web research is available:
+- research only facts that can change
+- prioritize official government, embassy, tourism authority, national park and other authoritative sources
+- check entry rules when relevant
+- check permits when relevant
+- check important recent travel or access conditions
+- do not waste searches on general destination descriptions
+- never invent current facts
+- state uncertainty when information cannot be confirmed
+- future rules for the traveler's actual future travel date may change, so explain that current rules must be rechecked closer to departure
+
+Use this format:
 
 ## Recommended journey
 
+Brief recommendation.
+
 ## Suggested itinerary
 
-Use a short Markdown table.
+| Day | Plan |
+|---|---|
+| 1 | ... |
 
 ## Current permits and travel rules
 
+Use researched information when available.
+
 ## Conditions and important updates
+
+Only include useful current findings.
 
 ## Safety and altitude
 
+Short practical guidance.
+
 ## Next step
 
-Keep the whole answer compact.
+Recommend an appropriate Himalayan26 tour or booking request.
+
+Keep the response compact enough for a travel website.
 `;
 
-    const input = liveResearch
-      ? `
-LIVE RESEARCH IS ENABLED.
-
-Research only the most important current information needed for this request.
-
-Traveler request:
-${message}
-`
-      : `
-LIVE RESEARCH IS DISABLED.
-
-Traveler request:
-${message}
-`;
-
-    const requestBody: Record<
-      string,
-      unknown
-    > = {
-      model: "gpt-5.6-luna",
-      instructions,
-      input,
-      max_output_tokens: 850,
-    };
-
-    if (liveResearch) {
-      requestBody.tools = [
+    // Normal AI mode
+    if (!liveResearch) {
+      const {
+        response,
+        result,
+      } = await callOpenAI(
+        apiKey,
         {
-          type: "web_search",
-          search_context_size: "low",
-        },
-      ];
-    }
-
-    const response = await fetch(
-      "https://api.openai.com/v1/responses",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type":
-            "application/json",
-        },
-        body: JSON.stringify(
-          requestBody
-        ),
-      }
-    );
-
-    const result =
-      await response.json();
-
-    if (!response.ok) {
-      console.error(
-        "OpenAI API error:",
-        result
+          model: "gpt-5.6-luna",
+          reasoning: {
+            effort: "none",
+          },
+          instructions,
+          input: message,
+          max_output_tokens: 1000,
+        }
       );
 
-      const errorMessage =
-        result?.error?.message ||
-        "The AI Trip Planner could not respond right now.";
+      if (!response.ok) {
+        console.error(
+          "OpenAI API error:",
+          result
+        );
 
-      if (
-        response.status === 429 ||
-        errorMessage
-          .toLowerCase()
-          .includes("rate limit")
-      ) {
+        const apiError =
+          makeApiError(
+            response,
+            result
+          );
+
         return NextResponse.json(
           {
             error:
-              "Live research is temporarily busy. Please wait a moment and try again.",
+              apiError.message,
           },
-          { status: 429 }
+          {
+            status:
+              apiError.status,
+          }
         );
       }
 
+      const answer =
+        extractAnswer(result);
+
+      if (!answer) {
+        return NextResponse.json(
+          {
+            error:
+              "The AI Trip Planner could not create the final response. Please try again.",
+          },
+          {
+            status: 502,
+          }
+        );
+      }
+
+      return NextResponse.json({
+        ok: true,
+        answer,
+        liveResearch: false,
+        sources: [],
+      });
+    }
+
+    // ---------------------------
+    // LIVE RESEARCH — FIRST PASS
+    // ---------------------------
+
+    const firstCall =
+      await callOpenAI(
+        apiKey,
+        {
+          model: "gpt-5.6-luna",
+
+          reasoning: {
+            effort: "none",
+          },
+
+          instructions,
+
+          input: `
+Use live web research to answer this traveler request.
+
+Focus only on important changing information such as permits, entry requirements and important current travel conditions.
+
+Traveler request:
+${message}
+`,
+
+          tools: [
+            {
+              type: "web_search",
+              search_context_size:
+                "low",
+            },
+          ],
+
+          tool_choice: "auto",
+
+          include: [
+            "web_search_call.action.sources",
+          ],
+
+          max_output_tokens: 1200,
+        }
+      );
+
+    if (!firstCall.response.ok) {
+      console.error(
+        "OpenAI research error:",
+        firstCall.result
+      );
+
+      const apiError =
+        makeApiError(
+          firstCall.response,
+          firstCall.result
+        );
+
       return NextResponse.json(
         {
-          error: errorMessage,
+          error:
+            apiError.message,
         },
         {
           status:
-            response.status >= 400
-              ? response.status
-              : 500,
+            apiError.status,
         }
       );
     }
 
-    const answer =
-      extractAnswer(result);
+    let answer =
+      extractAnswer(
+        firstCall.result
+      );
+
+    let secondResult: any = null;
+
+    // ------------------------------------------------
+    // FALLBACK:
+    // Research succeeded but no final text was written.
+    // Continue from the researched response.
+    // ------------------------------------------------
+
+    if (
+      !answer &&
+      typeof firstCall.result?.id ===
+        "string"
+    ) {
+      const secondCall =
+        await callOpenAI(
+          apiKey,
+          {
+            model:
+              "gpt-5.6-luna",
+
+            reasoning: {
+              effort: "none",
+            },
+
+            previous_response_id:
+              firstCall.result.id,
+
+            input:
+              "Using the research you just completed, now write the final traveler-facing answer. Do not perform more web searches. Follow the requested Himalayan26 format and keep it concise.",
+
+            max_output_tokens: 1000,
+          }
+        );
+
+      secondResult =
+        secondCall.result;
+
+      if (
+        !secondCall.response.ok
+      ) {
+        console.error(
+          "OpenAI continuation error:",
+          secondCall.result
+        );
+
+        const apiError =
+          makeApiError(
+            secondCall.response,
+            secondCall.result
+          );
+
+        return NextResponse.json(
+          {
+            error:
+              apiError.message,
+          },
+          {
+            status:
+              apiError.status,
+          }
+        );
+      }
+
+      answer =
+        extractAnswer(
+          secondCall.result
+        );
+    }
 
     if (!answer) {
+      console.error(
+        "No final AI text.",
+        {
+          firstStatus:
+            firstCall.result
+              ?.status,
+          firstId:
+            firstCall.result?.id,
+          firstOutputTypes:
+            Array.isArray(
+              firstCall.result
+                ?.output
+            )
+              ? firstCall.result.output.map(
+                  (item: any) =>
+                    item?.type
+                )
+              : [],
+          secondStatus:
+            secondResult?.status,
+        }
+      );
+
       return NextResponse.json(
         {
           error:
-            "The AI Trip Planner returned an empty response.",
+            "Live research completed, but the final trip plan could not be generated. Please try again.",
         },
-        { status: 502 }
+        {
+          status: 502,
+        }
       );
     }
 
     const sources =
-      liveResearch
-        ? extractResearchSources(result)
-        : [];
+      extractSources(
+        firstCall.result,
+        secondResult
+      );
 
     return NextResponse.json({
       ok: true,
       answer,
-      liveResearch,
+      liveResearch: true,
       sources,
     });
   } catch (error) {
@@ -311,7 +602,9 @@ ${message}
         error:
           "Something went wrong with the AI Trip Planner.",
       },
-      { status: 500 }
+      {
+        status: 500,
+      }
     );
   }
 }
