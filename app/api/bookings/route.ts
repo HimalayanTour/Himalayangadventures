@@ -11,20 +11,10 @@ type BookingBody = {
   dates?: unknown;
   travelers?: unknown;
   message?: unknown;
-
-  // These will also be supported directly
-  // when we update the form later.
   phone?: unknown;
   country?: unknown;
   tripStyle?: unknown;
   accommodation?: unknown;
-};
-
-type ParsedMessage = {
-  phone: string | null;
-  country: string | null;
-  tripStyle: string | null;
-  accommodation: string | null;
 };
 
 function getDb() {
@@ -63,155 +53,210 @@ function cleanOptionalText(
   value: unknown,
   maxLength = 500
 ) {
-  const text = cleanText(
-    value,
-    maxLength
-  );
+  const text = cleanText(value, maxLength);
 
   return text || null;
 }
 
-function parseStructuredMessage(
-  message: string
-): ParsedMessage {
-  if (!message) {
-    return {
-      phone: null,
-      country: null,
-      tripStyle: null,
-      accommodation: null,
-    };
-  }
-
-  const lines =
-    message.split("\n");
-
-  let phone: string | null =
-    null;
-
-  let country: string | null =
-    null;
-
-  let tripStyle: string | null =
-    null;
-
-  let accommodation:
-    | string
-    | null = null;
-
-  for (const line of lines) {
-    const trimmed =
-      line.trim();
-
-    if (
-      trimmed.startsWith(
-        "Phone / WhatsApp:"
-      )
-    ) {
-      const value = trimmed
-        .replace(
-          "Phone / WhatsApp:",
-          ""
-        )
-        .trim();
-
-      if (
-        value &&
-        value !==
-          "Not provided"
-      ) {
-        phone =
-          value.slice(0, 100);
-      }
-
-      continue;
-    }
-
-    if (
-      trimmed.startsWith(
-        "Country:"
-      )
-    ) {
-      const value = trimmed
-        .replace(
-          "Country:",
-          ""
-        )
-        .trim();
-
-      if (
-        value &&
-        value !==
-          "Not provided"
-      ) {
-        country =
-          value.slice(0, 100);
-      }
-
-      continue;
-    }
-
-    if (
-      trimmed.startsWith(
-        "Trip style:"
-      )
-    ) {
-      const value = trimmed
-        .replace(
-          "Trip style:",
-          ""
-        )
-        .trim();
-
-      if (
-        value &&
-        value !==
-          "Not specified"
-      ) {
-        tripStyle =
-          value.slice(0, 100);
-      }
-
-      continue;
-    }
-
-    if (
-      trimmed.startsWith(
-        "Accommodation:"
-      )
-    ) {
-      const value = trimmed
-        .replace(
-          "Accommodation:",
-          ""
-        )
-        .trim();
-
-      if (
-        value &&
-        value !==
-          "Not specified"
-      ) {
-        accommodation =
-          value.slice(0, 100);
-      }
-    }
-  }
-
-  return {
-    phone,
-    country,
-    tripStyle,
-    accommodation,
-  };
-}
-
-function isValidEmail(
-  email: string
-) {
+function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
     email
   );
+}
+
+function formatTourName(
+  slug: string | null
+) {
+  if (!slug) {
+    return "Custom Himalayan Journey";
+  }
+
+  return slug
+    .split("-")
+    .map(
+      (word) =>
+        word.charAt(0).toUpperCase() +
+        word.slice(1)
+    )
+    .join(" ");
+}
+
+async function sendBookingEmail({
+  customerName,
+  customerEmail,
+  tourName,
+  dates,
+  travelers,
+  phone,
+  country,
+  tripStyle,
+  accommodation,
+  message,
+  bookingId,
+}: {
+  customerName: string;
+  customerEmail: string;
+  tourName: string;
+  dates: string | null;
+  travelers: number;
+  phone: string | null;
+  country: string | null;
+  tripStyle: string | null;
+  accommodation: string | null;
+  message: string | null;
+  bookingId: string;
+}) {
+  const resendApiKey =
+    process.env.RESEND_API_KEY;
+
+  if (!resendApiKey) {
+    console.warn(
+      "RESEND_API_KEY is missing. Email skipped."
+    );
+
+    return {
+      sent: false,
+      reason: "missing_api_key",
+    };
+  }
+
+  /*
+    WITHOUT A VERIFIED DOMAIN:
+    Resend's test sender can only be used
+    for test delivery.
+
+    BOOKING_NOTIFICATION_EMAIL should be
+    your own email address.
+
+    AFTER VERIFYING A DOMAIN:
+    Add RESEND_FROM_EMAIL in Vercel, for example:
+
+    Himalayan26 <bookings@yourdomain.com>
+
+    Then the same code will send directly
+    to the customer.
+  */
+
+  const verifiedFrom =
+    process.env.RESEND_FROM_EMAIL?.trim();
+
+  const notificationEmail =
+    process.env.BOOKING_NOTIFICATION_EMAIL?.trim();
+
+  const testingMode = !verifiedFrom;
+
+  if (
+    testingMode &&
+    !notificationEmail
+  ) {
+    console.warn(
+      "BOOKING_NOTIFICATION_EMAIL is missing. Resend test email skipped."
+    );
+
+    return {
+      sent: false,
+      reason:
+        "missing_notification_email",
+    };
+  }
+
+  const from = verifiedFrom
+    ? verifiedFrom
+    : "Himalayan26 <onboarding@resend.dev>";
+
+  const to = testingMode
+    ? notificationEmail!
+    : customerEmail;
+
+  const subject = testingMode
+    ? `TEST — New Himalayan booking from ${customerName}`
+    : "We received your Himalayan tour booking request";
+
+  const text = testingMode
+    ? `NEW BOOKING REQUEST
+
+Booking ID: ${bookingId}
+
+Customer: ${customerName}
+Customer email: ${customerEmail}
+
+Tour: ${tourName}
+Preferred dates: ${dates || "Not specified"}
+Travelers: ${travelers}
+
+Phone / WhatsApp: ${phone || "Not provided"}
+Country: ${country || "Not provided"}
+Trip style: ${tripStyle || "Not specified"}
+Accommodation: ${accommodation || "Not specified"}
+
+Customer message:
+${message || "No additional message."}
+
+This is a test-mode booking notification from Himalayan26.
+`
+    : `Hello ${customerName},
+
+Thank you for contacting Himalayan26.
+
+We have received your booking request for ${tourName}.
+
+Preferred dates: ${dates || "Not specified"}
+Travelers: ${travelers}
+Trip style: ${tripStyle || "Not specified"}
+Accommodation: ${accommodation || "Not specified"}
+
+Our Himalayan travel team is reviewing your request and will contact you with the next steps.
+
+Booking reference:
+${bookingId}
+
+Best regards,
+Himalayan26
+`;
+
+  const response = await fetch(
+    "https://api.resend.com/emails",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${resendApiKey}`,
+        "Content-Type":
+          "application/json",
+      },
+      body: JSON.stringify({
+        from,
+        to: [to],
+        subject,
+        text,
+      }),
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    console.error(
+      "Resend email error:",
+      result
+    );
+
+    return {
+      sent: false,
+      reason: "resend_error",
+      details: result,
+    };
+  }
+
+  console.log(
+    "Resend email sent:",
+    result.id
+  );
+
+  return {
+    sent: true,
+    id: result.id,
+    testingMode,
+  };
 }
 
 export async function POST(
@@ -261,6 +306,30 @@ export async function POST(
       cleanOptionalText(
         body.message,
         5000
+      );
+
+    const phone =
+      cleanOptionalText(
+        body.phone,
+        100
+      );
+
+    const country =
+      cleanOptionalText(
+        body.country,
+        100
+      );
+
+    const tripStyle =
+      cleanOptionalText(
+        body.tripStyle,
+        100
+      );
+
+    const accommodation =
+      cleanOptionalText(
+        body.accommodation,
+        100
       );
 
     if (!name) {
@@ -319,54 +388,16 @@ export async function POST(
       );
     }
 
-    /*
-      The current booking form still
-      stores these details inside the
-      message.
-
-      We read them here so they can
-      also be saved into the new real
-      database columns.
-    */
-    const parsed =
-      parseStructuredMessage(
-        message || ""
-      );
-
-    /*
-      Direct fields are preferred.
-
-      If the form has not yet been
-      upgraded to send them directly,
-      we use the values extracted from
-      the existing message.
-    */
-    const phone =
-      cleanOptionalText(
-        body.phone,
-        100
-      ) || parsed.phone;
-
-    const country =
-      cleanOptionalText(
-        body.country,
-        100
-      ) || parsed.country;
-
-    const tripStyle =
-      cleanOptionalText(
-        body.tripStyle,
-        100
-      ) || parsed.tripStyle;
-
-    const accommodation =
-      cleanOptionalText(
-        body.accommodation,
-        100
-      ) ||
-      parsed.accommodation;
-
     const db = getDb();
+
+    /*
+      STEP 1:
+      Save the booking first.
+
+      This means a temporary email
+      problem will never cause us to
+      lose the customer's booking.
+    */
 
     const {
       data,
@@ -380,13 +411,10 @@ export async function POST(
         dates,
         travelers,
         message,
-
         phone,
         country,
-        trip_style:
-          tripStyle,
+        trip_style: tripStyle,
         accommodation,
-
         status: "new",
       })
       .select("id")
@@ -409,10 +437,45 @@ export async function POST(
       );
     }
 
+    /*
+      STEP 2:
+      Send the automatic email.
+
+      If Resend fails, the booking
+      remains safely stored in
+      Supabase.
+    */
+
+    const emailResult =
+      await sendBookingEmail({
+        customerName: name,
+        customerEmail: email,
+        tourName:
+          formatTourName(
+            tourSlug
+          ),
+        dates,
+        travelers,
+        phone,
+        country,
+        tripStyle,
+        accommodation,
+        message,
+        bookingId: data.id,
+      });
+
     return NextResponse.json(
       {
         ok: true,
         id: data.id,
+        emailSent:
+          emailResult.sent,
+        emailMode:
+          "testingMode" in
+            emailResult &&
+          emailResult.testingMode
+            ? "test"
+            : "customer",
         message:
           "Booking request received. Our team will contact you.",
       },
