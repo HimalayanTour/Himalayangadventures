@@ -1,20 +1,355 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import {
+  FormEvent,
+  ReactNode,
+  useState,
+} from "react";
+
+function formatInline(text: string): ReactNode[] {
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+
+  return parts.map((part, index) => {
+    if (
+      part.startsWith("**") &&
+      part.endsWith("**")
+    ) {
+      return (
+        <strong key={index}>
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+
+    return <span key={index}>{part}</span>;
+  });
+}
+
+function isTableLine(line: string) {
+  return (
+    line.trim().startsWith("|") &&
+    line.trim().endsWith("|")
+  );
+}
+
+function isSeparatorLine(line: string) {
+  const cleaned = line
+    .replace(/\|/g, "")
+    .replace(/:/g, "")
+    .replace(/-/g, "")
+    .trim();
+
+  return cleaned === "";
+}
+
+function parseTableRow(line: string) {
+  return line
+    .trim()
+    .slice(1, -1)
+    .split("|")
+    .map((cell) => cell.trim());
+}
+
+function renderAnswer(text: string) {
+  const lines = text.split("\n");
+  const elements: ReactNode[] = [];
+
+  let index = 0;
+
+  while (index < lines.length) {
+    const rawLine = lines[index];
+    const line = rawLine.trim();
+
+    if (!line) {
+      index += 1;
+      continue;
+    }
+
+    // Tables
+    if (isTableLine(line)) {
+      const tableLines: string[] = [];
+
+      while (
+        index < lines.length &&
+        isTableLine(lines[index])
+      ) {
+        tableLines.push(lines[index]);
+        index += 1;
+      }
+
+      const rows = tableLines
+        .filter(
+          (row) => !isSeparatorLine(row)
+        )
+        .map(parseTableRow);
+
+      if (rows.length > 0) {
+        const header = rows[0];
+        const body = rows.slice(1);
+
+        elements.push(
+          <div
+            key={`table-${index}`}
+            style={{
+              overflowX: "auto",
+              marginTop: 18,
+              marginBottom: 24,
+            }}
+          >
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                minWidth: 600,
+              }}
+            >
+              <thead>
+                <tr>
+                  {header.map(
+                    (cell, cellIndex) => (
+                      <th
+                        key={cellIndex}
+                        style={{
+                          textAlign: "left",
+                          padding: "12px 14px",
+                          borderBottom:
+                            "1px solid rgba(255,255,255,0.18)",
+                          fontSize: 14,
+                        }}
+                      >
+                        {formatInline(cell)}
+                      </th>
+                    )
+                  )}
+                </tr>
+              </thead>
+
+              <tbody>
+                {body.map(
+                  (row, rowIndex) => (
+                    <tr key={rowIndex}>
+                      {row.map(
+                        (
+                          cell,
+                          cellIndex
+                        ) => (
+                          <td
+                            key={
+                              cellIndex
+                            }
+                            style={{
+                              padding:
+                                "12px 14px",
+                              borderBottom:
+                                "1px solid rgba(255,255,255,0.08)",
+                              verticalAlign:
+                                "top",
+                              lineHeight:
+                                1.6,
+                            }}
+                          >
+                            {formatInline(
+                              cell
+                            )}
+                          </td>
+                        )
+                      )}
+                    </tr>
+                  )
+                )}
+              </tbody>
+            </table>
+          </div>
+        );
+
+        continue;
+      }
+    }
+
+    // H1
+    if (line.startsWith("# ")) {
+      elements.push(
+        <h2
+          key={`h1-${index}`}
+          style={{
+            marginTop: 28,
+            marginBottom: 12,
+            fontSize: 28,
+            lineHeight: 1.25,
+          }}
+        >
+          {formatInline(line.slice(2))}
+        </h2>
+      );
+
+      index += 1;
+      continue;
+    }
+
+    // H2
+    if (line.startsWith("## ")) {
+      elements.push(
+        <h3
+          key={`h2-${index}`}
+          style={{
+            marginTop: 26,
+            marginBottom: 10,
+            fontSize: 23,
+            lineHeight: 1.3,
+          }}
+        >
+          {formatInline(line.slice(3))}
+        </h3>
+      );
+
+      index += 1;
+      continue;
+    }
+
+    // H3
+    if (line.startsWith("### ")) {
+      elements.push(
+        <h4
+          key={`h3-${index}`}
+          style={{
+            marginTop: 22,
+            marginBottom: 8,
+            fontSize: 18,
+            lineHeight: 1.35,
+          }}
+        >
+          {formatInline(line.slice(4))}
+        </h4>
+      );
+
+      index += 1;
+      continue;
+    }
+
+    // Bullet lists
+    if (
+      line.startsWith("- ") ||
+      line.startsWith("* ")
+    ) {
+      const items: string[] = [];
+
+      while (
+        index < lines.length &&
+        (
+          lines[index]
+            .trim()
+            .startsWith("- ") ||
+          lines[index]
+            .trim()
+            .startsWith("* ")
+        )
+      ) {
+        items.push(
+          lines[index].trim().slice(2)
+        );
+        index += 1;
+      }
+
+      elements.push(
+        <ul
+          key={`ul-${index}`}
+          style={{
+            paddingLeft: 24,
+            marginTop: 10,
+            marginBottom: 20,
+            lineHeight: 1.75,
+          }}
+        >
+          {items.map((item, itemIndex) => (
+            <li key={itemIndex}>
+              {formatInline(item)}
+            </li>
+          ))}
+        </ul>
+      );
+
+      continue;
+    }
+
+    // Numbered lists
+    if (/^\d+\.\s/.test(line)) {
+      const items: string[] = [];
+
+      while (
+        index < lines.length &&
+        /^\d+\.\s/.test(
+          lines[index].trim()
+        )
+      ) {
+        items.push(
+          lines[index]
+            .trim()
+            .replace(/^\d+\.\s/, "")
+        );
+
+        index += 1;
+      }
+
+      elements.push(
+        <ol
+          key={`ol-${index}`}
+          style={{
+            paddingLeft: 26,
+            marginTop: 10,
+            marginBottom: 20,
+            lineHeight: 1.75,
+          }}
+        >
+          {items.map((item, itemIndex) => (
+            <li key={itemIndex}>
+              {formatInline(item)}
+            </li>
+          ))}
+        </ol>
+      );
+
+      continue;
+    }
+
+    // Normal paragraph
+    elements.push(
+      <p
+        key={`p-${index}`}
+        style={{
+          marginTop: 8,
+          marginBottom: 14,
+          lineHeight: 1.75,
+        }}
+      >
+        {formatInline(line)}
+      </p>
+    );
+
+    index += 1;
+  }
+
+  return elements;
+}
 
 export default function AiTripPlannerPage() {
-  const [message, setMessage] = useState("");
-  const [answer, setAnswer] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [message, setMessage] =
+    useState("");
+
+  const [answer, setAnswer] =
+    useState("");
+
+  const [error, setError] =
+    useState("");
+
+  const [loading, setLoading] =
+    useState(false);
 
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>
   ) {
     event.preventDefault();
 
-    const trimmed =
-      message.trim();
+    const trimmed = message.trim();
 
     if (!trimmed) {
       setError(
@@ -291,19 +626,18 @@ export default function AiTripPlannerPage() {
           <div
             style={{
               marginTop: 20,
-              whiteSpace: "pre-wrap",
-              lineHeight: 1.75,
               fontSize: 16,
+              maxWidth: 1000,
             }}
           >
-            {answer}
+            {renderAnswer(answer)}
           </div>
         )}
 
         {answer && (
           <div
             style={{
-              marginTop: 28,
+              marginTop: 30,
               display: "flex",
               gap: 12,
               flexWrap: "wrap",
