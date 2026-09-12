@@ -35,14 +35,11 @@ function extractAnswer(result: any) {
   let answer = "";
 
   if (!Array.isArray(result?.output)) {
-    return answer;
+    return "";
   }
 
   for (const item of result.output) {
-    if (
-      item?.type !== "message" ||
-      !Array.isArray(item?.content)
-    ) {
+    if (!Array.isArray(item?.content)) {
       continue;
     }
 
@@ -51,7 +48,7 @@ function extractAnswer(result: any) {
         content?.type === "output_text" &&
         typeof content?.text === "string"
       ) {
-        answer += `${content.text}\n`;
+        answer += content.text + "\n";
       }
     }
   }
@@ -95,17 +92,13 @@ function extractSources(
     }
 
     for (const item of result.output) {
-      // Sources returned directly from web search
       if (
         item?.type === "web_search_call" &&
         Array.isArray(
           item?.action?.sources
         )
       ) {
-        for (
-          const source of
-            item.action.sources
-        ) {
+        for (const source of item.action.sources) {
           addSource(
             source?.url,
             source?.title
@@ -113,44 +106,31 @@ function extractSources(
         }
       }
 
-      // Sources/citations attached to final text
-      if (
-        item?.type === "message" &&
-        Array.isArray(item?.content)
-      ) {
-        for (const content of item.content) {
+      if (!Array.isArray(item?.content)) {
+        continue;
+      }
+
+      for (const content of item.content) {
+        if (
+          !Array.isArray(
+            content?.annotations
+          )
+        ) {
+          continue;
+        }
+
+        for (
+          const annotation of
+            content.annotations
+        ) {
           if (
-            !Array.isArray(
-              content?.annotations
-            )
+            annotation?.type ===
+            "url_citation"
           ) {
-            continue;
-          }
-
-          for (
-            const annotation of
-              content.annotations
-          ) {
-            if (
-              annotation?.type ===
-              "url_citation"
-            ) {
-              addSource(
-                annotation?.url,
-                annotation?.title
-              );
-            }
-
-            if (
-              annotation?.type ===
-                "citation" &&
-              annotation?.url
-            ) {
-              addSource(
-                annotation.url,
-                annotation.title
-              );
-            }
+            addSource(
+              annotation?.url,
+              annotation?.title
+            );
           }
         }
       }
@@ -169,11 +149,13 @@ async function callOpenAI(
     {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${apiKey}`,
+        Authorization:
+          `Bearer ${apiKey}`,
         "Content-Type":
           "application/json",
       },
       body: JSON.stringify(body),
+      cache: "no-store",
     }
   );
 
@@ -186,35 +168,102 @@ async function callOpenAI(
   };
 }
 
-function makeApiError(
+function apiErrorMessage(
   response: Response,
   result: any
 ) {
-  const rawMessage =
+  const message =
     result?.error?.message ||
-    "The AI Trip Planner could not respond right now.";
+    "The AI Trip Planner could not respond.";
 
   if (
     response.status === 429 ||
-    rawMessage
+    message
       .toLowerCase()
       .includes("rate limit")
   ) {
     return {
+      status: 429,
       message:
         "Live research is temporarily busy. Please wait about one minute and try again.",
-      status: 429,
     };
   }
 
   return {
-    message: rawMessage,
     status:
       response.status >= 400
         ? response.status
         : 500,
+    message,
   };
 }
+
+const instructions = `
+You are Himalayan26 AI Trip Planner.
+
+You specialize in:
+- Nepal
+- Bhutan
+- Tibet
+- Indian Himalaya
+
+Known Himalayan26 tours:
+- Everest Base Camp — Nepal — 14 days — Challenging
+- Annapurna Classic — Nepal — 10 days — Moderate
+- Langtang Valley — Nepal — 8 days — Moderate
+- Manaslu Circuit — Nepal — 15 days — Challenging
+- Upper Mustang — Nepal — 11 days — Moderate
+- Bhutan Mountain & Culture — Bhutan — 9 days — Easy–Moderate
+- Tibet High Plateau — Tibet — 12 days — Moderate
+- Ladakh High Altitude — India — 10 days — Moderate
+- Kailash Mansarovar Journey — Tibet — 15 days — Moderate
+
+Write for travelers.
+
+Be:
+- professional
+- concise
+- practical
+- safety-conscious
+
+When live web research is available:
+- research only facts that can change
+- prioritize official government, embassy, tourism authority, national park and other authoritative sources
+- research entry rules when relevant
+- research permits when relevant
+- research important recent travel or access conditions
+- never invent current information
+- clearly say when something still needs verification
+- remember future regulations may change before the travel date
+
+Format the final answer like this:
+
+## Recommended journey
+
+Short personalized recommendation.
+
+## Suggested itinerary
+
+| Day | Plan |
+|---|---|
+| 1 | ... |
+
+## Current permits and travel rules
+
+Concise researched information.
+
+## Conditions and important updates
+
+Only important current findings.
+
+## Safety and altitude
+
+Short practical guidance.
+
+## Next step
+
+Recommend the relevant Himalayan26 tour or booking request.
+`;
 
 export async function POST(
   request: Request
@@ -227,7 +276,7 @@ export async function POST(
       return NextResponse.json(
         {
           error:
-            "AI Trip Planner is not connected yet. OPENAI_API_KEY is missing.",
+            "OPENAI_API_KEY is missing.",
         },
         {
           status: 503,
@@ -253,8 +302,7 @@ export async function POST(
     }
 
     const message = cleanText(
-      body.message,
-      3000
+      body.message
     );
 
     const liveResearch =
@@ -264,7 +312,7 @@ export async function POST(
       return NextResponse.json(
         {
           error:
-            "Please tell the AI Trip Planner what kind of Himalayan journey you want.",
+            "Please describe the Himalayan journey you want.",
         },
         {
           status: 400,
@@ -272,122 +320,60 @@ export async function POST(
       );
     }
 
-    const instructions = `
-You are Himalayan26 AI Trip Planner.
+    // --------------------------------
+    // NORMAL AI — NO LIVE WEB SEARCH
+    // --------------------------------
 
-You specialize in journeys in:
-- Nepal
-- Bhutan
-- Tibet
-- Indian Himalaya
-
-Known Himalayan26 tours:
-- Everest Base Camp — Nepal — 14 days — Challenging
-- Annapurna Classic — Nepal — 10 days — Moderate
-- Langtang Valley — Nepal — 8 days — Moderate
-- Manaslu Circuit — Nepal — 15 days — Challenging
-- Upper Mustang — Nepal — 11 days — Moderate
-- Bhutan Mountain & Culture — Bhutan — 9 days — Easy–Moderate
-- Tibet High Plateau — Tibet — 12 days — Moderate
-- Ladakh High Altitude — India — 10 days — Moderate
-- Kailash Mansarovar Journey — Tibet — 15 days — Moderate
-
-Write for travelers, not developers.
-
-Be professional, practical and concise.
-
-When web research is available:
-- research only facts that can change
-- prioritize official government, embassy, tourism authority, national park and other authoritative sources
-- check entry rules when relevant
-- check permits when relevant
-- check important recent travel or access conditions
-- do not waste searches on general destination descriptions
-- never invent current facts
-- state uncertainty when information cannot be confirmed
-- future rules for the traveler's actual future travel date may change, so explain that current rules must be rechecked closer to departure
-
-Use this format:
-
-## Recommended journey
-
-Brief recommendation.
-
-## Suggested itinerary
-
-| Day | Plan |
-|---|---|
-| 1 | ... |
-
-## Current permits and travel rules
-
-Use researched information when available.
-
-## Conditions and important updates
-
-Only include useful current findings.
-
-## Safety and altitude
-
-Short practical guidance.
-
-## Next step
-
-Recommend an appropriate Himalayan26 tour or booking request.
-
-Keep the response compact enough for a travel website.
-`;
-
-    // Normal AI mode
     if (!liveResearch) {
-      const {
-        response,
-        result,
-      } = await callOpenAI(
-        apiKey,
-        {
-          model: "gpt-5.6-luna",
-          reasoning: {
-            effort: "none",
-          },
-          instructions,
-          input: message,
-          max_output_tokens: 1000,
-        }
-      );
+      const first =
+        await callOpenAI(
+          apiKey,
+          {
+            model:
+              "gpt-5.6-luna",
 
-      if (!response.ok) {
-        console.error(
-          "OpenAI API error:",
-          result
+            reasoning: {
+              effort: "none",
+            },
+
+            instructions,
+
+            input: message,
+
+            max_output_tokens:
+              1800,
+          }
         );
 
-        const apiError =
-          makeApiError(
-            response,
-            result
+      if (!first.response.ok) {
+        const error =
+          apiErrorMessage(
+            first.response,
+            first.result
           );
 
         return NextResponse.json(
           {
             error:
-              apiError.message,
+              error.message,
           },
           {
             status:
-              apiError.status,
+              error.status,
           }
         );
       }
 
       const answer =
-        extractAnswer(result);
+        extractAnswer(
+          first.result
+        );
 
       if (!answer) {
         return NextResponse.json(
           {
             error:
-              "The AI Trip Planner could not create the final response. Please try again.",
+              "The AI could not create a trip plan. Please try again.",
           },
           {
             status: 502,
@@ -403,15 +389,16 @@ Keep the response compact enough for a travel website.
       });
     }
 
-    // ---------------------------
-    // LIVE RESEARCH — FIRST PASS
-    // ---------------------------
+    // ================================
+    // LIVE WEB RESEARCH
+    // ================================
 
-    const firstCall =
+    const research =
       await callOpenAI(
         apiKey,
         {
-          model: "gpt-5.6-luna",
+          model:
+            "gpt-5.6-luna",
 
           reasoning: {
             effort: "none",
@@ -420,11 +407,12 @@ Keep the response compact enough for a travel website.
           instructions,
 
           input: `
-Use live web research to answer this traveler request.
+Create a Himalayan travel plan for this traveler.
 
-Focus only on important changing information such as permits, entry requirements and important current travel conditions.
+Use live web search only for information that may have changed.
 
 Traveler request:
+
 ${message}
 `,
 
@@ -442,53 +430,74 @@ ${message}
             "web_search_call.action.sources",
           ],
 
-          max_output_tokens: 1200,
+          max_output_tokens:
+            2800,
         }
       );
 
-    if (!firstCall.response.ok) {
+    if (!research.response.ok) {
       console.error(
-        "OpenAI research error:",
-        firstCall.result
+        "OpenAI research request failed:",
+        research.result
       );
 
-      const apiError =
-        makeApiError(
-          firstCall.response,
-          firstCall.result
+      const error =
+        apiErrorMessage(
+          research.response,
+          research.result
         );
 
       return NextResponse.json(
         {
           error:
-            apiError.message,
+            error.message,
         },
         {
           status:
-            apiError.status,
+            error.status,
         }
       );
     }
 
     let answer =
       extractAnswer(
-        firstCall.result
+        research.result
       );
 
-    let secondResult: any = null;
+    let continuationResult: any =
+      null;
 
-    // ------------------------------------------------
-    // FALLBACK:
-    // Research succeeded but no final text was written.
-    // Continue from the researched response.
-    // ------------------------------------------------
-
+    // If web search happened but the model did not
+    // have room to write the final answer,
+    // continue the SAME response.
     if (
       !answer &&
-      typeof firstCall.result?.id ===
+      typeof research.result?.id ===
         "string"
     ) {
-      const secondCall =
+      console.log(
+        "Research needs continuation:",
+        {
+          status:
+            research.result?.status,
+          incompleteReason:
+            research.result
+              ?.incomplete_details
+              ?.reason ||
+            null,
+          outputTypes:
+            Array.isArray(
+              research.result?.output
+            )
+              ? research.result.output.map(
+                  (item: any) =>
+                    item?.type
+                )
+              : [],
+        }
+      );
+
+      const continuation =
         await callOpenAI(
           apiKey,
           {
@@ -500,90 +509,111 @@ ${message}
             },
 
             previous_response_id:
-              firstCall.result.id,
+              research.result.id,
+
+            instructions,
 
             input:
-              "Using the research you just completed, now write the final traveler-facing answer. Do not perform more web searches. Follow the requested Himalayan26 format and keep it concise.",
+              "Now write the final traveler-facing Himalayan26 trip plan using the research already completed. Do not perform another web search. Give the complete final answer now.",
 
-            max_output_tokens: 1000,
+            max_output_tokens:
+              2200,
           }
         );
 
-      secondResult =
-        secondCall.result;
+      continuationResult =
+        continuation.result;
 
       if (
-        !secondCall.response.ok
+        !continuation.response.ok
       ) {
         console.error(
-          "OpenAI continuation error:",
-          secondCall.result
+          "Continuation failed:",
+          continuation.result
         );
 
-        const apiError =
-          makeApiError(
-            secondCall.response,
-            secondCall.result
+        const error =
+          apiErrorMessage(
+            continuation.response,
+            continuation.result
           );
 
         return NextResponse.json(
           {
             error:
-              apiError.message,
+              error.message,
           },
           {
             status:
-              apiError.status,
+              error.status,
           }
         );
       }
 
       answer =
         extractAnswer(
-          secondCall.result
+          continuation.result
         );
     }
 
+    const sources =
+      extractSources(
+        research.result,
+        continuationResult
+      );
+
     if (!answer) {
+      const diagnostic = {
+        researchStatus:
+          research.result?.status ||
+          "unknown",
+
+        incompleteReason:
+          research.result
+            ?.incomplete_details
+            ?.reason ||
+          "none",
+
+        researchOutputTypes:
+          Array.isArray(
+            research.result?.output
+          )
+            ? research.result.output.map(
+                (item: any) =>
+                  item?.type
+              )
+            : [],
+
+        continuationStatus:
+          continuationResult?.status ||
+          "not-run",
+
+        continuationOutputTypes:
+          Array.isArray(
+            continuationResult?.output
+          )
+            ? continuationResult.output.map(
+                (item: any) =>
+                  item?.type
+              )
+            : [],
+      };
+
       console.error(
-        "No final AI text.",
-        {
-          firstStatus:
-            firstCall.result
-              ?.status,
-          firstId:
-            firstCall.result?.id,
-          firstOutputTypes:
-            Array.isArray(
-              firstCall.result
-                ?.output
-            )
-              ? firstCall.result.output.map(
-                  (item: any) =>
-                    item?.type
-                )
-              : [],
-          secondStatus:
-            secondResult?.status,
-        }
+        "AI live research produced no final text:",
+        diagnostic
       );
 
       return NextResponse.json(
         {
           error:
-            "Live research completed, but the final trip plan could not be generated. Please try again.",
+            `Live research completed but no final answer was generated. Status: ${diagnostic.researchStatus}. Reason: ${diagnostic.incompleteReason}.`,
         },
         {
           status: 502,
         }
       );
     }
-
-    const sources =
-      extractSources(
-        firstCall.result,
-        secondResult
-      );
 
     return NextResponse.json({
       ok: true,
@@ -593,7 +623,7 @@ ${message}
     });
   } catch (error) {
     console.error(
-      "AI route error:",
+      "AI route unexpected error:",
       error
     );
 
