@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 type AiRequestBody = {
   message?: unknown;
@@ -13,10 +14,7 @@ type ResearchSource = {
   url: string;
 };
 
-function cleanText(
-  value: unknown,
-  maxLength = 3000
-) {
+function cleanText(value: unknown, maxLength = 2000) {
   if (typeof value !== "string") {
     return "";
   }
@@ -32,11 +30,11 @@ function extractAnswer(result: any) {
     return result.output_text.trim();
   }
 
-  let answer = "";
-
   if (!Array.isArray(result?.output)) {
     return "";
   }
+
+  let answer = "";
 
   for (const item of result.output) {
     if (!Array.isArray(item?.content)) {
@@ -48,7 +46,7 @@ function extractAnswer(result: any) {
         content?.type === "output_text" &&
         typeof content?.text === "string"
       ) {
-        answer += content.text + "\n";
+        answer += `${content.text}\n`;
       }
     }
   }
@@ -56,16 +54,11 @@ function extractAnswer(result: any) {
   return answer.trim();
 }
 
-function extractSources(
-  ...results: any[]
-): ResearchSource[] {
+function extractSources(result: any): ResearchSource[] {
   const sources: ResearchSource[] = [];
   const seen = new Set<string>();
 
-  function addSource(
-    url: unknown,
-    title: unknown
-  ) {
+  function addSource(url: unknown, title: unknown) {
     if (
       typeof url !== "string" ||
       !url.startsWith("http") ||
@@ -79,65 +72,47 @@ function extractSources(
     sources.push({
       url,
       title:
-        typeof title === "string" &&
-        title.trim()
+        typeof title === "string" && title.trim()
           ? title.trim()
           : url,
     });
   }
 
-  for (const result of results) {
-    if (!Array.isArray(result?.output)) {
+  if (!Array.isArray(result?.output)) {
+    return sources;
+  }
+
+  for (const item of result.output) {
+    if (
+      item?.type === "web_search_call" &&
+      Array.isArray(item?.action?.sources)
+    ) {
+      for (const source of item.action.sources) {
+        addSource(source?.url, source?.title);
+      }
+    }
+
+    if (!Array.isArray(item?.content)) {
       continue;
     }
 
-    for (const item of result.output) {
-      if (
-        item?.type === "web_search_call" &&
-        Array.isArray(
-          item?.action?.sources
-        )
-      ) {
-        for (const source of item.action.sources) {
-          addSource(
-            source?.url,
-            source?.title
-          );
-        }
-      }
-
-      if (!Array.isArray(item?.content)) {
+    for (const content of item.content) {
+      if (!Array.isArray(content?.annotations)) {
         continue;
       }
 
-      for (const content of item.content) {
-        if (
-          !Array.isArray(
-            content?.annotations
-          )
-        ) {
-          continue;
-        }
-
-        for (
-          const annotation of
-            content.annotations
-        ) {
-          if (
-            annotation?.type ===
-            "url_citation"
-          ) {
-            addSource(
-              annotation?.url,
-              annotation?.title
-            );
-          }
+      for (const annotation of content.annotations) {
+        if (annotation?.type === "url_citation") {
+          addSource(
+            annotation?.url,
+            annotation?.title
+          );
         }
       }
     }
   }
 
-  return sources.slice(0, 6);
+  return sources.slice(0, 5);
 }
 
 async function callOpenAI(
@@ -149,18 +124,21 @@ async function callOpenAI(
     {
       method: "POST",
       headers: {
-        Authorization:
-          `Bearer ${apiKey}`,
-        "Content-Type":
-          "application/json",
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(body),
       cache: "no-store",
     }
   );
 
-  const result =
-    await response.json();
+  let result: any = null;
+
+  try {
+    result = await response.json();
+  } catch {
+    result = {};
+  }
 
   return {
     response,
@@ -168,24 +146,22 @@ async function callOpenAI(
   };
 }
 
-function apiErrorMessage(
+function getApiError(
   response: Response,
   result: any
 ) {
-  const message =
+  const rawMessage =
     result?.error?.message ||
     "The AI Trip Planner could not respond.";
 
   if (
     response.status === 429 ||
-    message
-      .toLowerCase()
-      .includes("rate limit")
+    rawMessage.toLowerCase().includes("rate limit")
   ) {
     return {
       status: 429,
       message:
-        "Live research is temporarily busy. Please wait about one minute and try again.",
+        "Live research reached the API rate limit. Please try again later or turn off Live Research.",
     };
   }
 
@@ -194,20 +170,16 @@ function apiErrorMessage(
       response.status >= 400
         ? response.status
         : 500,
-    message,
+    message: rawMessage,
   };
 }
 
-const instructions = `
+const normalInstructions = `
 You are Himalayan26 AI Trip Planner.
 
-You specialize in:
-- Nepal
-- Bhutan
-- Tibet
-- Indian Himalaya
+Recommend Himalayan journeys in Nepal, Bhutan, Tibet and the Indian Himalaya.
 
-Known Himalayan26 tours:
+Available Himalayan26 tours:
 - Everest Base Camp — Nepal — 14 days — Challenging
 - Annapurna Classic — Nepal — 10 days — Moderate
 - Langtang Valley — Nepal — 8 days — Moderate
@@ -218,65 +190,73 @@ Known Himalayan26 tours:
 - Ladakh High Altitude — India — 10 days — Moderate
 - Kailash Mansarovar Journey — Tibet — 15 days — Moderate
 
-Write for travelers.
+Be professional, concise, practical and safety-conscious.
 
-Be:
-- professional
-- concise
-- practical
-- safety-conscious
-
-When live web research is available:
-- research only facts that can change
-- prioritize official government, embassy, tourism authority, national park and other authoritative sources
-- research entry rules when relevant
-- research permits when relevant
-- research important recent travel or access conditions
-- never invent current information
-- clearly say when something still needs verification
-- remember future regulations may change before the travel date
-
-Format the final answer like this:
+Use this structure:
 
 ## Recommended journey
-
-Short personalized recommendation.
 
 ## Suggested itinerary
 
 | Day | Plan |
 |---|---|
-| 1 | ... |
-
-## Current permits and travel rules
-
-Concise researched information.
-
-## Conditions and important updates
-
-Only important current findings.
 
 ## Safety and altitude
 
-Short practical guidance.
-
 ## Next step
-
-Recommend the relevant Himalayan26 tour or booking request.
 `;
 
-export async function POST(
-  request: Request
-) {
+const researchInstructions = `
+You are Himalayan26 AI Trip Planner.
+
+Create a concise Himalayan travel plan.
+
+Use web search ONLY for current facts that may change, such as:
+- entry or visa rules
+- trekking permits
+- official access restrictions
+- important current travel conditions
+
+Prefer official government, embassy, tourism authority and national park sources.
+
+Do not search for general inspiration or basic itinerary information.
+
+Do not invent current information.
+If a current fact cannot be verified, clearly say it must be rechecked.
+
+Himalayan26 tours:
+Everest Base Camp, Annapurna Classic, Langtang Valley, Manaslu Circuit,
+Upper Mustang, Bhutan Mountain & Culture, Tibet High Plateau,
+Ladakh High Altitude, Kailash Mansarovar Journey.
+
+Keep the answer compact.
+
+Use:
+
+## Recommended journey
+
+## Suggested itinerary
+
+| Day | Plan |
+|---|---|
+
+## Current permits and travel rules
+
+## Conditions and important updates
+
+## Safety and altitude
+
+## Next step
+`;
+
+export async function POST(request: Request) {
   try {
-    const apiKey =
-      process.env.OPENAI_API_KEY;
+    const apiKey = process.env.OPENAI_API_KEY;
 
     if (!apiKey) {
       return NextResponse.json(
         {
-          error:
-            "OPENAI_API_KEY is missing.",
+          error: "OPENAI_API_KEY is missing.",
         },
         {
           status: 503,
@@ -292,8 +272,7 @@ export async function POST(
     } catch {
       return NextResponse.json(
         {
-          error:
-            "Invalid AI request.",
+          error: "Invalid AI request.",
         },
         {
           status: 400,
@@ -301,10 +280,7 @@ export async function POST(
       );
     }
 
-    const message = cleanText(
-      body.message
-    );
-
+    const message = cleanText(body.message);
     const liveResearch =
       body.liveResearch === true;
 
@@ -321,53 +297,51 @@ export async function POST(
     }
 
     // --------------------------------
-    // NORMAL AI — NO LIVE WEB SEARCH
+    // NORMAL AI
     // --------------------------------
 
     if (!liveResearch) {
-      const first =
-        await callOpenAI(
-          apiKey,
-          {
-            model:
-              "gpt-5.6-luna",
+      const ai = await callOpenAI(
+        apiKey,
+        {
+          model: "gpt-5.6-luna",
 
-            reasoning: {
-              effort: "none",
-            },
+          reasoning: {
+            effort: "none",
+          },
 
-            instructions,
+          instructions:
+            normalInstructions,
 
-            input: message,
+          input: message,
 
-            max_output_tokens:
-              1800,
-          }
+          max_output_tokens: 1200,
+        }
+      );
+
+      if (!ai.response.ok) {
+        console.error(
+          "OpenAI normal request failed:",
+          ai.result
         );
 
-      if (!first.response.ok) {
-        const error =
-          apiErrorMessage(
-            first.response,
-            first.result
-          );
+        const error = getApiError(
+          ai.response,
+          ai.result
+        );
 
         return NextResponse.json(
           {
-            error:
-              error.message,
+            error: error.message,
           },
           {
-            status:
-              error.status,
+            status: error.status,
           }
         );
       }
 
       const answer =
-        extractAnswer(
-          first.result
-        );
+        extractAnswer(ai.result);
 
       if (!answer) {
         return NextResponse.json(
@@ -389,102 +363,81 @@ export async function POST(
       });
     }
 
-    // ================================
-    // LIVE WEB RESEARCH
-    // ================================
+    // --------------------------------
+    // LIVE RESEARCH
+    // ONE WEB SEARCH CALL MAXIMUM
+    // --------------------------------
 
-    const research =
-      await callOpenAI(
-        apiKey,
-        {
-          model:
-            "gpt-5.6-luna",
+    const research = await callOpenAI(
+      apiKey,
+      {
+        model: "gpt-5.6-luna",
 
-          reasoning: {
-            effort: "none",
+        reasoning: {
+          effort: "none",
+        },
+
+        instructions:
+          researchInstructions,
+
+        input: message,
+
+        tools: [
+          {
+            type: "web_search",
+            search_context_size: "low",
           },
+        ],
 
-          instructions,
+        tool_choice: "auto",
 
-          input: `
-Create a Himalayan travel plan for this traveler.
+        max_tool_calls: 1,
 
-Use live web search only for information that may have changed.
+        include: [
+          "web_search_call.action.sources",
+        ],
 
-Traveler request:
-
-${message}
-`,
-
-          tools: [
-            {
-              type: "web_search",
-              search_context_size:
-                "low",
-            },
-          ],
-
-          tool_choice: "auto",
-
-          include: [
-            "web_search_call.action.sources",
-          ],
-
-          max_output_tokens:
-            2800,
-        }
-      );
+        max_output_tokens: 1400,
+      }
+    );
 
     if (!research.response.ok) {
       console.error(
-        "OpenAI research request failed:",
+        "OpenAI live research failed:",
         research.result
       );
 
-      const error =
-        apiErrorMessage(
-          research.response,
-          research.result
-        );
+      const error = getApiError(
+        research.response,
+        research.result
+      );
 
       return NextResponse.json(
         {
-          error:
-            error.message,
+          error: error.message,
         },
         {
-          status:
-            error.status,
+          status: error.status,
         }
       );
     }
 
-    let answer =
-      extractAnswer(
-        research.result
-      );
+    const answer =
+      extractAnswer(research.result);
 
-    let continuationResult: any =
-      null;
+    const sources =
+      extractSources(research.result);
 
-    // If web search happened but the model did not
-    // have room to write the final answer,
-    // continue the SAME response.
-    if (
-      !answer &&
-      typeof research.result?.id ===
-        "string"
-    ) {
-      console.log(
-        "Research needs continuation:",
+    if (!answer) {
+      console.error(
+        "Live research returned no final text:",
         {
           status:
             research.result?.status,
           incompleteReason:
             research.result
               ?.incomplete_details
-              ?.reason ||
-            null,
+              ?.reason || null,
           outputTypes:
             Array.isArray(
               research.result?.output
@@ -497,117 +450,10 @@ ${message}
         }
       );
 
-      const continuation =
-        await callOpenAI(
-          apiKey,
-          {
-            model:
-              "gpt-5.6-luna",
-
-            reasoning: {
-              effort: "none",
-            },
-
-            previous_response_id:
-              research.result.id,
-
-            instructions,
-
-            input:
-              "Now write the final traveler-facing Himalayan26 trip plan using the research already completed. Do not perform another web search. Give the complete final answer now.",
-
-            max_output_tokens:
-              2200,
-          }
-        );
-
-      continuationResult =
-        continuation.result;
-
-      if (
-        !continuation.response.ok
-      ) {
-        console.error(
-          "Continuation failed:",
-          continuation.result
-        );
-
-        const error =
-          apiErrorMessage(
-            continuation.response,
-            continuation.result
-          );
-
-        return NextResponse.json(
-          {
-            error:
-              error.message,
-          },
-          {
-            status:
-              error.status,
-          }
-        );
-      }
-
-      answer =
-        extractAnswer(
-          continuation.result
-        );
-    }
-
-    const sources =
-      extractSources(
-        research.result,
-        continuationResult
-      );
-
-    if (!answer) {
-      const diagnostic = {
-        researchStatus:
-          research.result?.status ||
-          "unknown",
-
-        incompleteReason:
-          research.result
-            ?.incomplete_details
-            ?.reason ||
-          "none",
-
-        researchOutputTypes:
-          Array.isArray(
-            research.result?.output
-          )
-            ? research.result.output.map(
-                (item: any) =>
-                  item?.type
-              )
-            : [],
-
-        continuationStatus:
-          continuationResult?.status ||
-          "not-run",
-
-        continuationOutputTypes:
-          Array.isArray(
-            continuationResult?.output
-          )
-            ? continuationResult.output.map(
-                (item: any) =>
-                  item?.type
-              )
-            : [],
-      };
-
-      console.error(
-        "AI live research produced no final text:",
-        diagnostic
-      );
-
       return NextResponse.json(
         {
           error:
-            `Live research completed but no final answer was generated. Status: ${diagnostic.researchStatus}. Reason: ${diagnostic.incompleteReason}.`,
+            "Live research could not finish the trip plan. Please try again or turn off Live Research.",
         },
         {
           status: 502,
