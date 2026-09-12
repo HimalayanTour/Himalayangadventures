@@ -53,12 +53,17 @@ function cleanOptionalText(
   value: unknown,
   maxLength = 500
 ) {
-  const text = cleanText(value, maxLength);
+  const text = cleanText(
+    value,
+    maxLength
+  );
 
   return text || null;
 }
 
-function isValidEmail(email: string) {
+function isValidEmail(
+  email: string
+) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
     email
   );
@@ -79,6 +84,17 @@ function formatTourName(
         word.slice(1)
     )
     .join(" ");
+}
+
+function escapeHtml(
+  value: string
+) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
 async function sendBookingEmail({
@@ -120,23 +136,6 @@ async function sendBookingEmail({
     };
   }
 
-  /*
-    WITHOUT A VERIFIED DOMAIN:
-    Resend's test sender can only be used
-    for test delivery.
-
-    BOOKING_NOTIFICATION_EMAIL should be
-    your own email address.
-
-    AFTER VERIFYING A DOMAIN:
-    Add RESEND_FROM_EMAIL in Vercel, for example:
-
-    Himalayan26 <bookings@yourdomain.com>
-
-    Then the same code will send directly
-    to the customer.
-  */
-
   const verifiedFrom =
     process.env.RESEND_FROM_EMAIL?.trim();
 
@@ -150,7 +149,7 @@ async function sendBookingEmail({
     !notificationEmail
   ) {
     console.warn(
-      "BOOKING_NOTIFICATION_EMAIL is missing. Resend test email skipped."
+      "BOOKING_NOTIFICATION_EMAIL is missing. Email skipped."
     );
 
     return {
@@ -168,12 +167,54 @@ async function sendBookingEmail({
     ? notificationEmail!
     : customerEmail;
 
-  const subject = testingMode
-    ? `TEST — New Himalayan booking from ${customerName}`
-    : "We received your Himalayan tour booking request";
+  const subject =
+    `New booking request: ${tourName}`;
 
-  const text = testingMode
-    ? `NEW BOOKING REQUEST
+  const safeName =
+    escapeHtml(customerName);
+
+  const safeEmail =
+    escapeHtml(customerEmail);
+
+  const safeTour =
+    escapeHtml(tourName);
+
+  const safeDates =
+    escapeHtml(
+      dates || "Not specified"
+    );
+
+  const safePhone =
+    escapeHtml(
+      phone || "Not provided"
+    );
+
+  const safeCountry =
+    escapeHtml(
+      country || "Not provided"
+    );
+
+  const safeTripStyle =
+    escapeHtml(
+      tripStyle || "Not specified"
+    );
+
+  const safeAccommodation =
+    escapeHtml(
+      accommodation ||
+        "Not specified"
+    );
+
+  const safeMessage =
+    escapeHtml(
+      message ||
+        "No additional message."
+    );
+
+  const safeBookingId =
+    escapeHtml(bookingId);
+
+  const text = `NEW HIMALAYAN BOOKING REQUEST
 
 Booking ID: ${bookingId}
 
@@ -192,26 +233,107 @@ Accommodation: ${accommodation || "Not specified"}
 Customer message:
 ${message || "No additional message."}
 
-This is a test-mode booking notification from Himalayan26.
-`
-    : `Hello ${customerName},
+Himalayan26 Booking System
+`;
 
-Thank you for contacting Himalayan26.
+  const html = `
+<!doctype html>
+<html>
+  <body style="margin:0;padding:0;background:#f4f7f8;font-family:Arial,sans-serif;color:#10232a;">
+    <div style="max-width:680px;margin:0 auto;padding:32px 18px;">
+      <div style="background:#071a21;border-radius:18px;padding:28px;color:#ffffff;">
+        <div style="font-size:13px;letter-spacing:1.8px;color:#68e0c2;font-weight:700;">
+          HIMALAYAN26
+        </div>
 
-We have received your booking request for ${tourName}.
+        <h1 style="margin:10px 0 8px;font-size:28px;line-height:1.2;">
+          New booking request
+        </h1>
 
-Preferred dates: ${dates || "Not specified"}
-Travelers: ${travelers}
-Trip style: ${tripStyle || "Not specified"}
-Accommodation: ${accommodation || "Not specified"}
+        <p style="margin:0;color:#b8c7cc;">
+          A new traveler has submitted a booking request.
+        </p>
+      </div>
 
-Our Himalayan travel team is reviewing your request and will contact you with the next steps.
+      <div style="background:#ffffff;border-radius:18px;margin-top:18px;padding:26px;border:1px solid #e6ecef;">
+        <h2 style="margin-top:0;font-size:20px;">
+          Customer details
+        </h2>
 
-Booking reference:
-${bookingId}
+        <table style="width:100%;border-collapse:collapse;font-size:15px;">
+          <tr>
+            <td style="padding:9px 0;color:#6b7b81;">Name</td>
+            <td style="padding:9px 0;font-weight:700;">${safeName}</td>
+          </tr>
 
-Best regards,
-Himalayan26
+          <tr>
+            <td style="padding:9px 0;color:#6b7b81;">Email</td>
+            <td style="padding:9px 0;font-weight:700;">${safeEmail}</td>
+          </tr>
+
+          <tr>
+            <td style="padding:9px 0;color:#6b7b81;">Tour</td>
+            <td style="padding:9px 0;font-weight:700;">${safeTour}</td>
+          </tr>
+
+          <tr>
+            <td style="padding:9px 0;color:#6b7b81;">Preferred dates</td>
+            <td style="padding:9px 0;font-weight:700;">${safeDates}</td>
+          </tr>
+
+          <tr>
+            <td style="padding:9px 0;color:#6b7b81;">Travelers</td>
+            <td style="padding:9px 0;font-weight:700;">${travelers}</td>
+          </tr>
+
+          <tr>
+            <td style="padding:9px 0;color:#6b7b81;">Phone / WhatsApp</td>
+            <td style="padding:9px 0;font-weight:700;">${safePhone}</td>
+          </tr>
+
+          <tr>
+            <td style="padding:9px 0;color:#6b7b81;">Country</td>
+            <td style="padding:9px 0;font-weight:700;">${safeCountry}</td>
+          </tr>
+
+          <tr>
+            <td style="padding:9px 0;color:#6b7b81;">Trip style</td>
+            <td style="padding:9px 0;font-weight:700;">${safeTripStyle}</td>
+          </tr>
+
+          <tr>
+            <td style="padding:9px 0;color:#6b7b81;">Accommodation</td>
+            <td style="padding:9px 0;font-weight:700;">${safeAccommodation}</td>
+          </tr>
+        </table>
+      </div>
+
+      <div style="background:#ffffff;border-radius:18px;margin-top:18px;padding:26px;border:1px solid #e6ecef;">
+        <h2 style="margin-top:0;font-size:20px;">
+          Customer message
+        </h2>
+
+        <div style="background:#f5f9fa;border-radius:12px;padding:16px;line-height:1.6;white-space:pre-wrap;">
+          ${safeMessage}
+        </div>
+      </div>
+
+      <div style="background:#ffffff;border-radius:18px;margin-top:18px;padding:22px 26px;border:1px solid #e6ecef;">
+        <div style="font-size:13px;color:#6b7b81;">
+          Booking ID
+        </div>
+
+        <div style="font-family:monospace;font-size:14px;margin-top:6px;">
+          ${safeBookingId}
+        </div>
+      </div>
+
+      <p style="text-align:center;color:#8a989d;font-size:12px;margin-top:22px;">
+        Himalayan26 Booking System
+      </p>
+    </div>
+  </body>
+</html>
 `;
 
   const response = await fetch(
@@ -219,7 +341,8 @@ Himalayan26
     {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${resendApiKey}`,
+        Authorization:
+          `Bearer ${resendApiKey}`,
         "Content-Type":
           "application/json",
       },
@@ -228,11 +351,13 @@ Himalayan26
         to: [to],
         subject,
         text,
+        html,
       }),
     }
   );
 
-  const result = await response.json();
+  const result =
+    await response.json();
 
   if (!response.ok) {
     console.error(
@@ -390,15 +515,6 @@ export async function POST(
 
     const db = getDb();
 
-    /*
-      STEP 1:
-      Save the booking first.
-
-      This means a temporary email
-      problem will never cause us to
-      lose the customer's booking.
-    */
-
     const {
       data,
       error,
@@ -413,7 +529,8 @@ export async function POST(
         message,
         phone,
         country,
-        trip_style: tripStyle,
+        trip_style:
+          tripStyle,
         accommodation,
         status: "new",
       })
@@ -436,15 +553,6 @@ export async function POST(
         }
       );
     }
-
-    /*
-      STEP 2:
-      Send the automatic email.
-
-      If Resend fails, the booking
-      remains safely stored in
-      Supabase.
-    */
 
     const emailResult =
       await sendBookingEmail({
@@ -470,12 +578,6 @@ export async function POST(
         id: data.id,
         emailSent:
           emailResult.sent,
-        emailMode:
-          "testingMode" in
-            emailResult &&
-          emailResult.testingMode
-            ? "test"
-            : "customer",
         message:
           "Booking request received. Our team will contact you.",
       },
