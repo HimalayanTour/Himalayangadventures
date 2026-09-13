@@ -13,7 +13,7 @@ type ResearchSource = {
 
 function formatInline(text: string): ReactNode[] {
   const pattern =
-    /(\*\*.*?\*\a*|\[[^\]]+\]\(https?:\/\/[^\s)]+\))/g;
+    /(\*\*.*?\*\*|\[[^\]]+\]\(https?:\/\/[^\s)]+\))/g;
 
   const parts = text.split(pattern);
 
