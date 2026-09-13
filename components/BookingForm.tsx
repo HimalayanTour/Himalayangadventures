@@ -1,6 +1,10 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import {
+  FormEvent,
+  useEffect,
+  useState,
+} from "react";
 
 type BookingFormProps = {
   tourSlug?: string;
@@ -9,9 +13,88 @@ type BookingFormProps = {
 export default function BookingForm({
   tourSlug = "",
 }: BookingFormProps) {
-  const [statusMessage, setStatusMessage] = useState("");
-  const [sending, setSending] = useState(false);
-  const [sent, setSent] = useState(false);
+  const [statusMessage, setStatusMessage] =
+    useState("");
+
+  const [sending, setSending] =
+    useState(false);
+
+  const [sent, setSent] =
+    useState(false);
+
+  // Custom Journey values
+  const [destination, setDestination] =
+    useState("");
+
+  const [days, setDays] =
+    useState("");
+
+  const [travelers, setTravelers] =
+    useState("2");
+
+  const [tripStyle, setTripStyle] =
+    useState("");
+
+  const [accommodation, setAccommodation] =
+    useState("");
+
+  const [message, setMessage] =
+    useState("");
+
+  // --------------------------------
+  // READ CUSTOM JOURNEY URL VALUES
+  // --------------------------------
+
+  useEffect(() => {
+    const params =
+      new URLSearchParams(
+        window.location.search
+      );
+
+    const urlDestination =
+      params.get("destination") || "";
+
+    const urlDays =
+      params.get("days") || "";
+
+    const urlTravelers =
+      params.get("travelers") || "";
+
+    const urlStyle =
+      params.get("style") || "";
+
+    const urlAccommodation =
+      params.get("accommodation") || "";
+
+    const urlMessage =
+      params.get("message") || "";
+
+    if (urlDestination) {
+      setDestination(urlDestination);
+    }
+
+    if (urlDays) {
+      setDays(urlDays);
+    }
+
+    if (urlTravelers) {
+      setTravelers(urlTravelers);
+    }
+
+    if (urlStyle) {
+      setTripStyle(urlStyle);
+    }
+
+    if (urlAccommodation) {
+      setAccommodation(
+        urlAccommodation
+      );
+    }
+
+    if (urlMessage) {
+      setMessage(urlMessage);
+    }
+  }, []);
 
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>
@@ -26,7 +109,8 @@ export default function BookingForm({
     setStatusMessage("");
 
     const form = event.currentTarget;
-    const formData = new FormData(form);
+    const formData =
+      new FormData(form);
 
     const name = String(
       formData.get("name") || ""
@@ -48,24 +132,72 @@ export default function BookingForm({
       formData.get("dates") || ""
     ).trim();
 
-    const tripStyle = String(
-      formData.get("tripStyle") || ""
-    ).trim();
+    const selectedTripStyle =
+      String(
+        formData.get("tripStyle") ||
+          ""
+      ).trim();
 
-    const accommodation = String(
-      formData.get("accommodation") || ""
-    ).trim();
+    const selectedAccommodation =
+      String(
+        formData.get(
+          "accommodation"
+        ) || ""
+      ).trim();
 
-    const message = String(
-      formData.get("message") || ""
-    ).trim();
+    const userMessage =
+      String(
+        formData.get("message") || ""
+      ).trim();
 
-    const travelers = Math.max(
-      1,
-      Number(
-        formData.get("travelers")
-      ) || 1
-    );
+    const travelerCount =
+      Math.max(
+        1,
+        Number(
+          formData.get("travelers")
+        ) || 1
+      );
+
+    const selectedDestination =
+      String(
+        formData.get(
+          "destination"
+        ) || ""
+      ).trim();
+
+    const selectedDays =
+      String(
+        formData.get("days") || ""
+      ).trim();
+
+    // --------------------------------
+    // ADD CUSTOM JOURNEY INFORMATION
+    // TO THE SAVED BOOKING MESSAGE
+    // --------------------------------
+
+    const journeyDetails: string[] =
+      [];
+
+    if (selectedDestination) {
+      journeyDetails.push(
+        `Destination: ${selectedDestination}`
+      );
+    }
+
+    if (selectedDays) {
+      journeyDetails.push(
+        `Preferred trip length: ${selectedDays} days`
+      );
+    }
+
+    const finalMessage = [
+      journeyDetails.length > 0
+        ? journeyDetails.join("\n")
+        : "",
+      userMessage,
+    ]
+      .filter(Boolean)
+      .join("\n\n");
 
     const body = {
       tourSlug,
@@ -74,24 +206,30 @@ export default function BookingForm({
       phone,
       country,
       dates,
-      travelers,
-      tripStyle,
-      accommodation,
-      message,
+      travelers:
+        travelerCount,
+      tripStyle:
+        selectedTripStyle,
+      accommodation:
+        selectedAccommodation,
+      message: finalMessage,
     };
 
     try {
-      const response = await fetch(
-        "/api/bookings",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-          body: JSON.stringify(body),
-        }
-      );
+      const response =
+        await fetch(
+          "/api/bookings",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+            body: JSON.stringify(
+              body
+            ),
+          }
+        );
 
       let result: {
         message?: string;
@@ -120,8 +258,6 @@ export default function BookingForm({
         result.message ||
           "Thank you! Your booking request has been received. Our Himalayan travel team will contact you soon."
       );
-
-      form.reset();
     } catch (error) {
       console.error(
         "Booking form error:",
@@ -160,11 +296,58 @@ export default function BookingForm({
           lineHeight: 1.6,
         }}
       >
-        Tell us about your travel plans
-        and our Himalayan travel team
-        will help create the right
-        journey for you.
+        Tell us about your travel
+        plans and our Himalayan
+        travel team will help create
+        the right journey for you.
       </p>
+
+      {/* CUSTOM JOURNEY DETAILS */}
+
+      {destination && (
+        <div className="field">
+          <label htmlFor="booking-destination">
+            Destination / region
+          </label>
+
+          <input
+            id="booking-destination"
+            name="destination"
+            type="text"
+            value={destination}
+            onChange={(event) =>
+              setDestination(
+                event.target.value
+              )
+            }
+            disabled={sent}
+            placeholder="Nepal, Bhutan, Tibet..."
+          />
+        </div>
+      )}
+
+      {days && (
+        <div className="field">
+          <label htmlFor="booking-days">
+            Preferred trip length
+          </label>
+
+          <input
+            id="booking-days"
+            name="days"
+            type="number"
+            min="1"
+            max="60"
+            value={days}
+            onChange={(event) =>
+              setDays(
+                event.target.value
+              )
+            }
+            disabled={sent}
+          />
+        </div>
+      )}
 
       <div className="field">
         <label htmlFor="booking-name">
@@ -253,7 +436,12 @@ export default function BookingForm({
           type="number"
           min="1"
           max="50"
-          defaultValue="2"
+          value={travelers}
+          onChange={(event) =>
+            setTravelers(
+              event.target.value
+            )
+          }
           disabled={sent}
         />
       </div>
@@ -266,7 +454,12 @@ export default function BookingForm({
         <select
           id="booking-trip-style"
           name="tripStyle"
-          defaultValue=""
+          value={tripStyle}
+          onChange={(event) =>
+            setTripStyle(
+              event.target.value
+            )
+          }
           disabled={sent}
           style={{
             width: "100%",
@@ -278,6 +471,34 @@ export default function BookingForm({
             Select trip style
           </option>
 
+          <option value="Adventure">
+            Adventure
+          </option>
+
+          <option value="Culture">
+            Culture
+          </option>
+
+          <option value="Spiritual">
+            Spiritual
+          </option>
+
+          <option value="Photography">
+            Photography
+          </option>
+
+          <option value="Luxury">
+            Luxury
+          </option>
+
+          <option value="Family">
+            Family
+          </option>
+
+          <option value="Wellness">
+            Wellness
+          </option>
+
           <option value="Private tour">
             Private tour
           </option>
@@ -286,28 +507,12 @@ export default function BookingForm({
             Small group
           </option>
 
-          <option value="Luxury journey">
-            Luxury journey
-          </option>
-
           <option value="Adventure trekking">
             Adventure trekking
           </option>
 
           <option value="Culture and heritage">
             Culture & heritage
-          </option>
-
-          <option value="Photography">
-            Photography
-          </option>
-
-          <option value="Spiritual journey">
-            Spiritual journey
-          </option>
-
-          <option value="Family trip">
-            Family trip
           </option>
         </select>
       </div>
@@ -320,7 +525,12 @@ export default function BookingForm({
         <select
           id="booking-accommodation"
           name="accommodation"
-          defaultValue=""
+          value={accommodation}
+          onChange={(event) =>
+            setAccommodation(
+              event.target.value
+            )
+          }
           disabled={sent}
           style={{
             width: "100%",
@@ -340,12 +550,21 @@ export default function BookingForm({
             Comfort
           </option>
 
+          <option value="Comfortable">
+            Comfortable
+          </option>
+
           <option value="Premium">
             Premium
           </option>
 
           <option value="Luxury">
             Luxury
+          </option>
+
+          <option value="Best available in remote areas">
+            Best available in remote
+            areas
           </option>
 
           <option value="Not sure">
@@ -363,6 +582,12 @@ export default function BookingForm({
           id="booking-message"
           name="message"
           rows={6}
+          value={message}
+          onChange={(event) =>
+            setMessage(
+              event.target.value
+            )
+          }
           disabled={sent}
           placeholder="Tell us about your interests, fitness level, preferred pace, special requirements or anything else we should know."
         />
@@ -380,8 +605,8 @@ export default function BookingForm({
         {sending
           ? "Sending..."
           : sent
-          ? "Booking sent ✓"
-          : "Send booking request"}
+            ? "Booking sent ✓"
+            : "Send booking request"}
       </button>
 
       {statusMessage && (
