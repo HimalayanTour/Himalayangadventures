@@ -13,7 +13,7 @@ type ResearchSource = {
 
 function formatInline(text: string): ReactNode[] {
   const pattern =
-    /(\*\*.*?\*\*|\[[^\]]+\]\(https?:\/\/[^\s)]+\))/g;
+    /(\*\*.*?\*\a*|\[[^\]]+\]\(https?:\/\/[^\s)]+\))/g;
 
   const parts = text.split(pattern);
 
@@ -381,6 +381,16 @@ export default function AiTripPlannerPage() {
     setUsedLiveResearch,
   ] = useState(false);
 
+  const [
+    researchUnavailable,
+    setResearchUnavailable,
+  ] = useState(false);
+
+  const [
+    researchMessage,
+    setResearchMessage,
+  ] = useState("");
+
   const [error, setError] =
     useState("");
 
@@ -406,6 +416,8 @@ export default function AiTripPlannerPage() {
     setAnswer("");
     setSources([]);
     setUsedLiveResearch(false);
+    setResearchUnavailable(false);
+    setResearchMessage("");
 
     try {
       const response = await fetch(
@@ -447,6 +459,16 @@ export default function AiTripPlannerPage() {
 
       setUsedLiveResearch(
         result?.liveResearch === true
+      );
+
+      setResearchUnavailable(
+        result?.researchUnavailable === true
+      );
+
+      setResearchMessage(
+        typeof result?.researchMessage === "string"
+          ? result.researchMessage
+          : ""
       );
     } catch (error) {
       console.error(
@@ -765,6 +787,25 @@ export default function AiTripPlannerPage() {
                 ● Live Research Included
               </span>
             )}
+
+          {answer &&
+            researchUnavailable && (
+              <span
+                style={{
+                  padding:
+                    "7px 12px",
+                  borderRadius: 999,
+                  border:
+                    "1px solid rgba(255,193,7,0.35)",
+                  background:
+                    "rgba(255,193,7,0.10)",
+                  fontSize: 13,
+                  fontWeight: 700,
+                }}
+              >
+                ● Live Research Unavailable
+              </span>
+            )}
         </div>
 
         <h2>
@@ -798,6 +839,24 @@ export default function AiTripPlannerPage() {
               : "AI is preparing your Himalayan journey..."}
           </div>
         )}
+
+        {answer &&
+          researchUnavailable && (
+            <div
+              className="notice"
+              style={{
+                marginTop: 18,
+                marginBottom: 18,
+                lineHeight: 1.65,
+              }}
+            >
+              <strong>Live research was not available for this request.</strong>
+              <div style={{ marginTop: 6 }}>
+                {researchMessage ||
+                  "This plan was created without live verification. Please confirm current permits, entry rules and travel conditions with official sources before booking."}
+              </div>
+            </div>
+          )}
 
         {answer && (
           <div
