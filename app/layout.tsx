@@ -1,5 +1,6 @@
 import "./globals.css";
 import Link from "next/link";
+import MobileNav from "@/components/MobileNav";
 
 export const metadata = {
   title: "Himalayan Adventures 2026",
@@ -28,9 +29,11 @@ export default function RootLayout({
             <Link href="/about">About</Link>
           </nav>
 
-          <Link href="/contact-book" className="btn">
+          <Link href="/contact-book" className="btn desktopPlanButton">
             Plan my trip
           </Link>
+
+          <MobileNav />
         </div>
       </header>
 
@@ -44,7 +47,7 @@ export default function RootLayout({
             </div>
 
             <p>
-              Thoughtful journeys through the world's highest mountains,
+              Thoughtful journeys through the world&apos;s highest mountains,
               designed with current information and human guidance.
             </p>
           </div>
