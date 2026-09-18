@@ -1,6 +1,9 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTour, tours } from "@/lib/tours";
 import BookingForm from "@/components/BookingForm";
+
+const baseUrl = "https://himalayangadventures.vercel.app";
 
 const images: Record<string, string> = {
   "everest-base-camp":
@@ -78,6 +81,70 @@ export function generateStaticParams() {
   }));
 }
 
+/* -----------------------------
+   DYNAMIC TOUR SEO
+------------------------------ */
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const tour = getTour(slug);
+
+  if (!tour) {
+    return {
+      title: "Tour Not Found",
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  }
+
+  const description =
+    `Explore ${tour.name} in ${tour.country}. ` +
+    `${tour.days} Himalayan journey rated ${tour.difficulty}, ` +
+    `starting from ${tour.price}. View highlights and plan your journey.`;
+
+  const canonicalUrl = `/tours/${tour.slug}`;
+  const image = images[tour.slug];
+
+  return {
+    title: `${tour.name} | ${tour.country} Himalayan Journey`,
+
+    description,
+
+    alternates: {
+      canonical: canonicalUrl,
+    },
+
+    openGraph: {
+      type: "website",
+      url: canonicalUrl,
+      title: `${tour.name} | Himalayan Adventures`,
+      description,
+      siteName: "Himalayan Adventures",
+      images: image
+        ? [
+            {
+              url: image,
+              alt: `${tour.name} in ${tour.country}`,
+            },
+          ]
+        : undefined,
+    },
+
+    twitter: {
+      card: "summary_large_image",
+      title: `${tour.name} | Himalayan Adventures`,
+      description,
+      images: image ? [image] : undefined,
+    },
+  };
+}
+
 export default async function TourPage({
   params,
 }: {
@@ -93,8 +160,25 @@ export default async function TourPage({
   const image = images[tour.slug];
   const tourHighlights = highlights[tour.slug] || [];
 
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "TouristTrip",
+    name: tour.name,
+    description: `${tour.days} Himalayan journey through ${tour.country}, rated ${tour.difficulty}, starting from ${tour.price}.`,
+    url: `${baseUrl}/tours/${tour.slug}`,
+    touristType: "Himalayan adventure traveler",
+    image: image ? `${baseUrl}${encodeURI(image)}` : undefined,
+  };
+
   return (
     <main>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(structuredData).replace(/</g, "\\u003c"),
+        }}
+      />
+
       <section
         style={{
           minHeight: "520px",
@@ -173,7 +257,7 @@ export default async function TourPage({
 
               <div className="card" style={{ marginTop: "20px" }}>
                 <span className="eyebrow">Highlights</span>
-                <h2>What you'll experience</h2>
+                <h2>What you&apos;ll experience</h2>
 
                 <div
                   style={{
