@@ -229,7 +229,7 @@ export default function Page() {
                 Open AI Trip Planner
               </Link>
 
-              <Link className="btn alt" href="/safety-conditions">
+              <Link className="btn alt" href="/weather-conditions">
                 Check conditions
               </Link>
             </div>
@@ -338,7 +338,7 @@ export default function Page() {
                 flexWrap: "wrap",
               }}
             >
-              <Link className="btn alt" href="/safety-conditions">
+              <Link className="btn alt" href="/weather-conditions">
                 Safety &amp; conditions
               </Link>
 
