@@ -1,3 +1,407 @@
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: #07131a;
+  color: #eef6f7;
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  overflow-x: hidden;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+.shell {
+  min-height: 100vh;
+  background:
+    radial-gradient(
+      circle at 80% 0%,
+      #173b43 0,
+      #07131a 38%
+    );
+}
+
+.container {
+  width: min(1180px, 92%);
+  margin: auto;
+}
+
+/* =========================
+   NAVIGATION
+========================= */
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(7, 19, 26, 0.86);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.navin {
+  min-height: 74px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.brand {
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  font-size: 20px;
+  white-space: nowrap;
+}
+
+.brand span {
+  color: #6de0c2;
+}
+
+.navlinks {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  font-size: 14px;
+  color: #b9cacc;
+}
+
+.navlinks a {
+  transition:
+    color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.navlinks a:hover {
+  color: #fff;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 14px;
+  padding: 12px 17px;
+  min-height: 46px;
+  background: #6de0c2;
+  color: #06211d;
+  font-weight: 800;
+  cursor: pointer;
+  text-align: center;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease,
+    background 0.2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+  transform: none;
+}
+
+.btn.alt {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* =========================
+   HERO
+========================= */
+
+.hero {
+  padding: 90px 0 65px;
+  min-height: 650px;
+
+  display: flex;
+  align-items: center;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(2, 18, 25, 0.92) 0%,
+      rgba(2, 18, 25, 0.72) 42%,
+      rgba(2, 18, 25, 0.25) 72%,
+      rgba(2, 18, 25, 0.08) 100%
+    ),
+    url("/ChatGPT Image Sep 7, 2026, 12_42_57 AM.png");
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.eyebrow {
+  color: #6de0c2;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-size: 12px;
+}
+
+.hero h1 {
+  font-size: clamp(44px, 7vw, 86px);
+  line-height: 0.95;
+  letter-spacing: -0.07em;
+  max-width: 920px;
+  margin: 16px 0;
+}
+
+.hero p {
+  font-size: 19px;
+  line-height: 1.7;
+  color: #b8c8cb;
+  max-width: 720px;
+}
+
+/* =========================
+   ACTIONS
+========================= */
+
+.actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 28px;
+}
+
+/* =========================
+   SECTIONS
+========================= */
+
+.section {
+  padding: 62px 0;
+}
+
+.section h2 {
+  font-size: 38px;
+  letter-spacing: -0.04em;
+  margin: 0 0 12px;
+}
+
+.muted {
+  color: #9db0b5;
+  line-height: 1.7;
+}
+
+/* =========================
+   GRIDS
+========================= */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.layout2 {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 20px;
+}
+
+/* =========================
+   CARDS
+========================= */
+
+.card {
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 22px;
+  padding: 22px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.16);
+}
+
+.card h3 {
+  margin: 8px 0;
+  font-size: 23px;
+}
+
+.pill {
+  display: inline-flex;
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: rgba(109, 224, 194, 0.12);
+  color: #7ce7ce;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.price {
+  font-size: 24px;
+  font-weight: 900;
+  margin: 18px 0;
+}
+
+/* =========================
+   FORMS
+========================= */
+
+.field {
+  display: grid;
+  gap: 7px;
+  margin: 13px 0;
+}
+
+.field label {
+  font-size: 13px;
+  color: #a9bcc0;
+}
+
+.field input,
+.field textarea,
+.field select {
+  width: 100%;
+  padding: 13px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #081a22;
+  color: #fff;
+  outline: none;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+  border-color: rgba(109, 224, 194, 0.7);
+  box-shadow: 0 0 0 3px rgba(109, 224, 194, 0.08);
+}
+
+.field textarea {
+  min-height: 150px;
+  resize: vertical;
+}
+
+/* =========================
+   NOTICE
+========================= */
+
+.notice {
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(109, 224, 194, 0.09);
+  border: 1px solid rgba(109, 224, 194, 0.18);
+  color: #bdece1;
+}
+
+/* =========================
+   MAP
+========================= */
+
+.map {
+  height: 420px;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* =========================
+   FOOTER
+========================= */
+
+.footer {
+  padding: 50px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: #8ea3a8;
+}
+
+.footergrid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 30px;
+}
+
+.list {
+  display: grid;
+  gap: 12px;
+}
+
+/* =========================
+   STATS
+========================= */
+
+.statgrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.stat {
+  padding: 20px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.stat strong {
+  display: block;
+  font-size: 28px;
+}
+
+/* =========================
+   PAGE HERO
+========================= */
+
+.pagehero {
+  padding: 70px 0 35px;
+}
+
+.back {
+  color: #75dfc3;
+  font-size: 14px;
+}
+
+/* =========================
+   AI CHAT
+========================= */
+
+.chat {
+  min-height: 220px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: #061118;
+  border-radius: 16px;
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
 /* =========================
    MOBILE NAVIGATION
 ========================= */
@@ -11,9 +415,11 @@
   width: 44px;
   height: 44px;
   padding: 0;
+
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.07);
+
   cursor: pointer;
 
   display: flex;
@@ -37,7 +443,6 @@
   right: 0;
 
   width: min(300px, calc(100vw - 32px));
-
   padding: 12px;
 
   display: grid;
@@ -56,7 +461,6 @@
 .mobileMenu > a:not(.btn) {
   display: block;
   padding: 13px 14px;
-
   border-radius: 11px;
 
   color: #d6e2e4;
@@ -74,7 +478,24 @@
   margin-top: 6px;
 }
 
+/* =========================
+   TABLET
+========================= */
+
 @media (max-width: 900px) {
+  .container {
+    width: min(94%, 760px);
+  }
+
+  .navin {
+    min-height: 68px;
+    gap: 14px;
+  }
+
+  .navlinks {
+    display: none;
+  }
+
   .desktopPlanButton {
     display: none;
   }
@@ -83,10 +504,179 @@
     display: block;
     margin-left: auto;
   }
+
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .layout2,
+  .footergrid {
+    grid-template-columns: 1fr;
+  }
+
+  .statgrid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .hero {
+    min-height: 570px;
+    padding: 70px 0 55px;
+    background-position: 60% center;
+  }
+
+  .hero h1 {
+    letter-spacing: -0.055em;
+  }
+
+  .map {
+    height: 380px;
+  }
 }
+
+/* =========================
+   DESKTOP
+========================= */
 
 @media (min-width: 901px) {
   .mobileNav {
     display: none;
+  }
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 600px) {
+  .container {
+    width: 92%;
+  }
+
+  .navin {
+    min-height: 64px;
+    gap: 10px;
+  }
+
+  .brand {
+    font-size: 18px;
+  }
+
+  .hero {
+    min-height: 520px;
+    padding: 58px 0 48px;
+
+    background:
+      linear-gradient(
+        90deg,
+        rgba(2, 18, 25, 0.94) 0%,
+        rgba(2, 18, 25, 0.82) 55%,
+        rgba(2, 18, 25, 0.46) 100%
+      ),
+      url("/ChatGPT Image Sep 7, 2026, 12_42_57 AM.png");
+
+    background-size: cover;
+    background-position: 62% center;
+    background-repeat: no-repeat;
+  }
+
+  .hero h1 {
+    font-size: clamp(42px, 13vw, 58px);
+    line-height: 0.98;
+    letter-spacing: -0.055em;
+  }
+
+  .hero p {
+    font-size: 16px;
+    line-height: 1.65;
+  }
+
+  .section {
+    padding: 44px 0;
+  }
+
+  .section h2 {
+    font-size: 32px;
+    line-height: 1.08;
+  }
+
+  .pagehero {
+    padding: 48px 0 28px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .statgrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .card {
+    border-radius: 18px;
+    padding: 18px;
+  }
+
+  .card h3 {
+    font-size: 21px;
+  }
+
+  .actions {
+    gap: 10px;
+    margin-top: 22px;
+  }
+
+  .actions .btn {
+    flex: 1 1 160px;
+  }
+
+  .map {
+    height: 330px;
+    border-radius: 16px;
+  }
+
+  .footer {
+    padding: 38px 0;
+  }
+
+  .footergrid {
+    gap: 26px;
+  }
+
+  .chat {
+    min-height: 180px;
+    padding: 15px;
+  }
+}
+
+/* =========================
+   SMALL PHONES
+========================= */
+
+@media (max-width: 400px) {
+  .brand {
+    font-size: 16px;
+  }
+
+  .mobileMenuButton {
+    width: 40px;
+    height: 40px;
+  }
+
+  .hero h1 {
+    font-size: 40px;
+  }
+
+  .statgrid {
+    grid-template-columns: 1fr;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .actions .btn {
+    width: 100%;
+    flex: none;
   }
 }
