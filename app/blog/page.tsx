@@ -30,7 +30,7 @@ const journalPosts = [
     title: "A first Himalayan journey: where should you begin?",
     excerpt:
       "A simple way to think about Nepal, Bhutan, Tibet and Ladakh based on time, altitude and travel style.",
-    href: "/explore-himalaya",
+    href: "/explore",
   },
   {
     category: "WEATHER",
@@ -85,9 +85,7 @@ export default function JournalPage() {
           marginBottom: 38,
         }}
       >
-        <span className="pill">
-          HIMALAYAN JOURNAL
-        </span>
+        <span className="pill">HIMALAYAN JOURNAL</span>
 
         <h1
           style={{
@@ -111,35 +109,28 @@ export default function JournalPage() {
             lineHeight: 1.75,
           }}
         >
-          Explore practical Himalayan travel ideas,
-          destination inspiration, trekking guidance
-          and planning notes for your next journey.
+          Explore practical Himalayan travel ideas, destination inspiration,
+          trekking guidance and planning notes for your next journey.
         </p>
 
         <div
           className="actions"
-          style={{ marginTop: 28 }}
+          style={{
+            marginTop: 28,
+          }}
         >
-          <Link
-            className="btn"
-            href="/ai-trip-planner"
-          >
+          <Link className="btn" href="/ai-trip-planner">
             Plan with AI
           </Link>
 
-          <Link
-            className="btn alt"
-            href="/tours"
-          >
+          <Link className="btn alt" href="/tours">
             Explore journeys
           </Link>
         </div>
       </section>
 
       <section>
-        <span className="pill">
-          FEATURED
-        </span>
+        <span className="pill">FEATURED</span>
 
         <h2
           style={{
@@ -158,16 +149,14 @@ export default function JournalPage() {
             lineHeight: 1.7,
           }}
         >
-          Useful planning reads for travelers who are
-          starting to compare destinations and prepare
-          for high-altitude travel.
+          Useful planning reads for travelers who are starting to compare
+          destinations and prepare for high-altitude travel.
         </p>
 
         <div
           style={{
             display: "grid",
-            gridTemplateColumns:
-              "repeat(auto-fit, minmax(280px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
             gap: 18,
             marginTop: 24,
           }}
@@ -233,9 +222,7 @@ export default function JournalPage() {
           marginTop: 42,
         }}
       >
-        <span className="pill">
-          JOURNAL NOTES
-        </span>
+        <span className="pill">JOURNAL NOTES</span>
 
         <h2
           style={{
@@ -250,8 +237,7 @@ export default function JournalPage() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns:
-              "repeat(auto-fit, minmax(280px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
             gap: 18,
             marginTop: 24,
           }}
@@ -264,9 +250,7 @@ export default function JournalPage() {
                 padding: 24,
               }}
             >
-              <span className="pill">
-                {post.category}
-              </span>
+              <span className="pill">{post.category}</span>
 
               <h3
                 style={{
@@ -309,9 +293,7 @@ export default function JournalPage() {
           padding: "clamp(26px, 4vw, 40px)",
         }}
       >
-        <span className="pill">
-          LIVE PLANNING
-        </span>
+        <span className="pill">LIVE PLANNING</span>
 
         <h2
           style={{
@@ -329,9 +311,8 @@ export default function JournalPage() {
             lineHeight: 1.7,
           }}
         >
-          Once you have an idea of where you want to
-          go, compare trips, check current conditions
-          or build a custom journey around your own
+          Once you have an idea of where you want to go, compare trips, check
+          current conditions or build a custom journey around your own
           priorities.
         </p>
 
@@ -341,24 +322,15 @@ export default function JournalPage() {
             marginTop: 24,
           }}
         >
-          <Link
-            className="btn"
-            href="/compare-trips"
-          >
+          <Link className="btn" href="/compare-trips">
             Compare trips
           </Link>
 
-          <Link
-            className="btn alt"
-            href="/weather-conditions"
-          >
+          <Link className="btn alt" href="/weather-conditions">
             Check conditions
           </Link>
 
-          <Link
-            className="btn alt"
-            href="/custom-journey"
-          >
+          <Link className="btn alt" href="/custom-journey">
             Build custom journey
           </Link>
         </div>
@@ -372,9 +344,7 @@ export default function JournalPage() {
           textAlign: "center",
         }}
       >
-        <span className="pill">
-          YOUR JOURNEY
-        </span>
+        <span className="pill">YOUR JOURNEY</span>
 
         <h2
           style={{
@@ -394,9 +364,8 @@ export default function JournalPage() {
             lineHeight: 1.7,
           }}
         >
-          Use the AI planner for ideas or send us your
-          dates and priorities to start building a
-          Himalayan journey.
+          Use the AI planner for ideas or send us your dates and priorities to
+          start building a Himalayan journey.
         </p>
 
         <div
@@ -406,17 +375,11 @@ export default function JournalPage() {
             marginTop: 26,
           }}
         >
-          <Link
-            className="btn"
-            href="/ai-trip-planner"
-          >
+          <Link className="btn" href="/ai-trip-planner">
             Ask the AI planner
           </Link>
 
-          <Link
-            className="btn alt"
-            href="/contact-book"
-          >
+          <Link className="btn alt" href="/contact-book">
             Request a trip
           </Link>
         </div>
