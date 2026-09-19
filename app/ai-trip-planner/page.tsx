@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, ReactNode, useState } from "react";
+import { FormEvent, ReactNode, useEffect, useState } from "react";
 
 type ResearchSource = {
   title: string;
@@ -87,7 +87,10 @@ function renderAnswer(text: string) {
     if (isTableLine(line)) {
       const tableLines: string[] = [];
 
-      while (index < lines.length && isTableLine(lines[index])) {
+      while (
+        index < lines.length &&
+        isTableLine(lines[index])
+      ) {
         tableLines.push(lines[index]);
         index += 1;
       }
@@ -312,28 +315,28 @@ function renderAnswer(text: string) {
 
 const examplePrompts = [
   {
-    label: "NEPAL",
-    title: "First Himalayan trek",
+    label: "CLASSIC TIBET",
+    title: "Lhasa & Central Tibet",
     prompt:
-      "Plan a 12-day Nepal trip for two people in October with moderate trekking, local culture and comfortable accommodation.",
+      "Plan a 7-day Tibet journey for two travelers starting in Lhasa. We want cultural experiences, monasteries, beautiful landscapes, comfortable accommodation and realistic altitude acclimatization.",
   },
   {
-    label: "BHUTAN",
-    title: "Culture + comfort",
+    label: "EVEREST",
+    title: "Lhasa to Everest",
     prompt:
-      "I want a luxury Bhutan journey with culture, monasteries, mountain scenery and comfortable accommodation.",
+      "Plan an 8-day Tibet journey from Lhasa toward Everest for two travelers. Include realistic acclimatization, Gyantse, Shigatse, Himalayan scenery and comfortable pacing.",
   },
   {
-    label: "COMPARE",
-    title: "Everest or Annapurna?",
+    label: "MOUNT KAILASH",
+    title: "Sacred western Tibet",
     prompt:
-      "Compare Everest Base Camp and Annapurna for a first-time trekker. Include difficulty, altitude, scenery, crowds and ideal trip length.",
+      "Help me plan a Mount Kailash journey in Tibet. Explain the suggested trip length, altitude considerations, realistic pacing, cultural experiences and what current travel requirements I should verify.",
   },
   {
-    label: "TIBET",
-    title: "Photography journey",
+    label: "PHOTOGRAPHY",
+    title: "Tibet through the lens",
     prompt:
-      "Plan a photography-focused Tibet journey with comfortable accommodation, cultural experiences and time for landscapes.",
+      "Plan a 10-day photography-focused Tibet journey with Lhasa, cultural experiences, dramatic plateau landscapes, comfortable accommodation and enough time for photography.",
   },
 ];
 
@@ -349,6 +352,15 @@ export default function AiTripPlannerPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const prompt = params.get("prompt");
+
+    if (prompt) {
+      setMessage(prompt);
+    }
+  }, []);
+
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>
   ) {
@@ -358,7 +370,7 @@ export default function AiTripPlannerPage() {
 
     if (!trimmed) {
       setError(
-        "Tell us what kind of Himalayan journey you want."
+        "Tell us what kind of Tibet journey you want."
       );
       return;
     }
@@ -474,7 +486,7 @@ export default function AiTripPlannerPage() {
               letterSpacing: ".2em",
             }}
           >
-            AI-POWERED HIMALAYAN PLANNING
+            AI-POWERED TIBET PLANNING
           </div>
 
           <h1
@@ -488,7 +500,7 @@ export default function AiTripPlannerPage() {
           >
             Your idea.
             <br />
-            A smarter journey.
+            A smarter Tibet journey.
           </h1>
 
           <p
@@ -501,10 +513,10 @@ export default function AiTripPlannerPage() {
               lineHeight: 1.8,
             }}
           >
-            Tell us how you want to experience the Himalaya.
-            Himalayan26 AI can build a personalized journey and,
-            when available, research current travel information
-            to make the plan more useful.
+            Tell us how you want to experience Tibet.
+            Himalayan26 AI can help shape a personalized Tibet
+            journey and, when available, research current travel
+            information to make the plan more useful.
           </p>
 
           <div
@@ -516,7 +528,7 @@ export default function AiTripPlannerPage() {
             }}
           >
             {[
-              "Personalized itinerary",
+              "Personalized Tibet itinerary",
               "Live research",
               "Route comparison",
               "Human follow-up",
@@ -562,7 +574,7 @@ export default function AiTripPlannerPage() {
                   letterSpacing: ".15em",
                 }}
               >
-                START WITH AN IDEA
+                START WITH A TIBET IDEA
               </div>
 
               <h2
@@ -571,7 +583,7 @@ export default function AiTripPlannerPage() {
                   fontSize: "clamp(34px, 5vw, 52px)",
                 }}
               >
-                What kind of journey are you imagining?
+                What kind of Tibet journey are you imagining?
               </h2>
             </div>
 
@@ -583,7 +595,7 @@ export default function AiTripPlannerPage() {
                 lineHeight: 1.7,
               }}
             >
-              Choose an example or describe your own trip in
+              Choose an example or describe your own Tibet trip in
               the planner below.
             </p>
           </div>
@@ -688,7 +700,7 @@ export default function AiTripPlannerPage() {
                   letterSpacing: ".15em",
                 }}
               >
-                BUILD YOUR JOURNEY
+                BUILD YOUR TIBET JOURNEY
               </div>
 
               <h2
@@ -707,16 +719,16 @@ export default function AiTripPlannerPage() {
                   maxWidth: 740,
                 }}
               >
-                Include destination ideas, dates or season,
-                trip length, travelers, trekking difficulty,
-                accommodation style, interests and anything
-                you want the journey to prioritize.
+                Include your dates or season, trip length,
+                travelers, places you want to visit, preferred
+                pace, accommodation style, interests and anything
+                you want the Tibet journey to prioritize.
               </p>
 
               <form onSubmit={handleSubmit}>
                 <div className="field">
                   <label htmlFor="ai-message">
-                    Describe your ideal Himalayan trip
+                    Describe your ideal Tibet trip
                   </label>
 
                   <textarea
@@ -727,7 +739,7 @@ export default function AiTripPlannerPage() {
                     }
                     rows={10}
                     disabled={loading}
-                    placeholder="Example: Plan a 10-day Nepal trip for two travelers in November. We want moderate trekking, local culture, beautiful mountain views and comfortable accommodation."
+                    placeholder="Example: Plan an 8-day Tibet trip for two travelers in October. We want Lhasa, local culture, beautiful plateau landscapes, comfortable accommodation and realistic altitude acclimatization."
                     style={{
                       minHeight: 230,
                     }}
@@ -765,14 +777,12 @@ export default function AiTripPlannerPage() {
                         style={{
                           padding: "4px 8px",
                           borderRadius: 999,
-                          background:
-                            liveResearch
-                              ? "rgba(109,224,194,.12)"
-                              : "rgba(255,255,255,.06)",
-                          color:
-                            liveResearch
-                              ? "#78e5ca"
-                              : "#9db0b5",
+                          background: liveResearch
+                            ? "rgba(109,224,194,.12)"
+                            : "rgba(255,255,255,.06)",
+                          color: liveResearch
+                            ? "#78e5ca"
+                            : "#9db0b5",
                           fontSize: 11,
                           fontWeight: 900,
                         }}
@@ -790,8 +800,8 @@ export default function AiTripPlannerPage() {
                         fontSize: 14,
                       }}
                     >
-                      When available, the planner checks
-                      current web information relevant to your
+                      When available, the planner checks current
+                      web information relevant to your Tibet
                       request. If live research is temporarily
                       unavailable, the planner can still create
                       a trip plan.
@@ -855,11 +865,11 @@ export default function AiTripPlannerPage() {
                 >
                   {loading
                     ? liveResearch
-                      ? "Researching and building your journey..."
-                      : "Building your journey..."
+                      ? "Researching and building your Tibet journey..."
+                      : "Building your Tibet journey..."
                     : liveResearch
-                      ? "Create journey with live research"
-                      : "Create my AI journey"}
+                      ? "Create Tibet journey with live research"
+                      : "Create my Tibet journey"}
                 </button>
               </form>
 
@@ -915,18 +925,18 @@ export default function AiTripPlannerPage() {
                   ["03", "Who", "Solo, couple, family or group"],
                   [
                     "04",
-                    "Travel style",
-                    "Adventure, culture, photography, wellness or comfort",
+                    "Places",
+                    "Lhasa, Everest, Namtso, Kailash or other interests",
                   ],
                   [
                     "05",
-                    "Difficulty",
-                    "Easy, moderate or challenging",
+                    "Travel style",
+                    "Culture, photography, adventure, pilgrimage or comfort",
                   ],
                   [
                     "06",
                     "Priorities",
-                    "What you most want to experience",
+                    "What you most want to experience in Tibet",
                   ],
                 ].map(([number, title, text]) => (
                   <div
@@ -976,7 +986,7 @@ export default function AiTripPlannerPage() {
                   marginTop: 20,
                 }}
               >
-                Not sure? Find my travel style
+                Not sure? Find my Tibet travel style
               </Link>
             </aside>
           </div>
@@ -1010,7 +1020,7 @@ export default function AiTripPlannerPage() {
                     letterSpacing: ".15em",
                   }}
                 >
-                  YOUR HIMALAYAN26 PLAN
+                  YOUR TIBET JOURNEY
                 </div>
 
                 <h2
@@ -1096,7 +1106,7 @@ export default function AiTripPlannerPage() {
                   </div>
 
                   <strong>
-                    Your personalized journey will appear here.
+                    Your personalized Tibet journey will appear here.
                   </strong>
 
                   <p
@@ -1107,8 +1117,8 @@ export default function AiTripPlannerPage() {
                       lineHeight: 1.65,
                     }}
                   >
-                    Describe your trip above or choose one of
-                    the example ideas to begin.
+                    Describe your Tibet trip above or choose one
+                    of the example ideas to begin.
                   </p>
                 </div>
               </div>
@@ -1146,8 +1156,8 @@ export default function AiTripPlannerPage() {
                     }}
                   >
                     {liveResearch
-                      ? "Researching and designing your journey..."
-                      : "Designing your Himalayan journey..."}
+                      ? "Researching and designing your Tibet journey..."
+                      : "Designing your Tibet journey..."}
                   </strong>
 
                   <p
@@ -1174,13 +1184,12 @@ export default function AiTripPlannerPage() {
                 }}
               >
                 <strong>
-                  Live research was not available for this
-                  request.
+                  Live research was not available for this request.
                 </strong>
 
                 <div style={{ marginTop: 6 }}>
                   {researchMessage ||
-                    "This plan was created without live verification. Please confirm current permits, entry rules and travel conditions with official sources before booking."}
+                    "This Tibet plan was created without live verification. Please confirm current travel documentation, permits, route access and local conditions with appropriate official sources before booking."}
                 </div>
               </div>
             )}
@@ -1223,7 +1232,7 @@ export default function AiTripPlannerPage() {
                     fontSize: 25,
                   }}
                 >
-                  Information checked for this plan
+                  Information checked for this Tibet plan
                 </h3>
 
                 <p
@@ -1305,18 +1314,18 @@ export default function AiTripPlannerPage() {
                 }}
               >
                 <Link href="/tours" className="btn alt">
-                  Explore matching tours
+                  Explore Tibet tours
                 </Link>
 
                 <Link
                   href="/compare-trips"
                   className="btn alt"
                 >
-                  Compare journeys
+                  Compare Tibet journeys
                 </Link>
 
                 <Link
-                  href="/custom-journey"
+                  href="/custom-journey?destination=Tibet"
                   className="btn alt"
                 >
                   Customize this idea
@@ -1326,7 +1335,7 @@ export default function AiTripPlannerPage() {
                   href="/contact-book"
                   className="btn"
                 >
-                  Request this journey
+                  Request this Tibet journey
                 </Link>
               </div>
             )}
@@ -1344,7 +1353,7 @@ export default function AiTripPlannerPage() {
               letterSpacing: ".15em",
             }}
           >
-            AI + HUMAN TRAVEL PLANNING
+            AI + HUMAN TIBET PLANNING
           </div>
 
           <h2
@@ -1371,23 +1380,23 @@ export default function AiTripPlannerPage() {
             {[
               {
                 number: "01",
-                title: "Describe the journey",
-                text: "Tell the planner where, when and how you want to travel.",
+                title: "Describe your Tibet journey",
+                text: "Tell the planner when you want to travel, how long you have and what you want to experience in Tibet.",
               },
               {
                 number: "02",
                 title: "Research when available",
-                text: "Live research can add current information relevant to your request.",
+                text: "Live research can add current information relevant to your Tibet travel request.",
               },
               {
                 number: "03",
                 title: "Shape the itinerary",
-                text: "Use the recommendation to compare routes and refine your priorities.",
+                text: "Use the recommendation to compare Tibet routes and refine your priorities, pace and interests.",
               },
               {
                 number: "04",
-                title: "Confirm with people",
-                text: "Final logistics, permits, conditions, availability and pricing are confirmed before travel.",
+                title: "Confirm the journey",
+                text: "Final logistics, travel documentation, permits, route access, availability and pricing are confirmed before travel.",
               },
             ].map((item) => (
               <div
@@ -1460,7 +1469,7 @@ export default function AiTripPlannerPage() {
                 fontSize: "clamp(32px, 5vw, 48px)",
               }}
             >
-              Mountain travel still requires current verification.
+              Tibet travel requires current verification.
             </h2>
 
             <p
@@ -1471,13 +1480,12 @@ export default function AiTripPlannerPage() {
                 lineHeight: 1.8,
               }}
             >
-              Himalayan26 AI can help research and organize
-              travel information, but final permit
-              requirements, border rules, weather, trail
-              conditions, transportation, availability and
-              pricing must still be verified with appropriate
-              official sources and local professionals before
-              a booking is confirmed.
+              Himalayan26 AI can help research and organize Tibet
+              travel information, but final travel documentation,
+              permits, route access, local regulations, weather,
+              transportation, availability and pricing must still
+              be verified with appropriate official sources and
+              local professionals before a booking is confirmed.
             </p>
           </div>
         </div>
