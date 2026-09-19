@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -31,12 +30,12 @@ export default function MobileNav() {
           id="mobile-navigation"
           className="mobileMenu"
         >
-          <Link href="/explore" onClick={closeMenu}>
-            Explore
+          <Link href="/tibet" onClick={closeMenu}>
+            Explore Tibet
           </Link>
 
           <Link href="/tours" onClick={closeMenu}>
-            Tours
+            Tibet Tours
           </Link>
 
           <Link href="/ai-trip-planner" onClick={closeMenu}>
@@ -56,7 +55,7 @@ export default function MobileNav() {
             className="btn mobilePlanButton"
             onClick={closeMenu}
           >
-            Plan my trip
+            Plan my Tibet trip
           </Link>
         </div>
       )}
