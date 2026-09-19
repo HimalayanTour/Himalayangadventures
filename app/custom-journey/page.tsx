@@ -14,6 +14,7 @@ type TripStyle =
 
 const regions = [
   "Lhasa & Central Tibet",
+  "Lhoka (Southern Tibet)",
   "Lhasa to Everest",
   "Namtso & High Plateau",
   "Mount Kailash & Western Tibet",
