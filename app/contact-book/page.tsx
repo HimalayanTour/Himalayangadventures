@@ -4,18 +4,21 @@ import BookingForm from "@/components/BookingForm";
 const steps = [
   {
     number: "01",
-    title: "Tell us about your journey",
-    text: "Share your destination, dates, group size, preferred travel style and anything important to you.",
+    title: "Tell us about your Tibet journey",
+    text:
+      "Share your approximate dates, group size, travel style and the places or experiences in Tibet that interest you.",
   },
   {
     number: "02",
     title: "We review your request",
-    text: "Your information gives us a clearer starting point for understanding the journey you want to build.",
+    text:
+      "Your details give us a starting point for understanding your preferred pace, interests and journey priorities.",
   },
   {
     number: "03",
     title: "Shape the itinerary",
-    text: "Your request can be developed around pace, accommodation, interests and the practical requirements of the destination.",
+    text:
+      "The journey can then be developed around route, pacing, altitude, accommodation and the practical requirements for your travel dates.",
   },
 ];
 
@@ -30,7 +33,7 @@ export default function Page() {
             style={{
               padding: "clamp(34px, 5vw, 64px)",
               background:
-                "linear-gradient(135deg, rgba(22,42,49,.96), rgba(13,73,75,.72))",
+                "radial-gradient(circle at 85% 15%, rgba(93,229,201,.12), transparent 28%), linear-gradient(135deg, rgba(22,42,49,.96), rgba(13,73,75,.72))",
             }}
           >
             <div
@@ -40,18 +43,19 @@ export default function Page() {
                 letterSpacing: ".18em",
               }}
             >
-              CONTACT &amp; BOOK
+              PLAN YOUR TIBET JOURNEY
             </div>
 
             <h1
               style={{
                 maxWidth: 900,
-                fontSize: "clamp(46px, 7vw, 76px)",
+                fontSize:
+                  "clamp(46px, 7vw, 76px)",
                 lineHeight: 0.98,
                 marginBottom: 24,
               }}
             >
-              Your Himalayan journey
+              Your Tibet journey
               <br />
               starts here.
             </h1>
@@ -59,14 +63,16 @@ export default function Page() {
             <p
               className="muted"
               style={{
-                maxWidth: 820,
+                maxWidth: 830,
                 fontSize: 18,
                 lineHeight: 1.8,
               }}
             >
-              Tell us where you want to go, when you want to travel and what
-              matters most to you. Your request becomes the starting point for
-              planning a Himalayan journey around your priorities.
+              Tell us when you hope to travel, how many
+              people are traveling and what you want to
+              experience in Tibet. Your request becomes
+              the starting point for shaping a private
+              journey around your priorities.
             </p>
 
             <div
@@ -78,12 +84,18 @@ export default function Page() {
                 flexWrap: "wrap",
               }}
             >
-              <a className="btn" href="#booking-request">
-                Start my request
+              <a
+                className="btn"
+                href="#booking-request"
+              >
+                Start my Tibet request
               </a>
 
-              <Link className="btn alt" href="/tours">
-                Explore tours first
+              <Link
+                className="btn alt"
+                href="/tours"
+              >
+                Explore Tibet tours first
               </Link>
             </div>
           </div>
@@ -102,7 +114,8 @@ export default function Page() {
 
             <h2
               style={{
-                fontSize: "clamp(32px, 4vw, 46px)",
+                fontSize:
+                  "clamp(32px, 4vw, 46px)",
                 marginBottom: 14,
               }}
             >
@@ -117,9 +130,11 @@ export default function Page() {
                 marginBottom: 28,
               }}
             >
-              You do not need to have every part of your trip decided. Give us
-              what you know now and use the request form to explain the kind of
-              experience you are looking for.
+              You do not need to have your complete Tibet
+              itinerary decided. Give us what you know now
+              and tell us what kind of experience you want.
+              The details can be refined as the journey
+              develops.
             </p>
 
             <div
@@ -146,7 +161,13 @@ export default function Page() {
                     STEP {step.number}
                   </div>
 
-                  <h3 style={{ marginBottom: 12 }}>{step.title}</h3>
+                  <h3
+                    style={{
+                      marginBottom: 12,
+                    }}
+                  >
+                    {step.title}
+                  </h3>
 
                   <p
                     className="muted"
@@ -174,7 +195,7 @@ export default function Page() {
               style={{
                 display: "grid",
                 gridTemplateColumns:
-                  "minmax(260px, .75fr) minmax(0, 1.25fr)",
+                  "repeat(auto-fit, minmax(320px, 1fr))",
                 gap: 28,
                 alignItems: "start",
               }}
@@ -187,17 +208,18 @@ export default function Page() {
                     letterSpacing: ".16em",
                   }}
                 >
-                  TRIP REQUEST
+                  TIBET TRIP REQUEST
                 </div>
 
                 <h2
                   style={{
-                    fontSize: "clamp(32px, 4vw, 46px)",
+                    fontSize:
+                      "clamp(32px, 4vw, 46px)",
                     lineHeight: 1.08,
                     marginBottom: 18,
                   }}
                 >
-                  Tell us about your Himalaya.
+                  Tell us how you want to experience Tibet.
                 </h2>
 
                 <p
@@ -207,9 +229,11 @@ export default function Page() {
                     marginBottom: 26,
                   }}
                 >
-                  Complete the form with as much information as you currently
-                  have. Your dates can be approximate and your itinerary does
-                  not need to be finalized.
+                  Complete the form with as much
+                  information as you currently have. Your
+                  dates can be approximate and your final
+                  Tibet itinerary does not need to be
+                  decided yet.
                 </p>
 
                 <div
@@ -219,7 +243,12 @@ export default function Page() {
                     marginBottom: 14,
                   }}
                 >
-                  <div className="eyebrow" style={{ marginBottom: 9 }}>
+                  <div
+                    className="eyebrow"
+                    style={{
+                      marginBottom: 9,
+                    }}
+                  >
                     GOOD TO INCLUDE
                   </div>
 
@@ -230,15 +259,26 @@ export default function Page() {
                       margin: 0,
                     }}
                   >
-                    Your preferred destination, approximate dates, number of
-                    travelers, accommodation preference and the type of
-                    experience you want.
+                    Your approximate dates, number of
+                    travelers, preferred accommodation,
+                    travel style and the Tibet experiences
+                    that matter most to you—such as Lhasa,
+                    Everest, Namtso, Mount Kailash,
+                    monasteries, culture or photography.
                   </p>
                 </div>
 
-                <div className="card" style={{ padding: 22 }}>
-                  <div className="eyebrow" style={{ marginBottom: 9 }}>
-                    NOT SURE YET?
+                <div
+                  className="card"
+                  style={{ padding: 22 }}
+                >
+                  <div
+                    className="eyebrow"
+                    style={{
+                      marginBottom: 9,
+                    }}
+                  >
+                    NOT SURE WHICH ROUTE?
                   </div>
 
                   <p
@@ -248,17 +288,27 @@ export default function Page() {
                       marginBottom: 16,
                     }}
                   >
-                    Use the AI Trip Planner first if you want help comparing
-                    destinations or turning a general idea into a clearer plan.
+                    Use the Tibet AI Trip Planner first if
+                    you want help turning a general idea
+                    into a clearer journey concept.
                   </p>
 
-                  <Link className="btn alt" href="/ai-trip-planner">
-                    Ask the AI planner
+                  <Link
+                    className="btn alt"
+                    href="/ai-trip-planner"
+                  >
+                    Plan Tibet with AI
                   </Link>
                 </div>
               </div>
 
-              <div className="card" style={{ padding: "clamp(20px, 3vw, 30px)" }}>
+              <div
+                className="card"
+                style={{
+                  padding:
+                    "clamp(20px, 3vw, 30px)",
+                }}
+              >
                 <BookingForm />
               </div>
             </div>
@@ -269,29 +319,41 @@ export default function Page() {
             className="card"
             style={{
               marginTop: 54,
-              padding: "clamp(26px, 4vw, 38px)",
+              padding:
+                "clamp(26px, 4vw, 38px)",
             }}
           >
-            <div className="eyebrow" style={{ marginBottom: 12 }}>
+            <div
+              className="eyebrow"
+              style={{
+                marginBottom: 12,
+              }}
+            >
               BEFORE BOOKING
             </div>
 
-            <h2 style={{ marginBottom: 14 }}>
-              Mountain travel requires current information.
+            <h2
+              style={{
+                marginBottom: 14,
+              }}
+            >
+              Tibet travel requires current information.
             </h2>
 
             <p
               className="muted"
               style={{
-                maxWidth: 850,
+                maxWidth: 860,
                 lineHeight: 1.8,
                 marginBottom: 22,
               }}
             >
-              Routes, permits, entry requirements, weather and local conditions
-              can change. Important details should be confirmed using current
-              official information and appropriate local guidance before final
-              travel arrangements are made.
+              Travel documentation, permits, route access,
+              transportation arrangements, weather and
+              local conditions can change. Important
+              requirements should be confirmed for your
+              nationality, travel dates and intended route
+              before final arrangements are made.
             </p>
 
             <div
@@ -302,12 +364,25 @@ export default function Page() {
                 flexWrap: "wrap",
               }}
             >
-              <Link className="btn alt" href="/safety-conditions">
-                Safety &amp; conditions
+              <Link
+                className="btn alt"
+                href="/weather-conditions"
+              >
+                Tibet conditions
               </Link>
 
-              <Link className="btn alt" href="/himalayan-guide">
-                Himalayan guide
+              <Link
+                className="btn alt"
+                href="/tibet"
+              >
+                Explore Tibet
+              </Link>
+
+              <Link
+                className="btn alt"
+                href="/ai-research"
+              >
+                AI research
               </Link>
             </div>
           </div>
@@ -317,33 +392,41 @@ export default function Page() {
             className="card"
             style={{
               marginTop: 54,
-              padding: "clamp(30px, 5vw, 50px)",
+              padding:
+                "clamp(30px, 5vw, 50px)",
               background:
                 "linear-gradient(135deg, rgba(19,58,61,.9), rgba(16,35,42,.96))",
             }}
           >
-            <div className="eyebrow" style={{ marginBottom: 14 }}>
+            <div
+              className="eyebrow"
+              style={{
+                marginBottom: 14,
+              }}
+            >
               STILL EXPLORING?
             </div>
 
             <h2
               style={{
-                fontSize: "clamp(32px, 4vw, 46px)",
+                fontSize:
+                  "clamp(32px, 4vw, 46px)",
                 marginBottom: 14,
               }}
             >
-              Find the journey that fits you.
+              Find your way across Tibet.
             </h2>
 
             <p
               className="muted"
               style={{
-                maxWidth: 760,
+                maxWidth: 780,
                 lineHeight: 1.8,
               }}
             >
-              Explore the tour collection, compare journeys side by side or
-              build a private itinerary before sending your request.
+              Explore the Tibet journey collection,
+              compare two routes side by side or build a
+              private journey before sending your request.
             </p>
 
             <div
@@ -355,16 +438,25 @@ export default function Page() {
                 flexWrap: "wrap",
               }}
             >
-              <Link className="btn" href="/tours">
-                Explore tours
+              <Link
+                className="btn"
+                href="/tours"
+              >
+                Explore Tibet tours
               </Link>
 
-              <Link className="btn alt" href="/compare-trips">
-                Compare trips
+              <Link
+                className="btn alt"
+                href="/compare-trips"
+              >
+                Compare journeys
               </Link>
 
-              <Link className="btn alt" href="/custom-journey">
-                Custom journey
+              <Link
+                className="btn alt"
+                href="/custom-journey"
+              >
+                Build a private journey
               </Link>
             </div>
           </div>
