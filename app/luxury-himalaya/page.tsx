@@ -1,62 +1,99 @@
 import Link from "next/link";
 
-const luxuryPrinciples = [
+const comfortPrinciples = [
   {
     number: "01",
-    title: "Private logistics",
-    text: "Build the journey around your dates and priorities with private transfers, flexible scheduling and carefully coordinated logistics where available.",
+    title: "Private journey design",
+    text:
+      "Shape the Tibet journey around your dates, interests, preferred pace and priorities rather than following a fixed group itinerary.",
   },
   {
     number: "02",
     title: "Better pacing",
-    text: "Luxury in the Himalaya is also about time. Fewer rushed days and sensible pacing create more room to experience each destination properly.",
+    text:
+      "Comfort in Tibet is also about time. Thoughtful pacing can create more room for rest, acclimatization, photography and cultural experiences.",
   },
   {
     number: "03",
-    title: "Comfort where possible",
-    text: "Choose higher-comfort accommodation in cities and established destinations while using the best practical options available in remote mountain areas.",
+    title: "Comfort where available",
+    text:
+      "Choose your preferred accommodation level while recognizing that options can become more limited on remote high-altitude routes.",
   },
   {
     number: "04",
     title: "Personal priorities",
-    text: "Shape the itinerary around culture, photography, landscapes, wellness, trekking or a combination instead of following a fixed group schedule.",
+    text:
+      "Build the journey around culture, landscapes, photography, spirituality, Everest, Namtso, Mount Kailash or a combination of interests.",
   },
 ];
 
 const journeyIdeas = [
   {
-    region: "BHUTAN",
-    title: "Bhutan Mountain & Culture",
-    days: "9 days",
-    price: "From $2,490",
-    text: "A strong starting point for a private journey combining Himalayan landscapes, monasteries and cultural experiences.",
-    href: "/tours/bhutan-mountain-culture",
+    region: "CENTRAL TIBET",
+    title: "Lhasa Classic Journey",
+    days: "5 days",
+    price: "From $1,290",
+    text:
+      "A shorter Tibet journey that can be shaped around cultural interests, thoughtful pacing and more time in Lhasa.",
+    href: "/tours/lhasa-classic",
   },
   {
-    region: "TIBET",
+    region: "CENTRAL TIBET",
+    title: "Lhasa, Gyantse & Shigatse",
+    days: "7 days",
+    price: "From $1,590",
+    text:
+      "Travel through Central Tibet with a balance of cultural places, plateau landscapes and a more measured journey rhythm.",
+    href: "/tours/lhasa-shigatse-gyantse",
+  },
+  {
+    region: "HIGH PLATEAU",
     title: "Tibet High Plateau",
     days: "12 days",
     price: "From $2,190",
-    text: "Explore plateau landscapes and cultural sites with an itinerary that can be adapted around your preferred pace and priorities.",
+    text:
+      "Explore farther across Tibet with a private itinerary shaped around your preferred pace, interests and practical comfort.",
     href: "/tours/tibet-high-plateau",
   },
   {
-    region: "PRIVATE",
-    title: "Bespoke Himalayan Journey",
+    region: "PRIVATE TIBET",
+    title: "Custom Tibet Journey",
     days: "YOUR DATES",
     price: "CUSTOM",
-    text: "Start from your preferred destinations, travel style, accommodation level and available time to create a private itinerary.",
+    text:
+      "Start with your preferred Tibet route, travel style, accommodation preferences and available time to create a private journey brief.",
     href: "/custom-journey",
   },
 ];
 
 const comfortDetails = [
-  "Private itinerary design around your preferred dates.",
-  "Accommodation preferences built into the planning brief.",
-  "More time for rest, photography and cultural experiences.",
-  "Private or personalized logistics where practical.",
-  "Flexible daily pacing instead of a fixed group rhythm.",
-  "Clear expectations for comfort in remote mountain regions.",
+  "Private itinerary planning around your preferred dates.",
+  "Accommodation preferences included in the planning brief.",
+  "More time for rest, acclimatization, photography and cultural experiences.",
+  "Personalized logistics where practical and available.",
+  "A journey pace shaped around your priorities rather than a fixed group rhythm.",
+  "Clear expectations about comfort on remote high-altitude routes.",
+];
+
+const privatePriorities = [
+  {
+    number: "01",
+    title: "Your pace",
+    text:
+      "Tell us whether you prefer slower days, more rest time, longer cultural visits or additional photography time.",
+  },
+  {
+    number: "02",
+    title: "Your interests",
+    text:
+      "Focus the journey on culture, Everest, landscapes, monasteries, photography, Mount Kailash or a combination.",
+  },
+  {
+    number: "03",
+    title: "Your comfort",
+    text:
+      "Tell us the accommodation level you prefer so it can be considered against what is realistically available along the route.",
+  },
 ];
 
 export default function LuxuryHimalayaPage() {
@@ -68,14 +105,20 @@ export default function LuxuryHimalayaPage() {
         paddingBottom: 90,
       }}
     >
+      {/* HERO */}
+
       <section
         className="card"
         style={{
           padding: "clamp(28px, 5vw, 56px)",
           marginBottom: 38,
+          background:
+            "radial-gradient(circle at 85% 15%, rgba(109,224,194,.12), transparent 30%), linear-gradient(145deg, rgba(18,48,55,.96), rgba(8,28,35,.98))",
         }}
       >
-        <span className="pill">LUXURY HIMALAYA</span>
+        <span className="pill">
+          PRIVATE &amp; COMFORTABLE TIBET
+        </span>
 
         <h1
           style={{
@@ -88,36 +131,49 @@ export default function LuxuryHimalayaPage() {
         >
           Travel deeper.
           <br />
-          Stay comfortable.
+          Move at your pace.
         </h1>
 
         <p
           className="muted"
           style={{
-            maxWidth: 840,
+            maxWidth: 850,
             fontSize: 18,
             lineHeight: 1.75,
           }}
         >
-          Private Himalayan journeys designed around
-          better pacing, thoughtful logistics and your
-          preferred level of comfort — without losing
-          the character of the mountains.
+          Create a private Tibet journey around thoughtful
+          pacing, personalized planning and your preferred
+          level of comfort—while keeping expectations
+          realistic for remote high-altitude travel.
         </p>
 
-        <div className="actions" style={{ marginTop: 28 }}>
-          <Link className="btn" href="/custom-journey">
-            Design my private journey
+        <div
+          className="actions"
+          style={{ marginTop: 28 }}
+        >
+          <Link
+            className="btn"
+            href="/custom-journey"
+          >
+            Design my Tibet journey
           </Link>
 
-          <Link className="btn alt" href="/contact-book">
-            Request a trip
+          <Link
+            className="btn alt"
+            href="/contact-book"
+          >
+            Request a Tibet trip
           </Link>
         </div>
       </section>
 
+      {/* COMFORT PRINCIPLES */}
+
       <section>
-        <span className="pill">A DIFFERENT KIND OF LUXURY</span>
+        <span className="pill">
+          A DIFFERENT KIND OF COMFORT
+        </span>
 
         <h2
           style={{
@@ -126,20 +182,20 @@ export default function LuxuryHimalayaPage() {
             fontSize: "clamp(28px, 4vw, 42px)",
           }}
         >
-          In the Himalaya, luxury is more than a hotel
+          In Tibet, comfort is more than a hotel.
         </h2>
 
         <p
           className="muted"
           style={{
-            maxWidth: 820,
+            maxWidth: 830,
             lineHeight: 1.7,
           }}
         >
-          The most valuable upgrades can be privacy,
-          time, flexibility and good planning. Remote
-          regions may have limited infrastructure, so
-          expectations should match the destination.
+          Privacy, time, thoughtful pacing and good
+          planning can matter as much as accommodation.
+          As journeys move into more remote areas,
+          available facilities may become simpler.
         </p>
 
         <div
@@ -151,7 +207,7 @@ export default function LuxuryHimalayaPage() {
             marginTop: 24,
           }}
         >
-          {luxuryPrinciples.map((item) => (
+          {comfortPrinciples.map((item) => (
             <article
               className="card"
               key={item.number}
@@ -192,8 +248,12 @@ export default function LuxuryHimalayaPage() {
         </div>
       </section>
 
+      {/* JOURNEY IDEAS */}
+
       <section style={{ marginTop: 40 }}>
-        <span className="pill">JOURNEY IDEAS</span>
+        <span className="pill">
+          TIBET JOURNEY IDEAS
+        </span>
 
         <h2
           style={{
@@ -202,18 +262,19 @@ export default function LuxuryHimalayaPage() {
             fontSize: "clamp(28px, 4vw, 40px)",
           }}
         >
-          Start with a place, then personalize it
+          Start with a Tibet route, then personalize it.
         </h2>
 
         <p
           className="muted"
           style={{
-            maxWidth: 790,
+            maxWidth: 800,
             lineHeight: 1.7,
           }}
         >
-          Existing journeys can become the foundation
-          for a more private, comfort-focused itinerary.
+          Existing Tibet journeys can provide a starting
+          point for a more private itinerary shaped around
+          your pace, interests and comfort preferences.
         </p>
 
         <div
@@ -291,17 +352,115 @@ export default function LuxuryHimalayaPage() {
         </div>
       </section>
 
+      {/* PERSONALIZATION */}
+
+      <section
+        className="card"
+        style={{
+          marginTop: 38,
+          padding: "clamp(24px, 4vw, 40px)",
+        }}
+      >
+        <span className="pill">
+          PRIVATE TIBET
+        </span>
+
+        <h2
+          style={{
+            marginTop: 14,
+            marginBottom: 8,
+            fontSize: "clamp(28px, 4vw, 40px)",
+          }}
+        >
+          Design the journey around you.
+        </h2>
+
+        <p
+          className="muted"
+          style={{
+            maxWidth: 820,
+            lineHeight: 1.7,
+          }}
+        >
+          A private journey gives you more room to define
+          what matters most before the itinerary is
+          finalized.
+        </p>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(240px, 1fr))",
+            gap: 16,
+            marginTop: 24,
+          }}
+        >
+          {privatePriorities.map((item) => (
+            <div
+              key={item.number}
+              style={{
+                padding: 22,
+                borderRadius: 18,
+                border:
+                  "1px solid rgba(255,255,255,0.10)",
+                background:
+                  "rgba(255,255,255,0.03)",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 13,
+                  fontWeight: 800,
+                  letterSpacing: "0.12em",
+                  opacity: 0.6,
+                }}
+              >
+                CHOICE {item.number}
+              </span>
+
+              <h3
+                style={{
+                  marginTop: 14,
+                  marginBottom: 10,
+                  fontSize: 21,
+                }}
+              >
+                {item.title}
+              </h3>
+
+              <p
+                className="muted"
+                style={{
+                  lineHeight: 1.7,
+                  marginBottom: 0,
+                }}
+              >
+                {item.text}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* COMFORT + REMOTE REALITY */}
+
       <section
         style={{
           display: "grid",
           gridTemplateColumns:
             "repeat(auto-fit, minmax(300px, 1fr))",
           gap: 18,
-          marginTop: 38,
+          marginTop: 24,
         }}
       >
-        <div className="card" style={{ padding: 28 }}>
-          <span className="pill">COMFORT DETAILS</span>
+        <div
+          className="card"
+          style={{ padding: 28 }}
+        >
+          <span className="pill">
+            COMFORT DETAILS
+          </span>
 
           <h2
             style={{
@@ -309,15 +468,16 @@ export default function LuxuryHimalayaPage() {
               fontSize: 28,
             }}
           >
-            Design around how you want to travel
+            Tell us how you want to travel.
           </h2>
 
           <p
             className="muted"
             style={{ lineHeight: 1.7 }}
           >
-            A private journey gives us more room to
-            understand what comfort means to you.
+            Your planning brief can include the details
+            that make a Tibet journey feel more
+            comfortable and personal to you.
           </p>
 
           <div
@@ -336,7 +496,9 @@ export default function LuxuryHimalayaPage() {
                   alignItems: "flex-start",
                 }}
               >
-                <strong aria-hidden="true">✓</strong>
+                <strong aria-hidden="true">
+                  ✓
+                </strong>
 
                 <span
                   className="muted"
@@ -347,10 +509,23 @@ export default function LuxuryHimalayaPage() {
               </div>
             ))}
           </div>
+
+          <Link
+            className="btn"
+            href="/custom-journey"
+            style={{ marginTop: 24 }}
+          >
+            Build private Tibet journey
+          </Link>
         </div>
 
-        <div className="card" style={{ padding: 28 }}>
-          <span className="pill">REMOTE REALITY</span>
+        <div
+          className="card"
+          style={{ padding: 28 }}
+        >
+          <span className="pill">
+            REMOTE REALITY
+          </span>
 
           <h2
             style={{
@@ -358,31 +533,31 @@ export default function LuxuryHimalayaPage() {
               fontSize: 28,
             }}
           >
-            Comfort changes with altitude
+            Comfort changes across Tibet.
           </h2>
 
           <p
             className="muted"
             style={{ lineHeight: 1.75 }}
           >
-            Luxury standards in Kathmandu, Paro or
-            established destinations can be very
-            different from those available on remote
-            trekking routes. In mountain areas, the
-            best experience may mean excellent local
-            hospitality and the best available lodge
-            rather than conventional five-star
-            facilities.
+            Accommodation and service options can differ
+            significantly between established cities and
+            remote high-altitude routes. In more remote
+            areas, a comfortable journey may mean using
+            the best practical option available rather
+            than expecting the same standard everywhere.
           </p>
 
           <Link
             className="btn alt"
             href="/himalayan-guide"
           >
-            Read Himalayan Guide
+            Read Tibet Travel Guide
           </Link>
         </div>
       </section>
+
+      {/* ALTITUDE */}
 
       <section
         className="card"
@@ -391,7 +566,9 @@ export default function LuxuryHimalayaPage() {
           padding: "clamp(24px, 4vw, 40px)",
         }}
       >
-        <span className="pill">CONDITIONS MATTER</span>
+        <span className="pill">
+          COMFORT &amp; ALTITUDE
+        </span>
 
         <h2
           style={{
@@ -399,7 +576,7 @@ export default function LuxuryHimalayaPage() {
             fontSize: "clamp(28px, 4vw, 40px)",
           }}
         >
-          Private travel still follows the mountains
+          Better pacing matters on the plateau.
         </h2>
 
         <p
@@ -409,23 +586,141 @@ export default function LuxuryHimalayaPage() {
             lineHeight: 1.75,
           }}
         >
-          Weather, altitude, road conditions and local
-          operations can affect even carefully planned
-          private journeys. Good luxury travel in the
-          Himalaya includes flexibility when the
-          environment requires a change of plan.
+          A private itinerary can create more room for
+          thoughtful pacing, but altitude still needs to
+          be taken seriously. Individual responses vary,
+          and itinerary flexibility remains important
+          even on a comfort-focused journey.
         </p>
 
-        <div className="actions" style={{ marginTop: 20 }}>
-          <Link className="btn" href="/weather-conditions">
-            Check live conditions
+        <div
+          className="actions"
+          style={{ marginTop: 20 }}
+        >
+          <Link
+            className="btn alt"
+            href="/himalayan-guide"
+          >
+            Tibet planning guide
           </Link>
 
-          <Link className="btn alt" href="/responsible-travel">
-            Responsible Travel
+          <Link
+            className="btn alt"
+            href="/weather-conditions"
+          >
+            Tibet conditions
           </Link>
         </div>
       </section>
+
+      {/* CONDITIONS */}
+
+      <section
+        className="card"
+        style={{
+          marginTop: 24,
+          padding: "clamp(24px, 4vw, 40px)",
+        }}
+      >
+        <span className="pill">
+          CONDITIONS MATTER
+        </span>
+
+        <h2
+          style={{
+            marginTop: 14,
+            fontSize: "clamp(28px, 4vw, 40px)",
+          }}
+        >
+          Private travel still follows the plateau.
+        </h2>
+
+        <p
+          className="muted"
+          style={{
+            maxWidth: 900,
+            lineHeight: 1.75,
+          }}
+        >
+          Weather, altitude, road conditions,
+          transportation and local operating conditions
+          can affect even carefully planned private Tibet
+          journeys. Good planning includes flexibility
+          when conditions require the itinerary to
+          change.
+        </p>
+
+        <div
+          className="actions"
+          style={{ marginTop: 20 }}
+        >
+          <Link
+            className="btn"
+            href="/weather-conditions"
+          >
+            Check Tibet conditions
+          </Link>
+
+          <Link
+            className="btn alt"
+            href="/responsible-travel"
+          >
+            Responsible Tibet travel
+          </Link>
+        </div>
+      </section>
+
+      {/* CURRENT INFORMATION */}
+
+      <section
+        className="card"
+        style={{
+          marginTop: 24,
+          padding: "clamp(24px, 4vw, 40px)",
+        }}
+      >
+        <span className="pill">
+          BEFORE YOU GO
+        </span>
+
+        <h2
+          style={{
+            marginTop: 14,
+            fontSize: "clamp(28px, 4vw, 40px)",
+          }}
+        >
+          Confirm the final arrangements.
+        </h2>
+
+        <p
+          className="muted"
+          style={{
+            maxWidth: 900,
+            lineHeight: 1.75,
+          }}
+        >
+          Accommodation, transportation, travel
+          documentation, permits, route access and local
+          requirements can change. Final services,
+          availability, itinerary and pricing should be
+          confirmed for your specific travel dates before
+          booking.
+        </p>
+
+        <div
+          className="actions"
+          style={{ marginTop: 20 }}
+        >
+          <Link
+            className="btn alt"
+            href="/ai-research"
+          >
+            Research current information
+          </Link>
+        </div>
+      </section>
+
+      {/* FINAL CTA */}
 
       <section
         className="card"
@@ -433,9 +728,13 @@ export default function LuxuryHimalayaPage() {
           marginTop: 24,
           padding: "clamp(28px, 5vw, 46px)",
           textAlign: "center",
+          background:
+            "linear-gradient(135deg, rgba(19,58,61,.9), rgba(16,35,42,.96))",
         }}
       >
-        <span className="pill">PRIVATE HIMALAYA</span>
+        <span className="pill">
+          PRIVATE TIBET
+        </span>
 
         <h2
           style={{
@@ -444,21 +743,20 @@ export default function LuxuryHimalayaPage() {
             fontSize: "clamp(30px, 5vw, 46px)",
           }}
         >
-          Build the journey around you.
+          Build the Tibet journey around you.
         </h2>
 
         <p
           className="muted"
           style={{
-            maxWidth: 750,
+            maxWidth: 760,
             margin: "0 auto",
             lineHeight: 1.7,
           }}
         >
-          Choose your destination, dates, travel style
-          and accommodation preference, then turn those
-          priorities into a private Himalayan journey
-          brief.
+          Choose your dates, Tibet route, travel style,
+          pace and accommodation preferences, then turn
+          those priorities into a private journey brief.
         </p>
 
         <div
@@ -468,12 +766,18 @@ export default function LuxuryHimalayaPage() {
             marginTop: 26,
           }}
         >
-          <Link className="btn" href="/custom-journey">
-            Design my journey
+          <Link
+            className="btn"
+            href="/custom-journey"
+          >
+            Design my Tibet journey
           </Link>
 
-          <Link className="btn alt" href="/ai-trip-planner">
-            Explore with AI
+          <Link
+            className="btn alt"
+            href="/ai-trip-planner"
+          >
+            Plan Tibet with AI
           </Link>
         </div>
       </section>
@@ -481,14 +785,20 @@ export default function LuxuryHimalayaPage() {
   );
 }
 
-function SmallTag({ text }: { text: string }) {
+function SmallTag({
+  text,
+}: {
+  text: string;
+}) {
   return (
     <span
       style={{
         padding: "7px 10px",
         borderRadius: 999,
-        border: "1px solid rgba(255,255,255,0.10)",
-        background: "rgba(255,255,255,0.04)",
+        border:
+          "1px solid rgba(255,255,255,0.10)",
+        background:
+          "rgba(255,255,255,0.04)",
         fontSize: 13,
       }}
     >
