@@ -37,180 +37,317 @@ const destinations = [
   },
 ];
 
+const travelStyles = [
+  {
+    label: "ADVENTURE",
+    title: "Go further",
+    text: "Trekking routes, remote landscapes and challenging journeys.",
+    href: "/adventure",
+  },
+  {
+    label: "CULTURE",
+    title: "Travel deeper",
+    text: "Build cultural understanding into the journey.",
+    href: "/culture-heritage",
+  },
+  {
+    label: "PHOTOGRAPHY",
+    title: "Follow the light",
+    text: "Travel with more time for landscapes, atmosphere and place.",
+    href: "/photography-tours",
+  },
+  {
+    label: "COMFORT",
+    title: "Travel at your pace",
+    text: "Private planning, better pacing and greater comfort.",
+    href: "/luxury-himalaya",
+  },
+];
+
 export default function Home() {
   return (
     <main>
-      {/* HERO */}
-      <section className="section">
-        <div className="container">
-          <div
-            className="card"
-            style={{
-              padding: "clamp(38px, 6vw, 76px)",
-              background:
-                "linear-gradient(135deg, rgba(22,42,49,.98), rgba(13,73,75,.76))",
-            }}
-          >
+      {/* CINEMATIC HERO */}
+      <section
+        style={{
+          minHeight: "calc(100vh - 74px)",
+          position: "relative",
+          display: "flex",
+          alignItems: "center",
+          overflow: "hidden",
+          backgroundImage: `
+            linear-gradient(
+              90deg,
+              rgba(3, 14, 20, 0.92) 0%,
+              rgba(3, 14, 20, 0.72) 42%,
+              rgba(3, 14, 20, 0.28) 72%,
+              rgba(3, 14, 20, 0.18) 100%
+            ),
+            linear-gradient(
+              0deg,
+              rgba(3, 14, 20, 0.75) 0%,
+              transparent 42%
+            ),
+            url("/home-hero.jpg")
+          `,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "radial-gradient(circle at 72% 35%, rgba(109,224,194,.08), transparent 30%)",
+            pointerEvents: "none",
+          }}
+        />
+
+        <div
+          className="container"
+          style={{
+            position: "relative",
+            zIndex: 2,
+            paddingTop: "70px",
+            paddingBottom: "70px",
+          }}
+        >
+          <div style={{ maxWidth: "900px" }}>
             <div
               className="eyebrow"
               style={{
-                marginBottom: 22,
-                letterSpacing: ".18em",
+                marginBottom: "22px",
+                letterSpacing: ".2em",
               }}
             >
-              HIMALAYA · 2026
+              HIMALAYAN JOURNEYS · 2026
             </div>
 
             <h1
               style={{
-                maxWidth: 980,
-                fontSize: "clamp(52px, 8vw, 88px)",
-                lineHeight: 0.95,
-                marginBottom: 26,
+                fontSize: "clamp(56px, 8.5vw, 112px)",
+                lineHeight: 0.88,
+                letterSpacing: "-0.065em",
+                margin: 0,
+                maxWidth: "900px",
+                textShadow: "0 8px 40px rgba(0,0,0,.35)",
               }}
             >
-              Go higher.
+              Go beyond
               <br />
-              Travel smarter.
+              the ordinary.
             </h1>
 
             <p
-              className="muted"
               style={{
-                maxWidth: 850,
-                fontSize: 19,
-                lineHeight: 1.8,
+                maxWidth: "720px",
+                marginTop: "30px",
+                marginBottom: 0,
+                fontSize: "clamp(17px, 2vw, 21px)",
+                lineHeight: 1.7,
+                color: "rgba(238,246,247,.82)",
+                textShadow: "0 3px 20px rgba(0,0,0,.4)",
               }}
             >
-              Explore Himalayan journeys across Nepal, Bhutan, Tibet and the
-              Indian Himalaya with curated tour information, AI-assisted
-              planning, travel research, conditions and interactive maps.
+              Thoughtfully designed Himalayan journeys across Nepal, Bhutan,
+              Tibet and the Indian Himalaya — combining mountain experience,
+              cultural understanding and smarter trip planning.
             </p>
 
             <div
               className="actions"
               style={{
-                marginTop: 30,
+                marginTop: "34px",
                 display: "flex",
-                gap: 12,
+                gap: "12px",
                 flexWrap: "wrap",
               }}
             >
               <Link className="btn" href="/ai-trip-planner">
-                Build my trip
+                Build my journey
               </Link>
 
               <Link className="btn alt" href="/tours">
-                Explore journeys
+                Explore the Himalaya
               </Link>
             </div>
           </div>
+
+          <div
+            style={{
+              marginTop: "70px",
+              display: "grid",
+              gridTemplateColumns:
+                "repeat(auto-fit, minmax(150px, 1fr))",
+              maxWidth: "760px",
+              borderTop: "1px solid rgba(255,255,255,.18)",
+              paddingTop: "24px",
+              gap: "20px",
+            }}
+          >
+            <div>
+              <strong
+                style={{
+                  display: "block",
+                  fontSize: "30px",
+                  marginBottom: "4px",
+                }}
+              >
+                {tours.length}
+              </strong>
+              <span className="muted">Curated journeys</span>
+            </div>
+
+            <div>
+              <strong
+                style={{
+                  display: "block",
+                  fontSize: "30px",
+                  marginBottom: "4px",
+                }}
+              >
+                4
+              </strong>
+              <span className="muted">Himalayan regions</span>
+            </div>
+
+            <div>
+              <strong
+                style={{
+                  display: "block",
+                  fontSize: "30px",
+                  marginBottom: "4px",
+                }}
+              >
+                AI
+              </strong>
+              <span className="muted">Assisted planning</span>
+            </div>
+          </div>
+        </div>
+
+        <div
+          style={{
+            position: "absolute",
+            right: "4%",
+            bottom: "32px",
+            color: "rgba(255,255,255,.65)",
+            fontSize: "12px",
+            letterSpacing: ".14em",
+            writingMode: "vertical-rl",
+          }}
+        >
+          EXPLORE THE HIMALAYA
         </div>
       </section>
 
-      {/* QUICK VALUE */}
+      {/* INTRODUCTION */}
       <section className="section">
         <div className="container">
           <div
             style={{
               display: "grid",
               gridTemplateColumns:
-                "repeat(auto-fit, minmax(190px, 1fr))",
-              gap: 14,
+                "repeat(auto-fit, minmax(280px, 1fr))",
+              gap: "34px",
+              alignItems: "end",
             }}
           >
-            <div className="card" style={{ padding: 22 }}>
-              <div className="eyebrow" style={{ marginBottom: 10 }}>
-                JOURNEYS
+            <div>
+              <div
+                className="eyebrow"
+                style={{ marginBottom: "14px", letterSpacing: ".16em" }}
+              >
+                THE HIMALAYA, YOUR WAY
               </div>
-              <h3 style={{ marginBottom: 8 }}>{tours.length} routes</h3>
-              <p className="muted" style={{ margin: 0 }}>
-                Across several Himalayan regions.
-              </p>
+
+              <h2
+                style={{
+                  fontSize: "clamp(38px, 6vw, 64px)",
+                  lineHeight: 1,
+                  margin: 0,
+                  maxWidth: "720px",
+                }}
+              >
+                Extraordinary places deserve thoughtful journeys.
+              </h2>
             </div>
 
-            <div className="card" style={{ padding: 22 }}>
-              <div className="eyebrow" style={{ marginBottom: 10 }}>
-                AI PLANNER
-              </div>
-              <h3 style={{ marginBottom: 8 }}>Plan around you</h3>
-              <p className="muted" style={{ margin: 0 }}>
-                Turn travel ideas into useful trip criteria.
+            <div>
+              <p
+                className="muted"
+                style={{
+                  fontSize: "17px",
+                  lineHeight: 1.85,
+                  margin: 0,
+                }}
+              >
+                From Everest and Annapurna to Bhutan, Tibet and Ladakh, explore
+                routes shaped around landscape, culture, altitude and the way
+                you want to travel.
               </p>
-            </div>
 
-            <div className="card" style={{ padding: 22 }}>
-              <div className="eyebrow" style={{ marginBottom: 10 }}>
-                CONDITIONS
-              </div>
-              <h3 style={{ marginBottom: 8 }}>Stay informed</h3>
-              <p className="muted" style={{ margin: 0 }}>
-                Keep mountain weather and conditions visible.
-              </p>
-            </div>
+              <div className="actions" style={{ marginTop: "22px" }}>
+                <Link className="btn alt" href="/explore">
+                  Start exploring
+                </Link>
 
-            <div className="card" style={{ padding: 22 }}>
-              <div className="eyebrow" style={{ marginBottom: 10 }}>
-                CUSTOM TRAVEL
+                <Link className="btn alt" href="/travel-intent">
+                  Find my travel style
+                </Link>
               </div>
-              <h3 style={{ marginBottom: 8 }}>Build your own</h3>
-              <p className="muted" style={{ margin: 0 }}>
-                Shape a journey around your priorities.
-              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* POPULAR JOURNEYS */}
+      {/* FEATURED JOURNEYS */}
       <section className="section">
         <div className="container">
-          <div
-            className="eyebrow"
-            style={{
-              marginBottom: 14,
-              letterSpacing: ".16em",
-            }}
-          >
-            FEATURED JOURNEYS
-          </div>
-
           <div
             style={{
               display: "flex",
               justifyContent: "space-between",
               alignItems: "end",
-              gap: 24,
+              gap: "24px",
               flexWrap: "wrap",
-              marginBottom: 28,
+              marginBottom: "30px",
             }}
           >
             <div>
+              <div
+                className="eyebrow"
+                style={{ marginBottom: "14px", letterSpacing: ".16em" }}
+              >
+                SIGNATURE JOURNEYS
+              </div>
+
               <h2
                 style={{
-                  fontSize: "clamp(34px, 5vw, 50px)",
-                  marginBottom: 12,
+                  fontSize: "clamp(38px, 5vw, 58px)",
+                  margin: 0,
                 }}
               >
-                Start with the classics.
+                Begin with an icon.
               </h2>
 
               <p
                 className="muted"
                 style={{
-                  maxWidth: 760,
+                  maxWidth: "720px",
                   lineHeight: 1.8,
-                  margin: 0,
+                  marginTop: "14px",
+                  marginBottom: 0,
                 }}
               >
-                Explore some of our featured Himalayan journeys, then compare
-                routes or create a private itinerary around your own dates and
-                interests.
+                Discover classic Himalayan routes and culturally rich journeys,
+                then adapt the experience around your own dates and priorities.
               </p>
             </div>
 
             <Link className="btn alt" href="/tours">
-              View all journeys
+              View all {tours.length} journeys
             </Link>
           </div>
 
@@ -226,123 +363,136 @@ export default function Home() {
       <section className="section">
         <div className="container">
           <div
-            className="eyebrow"
+            className="card"
             style={{
-              marginBottom: 14,
-              letterSpacing: ".16em",
+              padding: "clamp(28px, 5vw, 54px)",
+              background:
+                "linear-gradient(135deg, rgba(16,39,47,.96), rgba(10,62,63,.58))",
             }}
           >
-            EXPLORE THE HIMALAYA
-          </div>
+            <div
+              className="eyebrow"
+              style={{ marginBottom: "14px", letterSpacing: ".16em" }}
+            >
+              FOUR HIMALAYAN REGIONS
+            </div>
 
-          <h2
-            style={{
-              fontSize: "clamp(34px, 5vw, 50px)",
-              marginBottom: 14,
-            }}
-          >
-            Four regions. Different ways to travel.
-          </h2>
+            <h2
+              style={{
+                fontSize: "clamp(38px, 5vw, 58px)",
+                maxWidth: "800px",
+                marginTop: 0,
+                marginBottom: "18px",
+              }}
+            >
+              One mountain world.
+              <br />
+              Many ways to experience it.
+            </h2>
 
-          <p
-            className="muted"
-            style={{
-              maxWidth: 820,
-              lineHeight: 1.8,
-              marginBottom: 30,
-            }}
-          >
-            The Himalaya is not one destination. Compare landscapes, travel
-            styles, cultural experiences and altitude before deciding where
-            your journey should begin.
-          </p>
+            <p
+              className="muted"
+              style={{
+                maxWidth: "760px",
+                lineHeight: 1.8,
+                marginBottom: "32px",
+              }}
+            >
+              Compare landscapes, cultures, altitude and journey styles before
+              choosing where your Himalayan experience should begin.
+            </p>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns:
-                "repeat(auto-fit, minmax(240px, 1fr))",
-              gap: 16,
-            }}
-          >
-            {destinations.map((destination) => (
-              <Link
-                key={destination.name}
-                href={destination.href}
-                className="card"
-                style={{
-                  padding: 26,
-                  color: "inherit",
-                  textDecoration: "none",
-                }}
-              >
-                <div
-                  className="eyebrow"
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns:
+                  "repeat(auto-fit, minmax(230px, 1fr))",
+                gap: "14px",
+              }}
+            >
+              {destinations.map((destination) => (
+                <Link
+                  key={destination.name}
+                  href={destination.href}
                   style={{
-                    marginBottom: 14,
-                    letterSpacing: ".12em",
+                    display: "block",
+                    padding: "24px",
+                    borderRadius: "18px",
+                    border: "1px solid rgba(255,255,255,.1)",
+                    background: "rgba(5,18,24,.38)",
+                    color: "inherit",
+                    textDecoration: "none",
                   }}
                 >
-                  {destination.label}
-                </div>
+                  <div
+                    className="eyebrow"
+                    style={{
+                      marginBottom: "14px",
+                      letterSpacing: ".1em",
+                      fontSize: "10px",
+                    }}
+                  >
+                    {destination.label}
+                  </div>
 
-                <h3
-                  style={{
-                    fontSize: 25,
-                    marginBottom: 12,
-                  }}
-                >
-                  {destination.name}
-                </h3>
+                  <h3
+                    style={{
+                      fontSize: "26px",
+                      marginTop: 0,
+                      marginBottom: "12px",
+                    }}
+                  >
+                    {destination.name}
+                  </h3>
 
-                <p
-                  className="muted"
-                  style={{
-                    lineHeight: 1.75,
-                    margin: 0,
-                  }}
-                >
-                  {destination.text}
-                </p>
-              </Link>
-            ))}
+                  <p
+                    className="muted"
+                    style={{
+                      lineHeight: 1.7,
+                      margin: 0,
+                    }}
+                  >
+                    {destination.text}
+                  </p>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* AI + MAP */}
+      {/* SMART PLANNING */}
       <section className="section">
         <div className="container">
           <div
             className="eyebrow"
-            style={{
-              marginBottom: 14,
-              letterSpacing: ".16em",
-            }}
+            style={{ marginBottom: "14px", letterSpacing: ".16em" }}
           >
-            SMARTER PLANNING
+            INTELLIGENT TRAVEL PLANNING
           </div>
 
           <h2
             style={{
-              fontSize: "clamp(34px, 5vw, 50px)",
-              marginBottom: 14,
+              fontSize: "clamp(38px, 5vw, 58px)",
+              maxWidth: "800px",
+              marginTop: 0,
+              marginBottom: "14px",
             }}
           >
-            Explore before you decide.
+            Inspiration meets useful information.
           </h2>
 
           <p
             className="muted"
             style={{
-              maxWidth: 820,
+              maxWidth: "820px",
               lineHeight: 1.8,
-              marginBottom: 30,
+              marginBottom: "32px",
             }}
           >
-            Ask the planning assistant about destinations and journey styles,
-            then use the map to understand where your Himalayan adventure could
-            take you.
+            Use the planning assistant to explore destinations, compare ideas
+            and turn a vague travel wish into a more useful Himalayan journey.
+            Then see where those journeys sit across the mountain region.
           </p>
 
           <div className="layout2">
@@ -352,16 +502,19 @@ export default function Home() {
               <div
                 className="card"
                 style={{
-                  padding: 22,
-                  marginBottom: 14,
+                  padding: "22px",
+                  marginBottom: "14px",
                 }}
               >
-                <div className="eyebrow" style={{ marginBottom: 10 }}>
-                  INTERACTIVE MAP
+                <div
+                  className="eyebrow"
+                  style={{ marginBottom: "10px" }}
+                >
+                  INTERACTIVE HIMALAYAN MAP
                 </div>
 
-                <h3 style={{ marginBottom: 10 }}>
-                  See the Himalaya geographically.
+                <h3 style={{ marginBottom: "10px" }}>
+                  Understand the landscape.
                 </h3>
 
                 <p
@@ -371,8 +524,8 @@ export default function Home() {
                     margin: 0,
                   }}
                 >
-                  Explore the regions and connect destination names with the
-                  wider Himalayan landscape.
+                  Explore the locations behind our journeys and connect each
+                  destination with the wider Himalayan region.
                 </p>
               </div>
 
@@ -382,26 +535,24 @@ export default function Home() {
         </div>
       </section>
 
-      {/* TRAVEL YOUR WAY */}
+      {/* TRAVEL STYLES */}
       <section className="section">
         <div className="container">
           <div
             className="eyebrow"
-            style={{
-              marginBottom: 14,
-              letterSpacing: ".16em",
-            }}
+            style={{ marginBottom: "14px", letterSpacing: ".16em" }}
           >
-            TRAVEL YOUR WAY
+            CHOOSE YOUR WAY
           </div>
 
           <h2
             style={{
-              fontSize: "clamp(34px, 5vw, 50px)",
-              marginBottom: 28,
+              fontSize: "clamp(38px, 5vw, 58px)",
+              marginTop: 0,
+              marginBottom: "30px",
             }}
           >
-            More than one way to experience the mountains.
+            The mountains are only the beginning.
           </h2>
 
           <div
@@ -409,80 +560,53 @@ export default function Home() {
               display: "grid",
               gridTemplateColumns:
                 "repeat(auto-fit, minmax(230px, 1fr))",
-              gap: 16,
+              gap: "16px",
             }}
           >
-            <Link
-              href="/adventure"
-              className="card"
-              style={{
-                padding: 24,
-                textDecoration: "none",
-                color: "inherit",
-              }}
-            >
-              <div className="eyebrow" style={{ marginBottom: 12 }}>
-                ADVENTURE
-              </div>
-              <h3 style={{ marginBottom: 10 }}>Go further</h3>
-              <p className="muted">
-                Trekking routes, remote landscapes and challenging journeys.
-              </p>
-            </Link>
+            {travelStyles.map((style) => (
+              <Link
+                key={style.label}
+                href={style.href}
+                className="card"
+                style={{
+                  minHeight: "240px",
+                  padding: "26px",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "flex-end",
+                  textDecoration: "none",
+                  color: "inherit",
+                  background:
+                    "linear-gradient(160deg, rgba(255,255,255,.07), rgba(255,255,255,.025))",
+                }}
+              >
+                <div
+                  className="eyebrow"
+                  style={{ marginBottom: "12px" }}
+                >
+                  {style.label}
+                </div>
 
-            <Link
-              href="/culture-heritage"
-              className="card"
-              style={{
-                padding: 24,
-                textDecoration: "none",
-                color: "inherit",
-              }}
-            >
-              <div className="eyebrow" style={{ marginBottom: 12 }}>
-                CULTURE
-              </div>
-              <h3 style={{ marginBottom: 10 }}>Travel deeper</h3>
-              <p className="muted">
-                Build cultural understanding into the journey.
-              </p>
-            </Link>
+                <h3
+                  style={{
+                    fontSize: "27px",
+                    marginBottom: "10px",
+                  }}
+                >
+                  {style.title}
+                </h3>
 
-            <Link
-              href="/photography-tours"
-              className="card"
-              style={{
-                padding: 24,
-                textDecoration: "none",
-                color: "inherit",
-              }}
-            >
-              <div className="eyebrow" style={{ marginBottom: 12 }}>
-                PHOTOGRAPHY
-              </div>
-              <h3 style={{ marginBottom: 10 }}>Follow the light</h3>
-              <p className="muted">
-                Travel with more time for landscapes, atmosphere and place.
-              </p>
-            </Link>
-
-            <Link
-              href="/luxury-himalaya"
-              className="card"
-              style={{
-                padding: 24,
-                textDecoration: "none",
-                color: "inherit",
-              }}
-            >
-              <div className="eyebrow" style={{ marginBottom: 12 }}>
-                COMFORT
-              </div>
-              <h3 style={{ marginBottom: 10 }}>Travel at your pace</h3>
-              <p className="muted">
-                Private planning, better pacing and greater comfort.
-              </p>
-            </Link>
+                <p
+                  className="muted"
+                  style={{
+                    lineHeight: 1.7,
+                    margin: 0,
+                  }}
+                >
+                  {style.text}
+                </p>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
@@ -493,24 +617,31 @@ export default function Home() {
           <div
             className="card"
             style={{
-              padding: "clamp(32px, 5vw, 54px)",
+              padding: "clamp(38px, 6vw, 72px)",
+              textAlign: "center",
               background:
-                "linear-gradient(135deg, rgba(19,58,61,.9), rgba(16,35,42,.96))",
+                "radial-gradient(circle at 50% 0%, rgba(109,224,194,.18), transparent 42%), linear-gradient(135deg, rgba(15,48,54,.96), rgba(7,25,32,.98))",
             }}
           >
-            <div className="eyebrow" style={{ marginBottom: 14 }}>
+            <div
+              className="eyebrow"
+              style={{
+                marginBottom: "16px",
+                letterSpacing: ".18em",
+              }}
+            >
               YOUR HIMALAYA
             </div>
 
             <h2
               style={{
-                maxWidth: 850,
-                fontSize: "clamp(36px, 5vw, 54px)",
-                lineHeight: 1.05,
-                marginBottom: 16,
+                maxWidth: "850px",
+                margin: "0 auto",
+                fontSize: "clamp(42px, 6vw, 68px)",
+                lineHeight: 1,
               }}
             >
-              Start with an idea.
+              Start with a dream.
               <br />
               Build the right journey.
             </h2>
@@ -518,29 +649,30 @@ export default function Home() {
             <p
               className="muted"
               style={{
-                maxWidth: 760,
+                maxWidth: "720px",
+                margin: "22px auto 0",
                 lineHeight: 1.8,
+                fontSize: "17px",
               }}
             >
-              Explore existing journeys, compare your options or tell us what
-              you want from the Himalaya and start building a trip around you.
+              Explore our journeys, compare routes or tell us what matters to
+              you and begin creating a Himalayan experience around your own
+              priorities.
             </p>
 
             <div
               className="actions"
               style={{
-                marginTop: 26,
-                display: "flex",
-                gap: 12,
-                flexWrap: "wrap",
+                marginTop: "30px",
+                justifyContent: "center",
               }}
             >
               <Link className="btn" href="/ai-trip-planner">
-                Build my trip
+                Plan with AI
               </Link>
 
-              <Link className="btn alt" href="/tours">
-                Explore tours
+              <Link className="btn alt" href="/custom-journey">
+                Create a private journey
               </Link>
 
               <Link className="btn alt" href="/contact-book">
