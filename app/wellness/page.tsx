@@ -1,62 +1,90 @@
 import Link from "next/link";
 
-const wellnessPrinciples = [
+const slowTravelPrinciples = [
   {
     number: "01",
     title: "Slower pacing",
-    text: "Build in quieter mornings, shorter travel days and enough time to experience a place without turning every day into a checklist.",
+    text:
+      "Build in quieter mornings, realistic travel days and enough time to experience Tibet without turning every day into a checklist.",
   },
   {
     number: "02",
-    title: "Nature & space",
-    text: "Choose landscapes and stays that create time outdoors, mountain views, peaceful surroundings and room away from busy itineraries.",
+    title: "Space & landscape",
+    text:
+      "Give yourself time to experience the scale of the plateau, changing light, cultural places and quieter moments between major stops.",
   },
   {
     number: "03",
-    title: "Mindful movement",
-    text: "Yoga, walking and gentle outdoor activity can be included where appropriate, while keeping altitude and individual ability in mind.",
+    title: "Gentle activity",
+    text:
+      "Walking and other gentle activity can be included where appropriate, while keeping altitude, conditions and individual ability in mind.",
   },
   {
     number: "04",
     title: "Rest matters",
-    text: "Rest days are valuable in Himalayan travel. They can support acclimatization, recovery and a more enjoyable overall journey.",
+    text:
+      "Rest and appropriate pacing are valuable in high-altitude Tibet travel. A good journey does not need to fill every available hour.",
   },
 ];
 
 const journeyIdeas = [
   {
-    region: "BHUTAN",
-    title: "Bhutan Mountain & Culture",
-    days: "9 days",
-    style: "CULTURE + NATURE",
-    text: "A thoughtful combination of mountain scenery, monasteries, cultural experiences and a pace that can be adapted for quieter travel.",
-    href: "/tours/bhutan-mountain-culture",
+    region: "LHASA",
+    title: "Lhasa Classic Journey",
+    days: "5 days",
+    style: "CULTURE · SLOWER PACE",
+    text:
+      "A shorter Tibet journey centered on Lhasa that can provide more time for cultural experiences and a measured introduction to the plateau.",
+    href: "/tours/lhasa-classic",
   },
   {
-    region: "NEPAL",
-    title: "Annapurna Classic",
-    days: "10 days",
-    style: "MOUNTAIN WALKING",
-    text: "A Himalayan trekking journey that can inspire a slower itinerary with mountain landscapes, villages and carefully planned rest.",
-    href: "/tours/annapurna-classic",
+    region: "CENTRAL TIBET",
+    title: "Lhasa, Gyantse & Shigatse",
+    days: "7 days",
+    style: "CULTURE · LANDSCAPE",
+    text:
+      "Travel through Central Tibet with historic places, plateau landscapes and a journey rhythm that can be shaped around your priorities.",
+    href: "/tours/lhasa-shigatse-gyantse",
   },
   {
-    region: "PRIVATE",
-    title: "Restorative Himalayan Journey",
+    region: "PRIVATE TIBET",
+    title: "Slow & Mindful Tibet Journey",
     days: "YOUR DATES",
     style: "CUSTOM",
-    text: "Build a private journey around nature, comfortable stays, gentle activity, cultural experiences and the amount of downtime you prefer.",
+    text:
+      "Build a private Tibet journey around thoughtful pacing, cultural experiences, landscapes, accommodation preferences and the amount of downtime you prefer.",
     href: "/custom-journey",
   },
 ];
 
 const planningNotes = [
-  "Choose a realistic pace for altitude and terrain.",
-  "Include rest and acclimatization where needed.",
+  "Choose a realistic pace for Tibet's altitude and travel distances.",
+  "Allow appropriate time for adjustment and rest.",
   "Tell us how active or relaxed you want the journey to feel.",
-  "Choose accommodation preferences before building the route.",
-  "Leave flexibility for changing mountain conditions.",
-  "Balance structured experiences with unplanned time.",
+  "Choose your accommodation preferences before shaping the route.",
+  "Leave flexibility for changing weather, roads and local conditions.",
+  "Balance planned experiences with quieter time.",
+];
+
+const mindfulApproach = [
+  {
+    number: "01",
+    title: "Observe more",
+    text:
+      "Leave room to notice landscapes, architecture and everyday details rather than moving immediately to the next destination.",
+  },
+  {
+    number: "02",
+    title: "Schedule less",
+    text:
+      "A meaningful Tibet journey does not need to maximize the number of places visited. More time in fewer places can create a different experience.",
+  },
+  {
+    number: "03",
+    title: "Respect the setting",
+    text:
+      "Quiet travel should remain respectful of local communities, religious practice, sacred places and the realities of everyday life in Tibet.",
+  },
 ];
 
 export default function WellnessPage() {
@@ -68,14 +96,20 @@ export default function WellnessPage() {
         paddingBottom: 90,
       }}
     >
+      {/* HERO */}
+
       <section
         className="card"
         style={{
           padding: "clamp(28px, 5vw, 56px)",
           marginBottom: 38,
+          background:
+            "radial-gradient(circle at 85% 15%, rgba(109,224,194,.12), transparent 30%), linear-gradient(145deg, rgba(18,48,55,.96), rgba(8,28,35,.98))",
         }}
       >
-        <span className="pill">WELLNESS HIMALAYA</span>
+        <span className="pill">
+          SLOW &amp; MINDFUL TIBET · 2026
+        </span>
 
         <h1
           style={{
@@ -88,7 +122,7 @@ export default function WellnessPage() {
         >
           Slow down.
           <br />
-          Make space for the mountains.
+          Make space for Tibet.
         </h1>
 
         <p
@@ -99,25 +133,38 @@ export default function WellnessPage() {
             lineHeight: 1.75,
           }}
         >
-          Restorative Himalayan travel built around
-          thoughtful pacing, nature, comfortable stays
-          and time to experience a destination without
-          rushing through it.
+          Experience Tibet with thoughtful pacing, more
+          time for culture and landscapes, comfortable
+          planning where practical, and enough space to
+          travel without rushing.
         </p>
 
-        <div className="actions" style={{ marginTop: 28 }}>
-          <Link className="btn" href="/custom-journey">
-            Build a wellness journey
+        <div
+          className="actions"
+          style={{ marginTop: 28 }}
+        >
+          <Link
+            className="btn"
+            href="/custom-journey"
+          >
+            Build a slower Tibet journey
           </Link>
 
-          <Link className="btn alt" href="/ai-trip-planner">
-            Plan with AI
+          <Link
+            className="btn alt"
+            href="/ai-trip-planner"
+          >
+            Plan Tibet with AI
           </Link>
         </div>
       </section>
 
+      {/* PRINCIPLES */}
+
       <section>
-        <span className="pill">TRAVEL WITH SPACE</span>
+        <span className="pill">
+          TRAVEL WITH SPACE
+        </span>
 
         <h2
           style={{
@@ -126,7 +173,7 @@ export default function WellnessPage() {
             fontSize: "clamp(28px, 4vw, 42px)",
           }}
         >
-          Wellness starts with the way you travel
+          A better rhythm can change the journey.
         </h2>
 
         <p
@@ -136,11 +183,10 @@ export default function WellnessPage() {
             lineHeight: 1.7,
           }}
         >
-          A wellness-focused Himalayan journey does not
-          need to be a retreat. It can simply mean a
-          better rhythm: sensible days, meaningful
-          experiences, time outdoors and enough room to
-          rest.
+          Slow travel in Tibet does not need to be a
+          retreat. It can simply mean sensible days,
+          meaningful experiences, realistic travel times
+          and enough room to rest and observe.
         </p>
 
         <div
@@ -152,7 +198,7 @@ export default function WellnessPage() {
             marginTop: 24,
           }}
         >
-          {wellnessPrinciples.map((item) => (
+          {slowTravelPrinciples.map((item) => (
             <article
               className="card"
               key={item.number}
@@ -193,8 +239,12 @@ export default function WellnessPage() {
         </div>
       </section>
 
+      {/* JOURNEY IDEAS */}
+
       <section style={{ marginTop: 40 }}>
-        <span className="pill">JOURNEY IDEAS</span>
+        <span className="pill">
+          TIBET JOURNEY IDEAS
+        </span>
 
         <h2
           style={{
@@ -203,7 +253,7 @@ export default function WellnessPage() {
             fontSize: "clamp(28px, 4vw, 40px)",
           }}
         >
-          Start with a journey that has room to breathe
+          Start with a journey that has room to breathe.
         </h2>
 
         <p
@@ -213,10 +263,10 @@ export default function WellnessPage() {
             lineHeight: 1.7,
           }}
         >
-          These existing journeys can be starting
-          points. A private itinerary can then be
-          adjusted around your preferred pace,
-          accommodation and activity level.
+          Begin with one of these Tibet journey ideas,
+          then use a private itinerary to adjust the
+          pace, interests, accommodation preferences and
+          amount of downtime.
         </p>
 
         <div
@@ -294,17 +344,115 @@ export default function WellnessPage() {
         </div>
       </section>
 
+      {/* MINDFUL APPROACH */}
+
+      <section
+        className="card"
+        style={{
+          marginTop: 38,
+          padding: "clamp(24px, 4vw, 40px)",
+        }}
+      >
+        <span className="pill">
+          MINDFUL TRAVEL
+        </span>
+
+        <h2
+          style={{
+            marginTop: 14,
+            marginBottom: 8,
+            fontSize: "clamp(28px, 4vw, 40px)",
+          }}
+        >
+          Experience more by trying to cover less.
+        </h2>
+
+        <p
+          className="muted"
+          style={{
+            maxWidth: 820,
+            lineHeight: 1.7,
+          }}
+        >
+          A slower Tibet itinerary can create more time
+          to understand a place instead of measuring the
+          journey by how many stops fit into each day.
+        </p>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(240px, 1fr))",
+            gap: 16,
+            marginTop: 24,
+          }}
+        >
+          {mindfulApproach.map((item) => (
+            <div
+              key={item.number}
+              style={{
+                padding: 22,
+                borderRadius: 18,
+                border:
+                  "1px solid rgba(255,255,255,0.10)",
+                background:
+                  "rgba(255,255,255,0.03)",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 13,
+                  fontWeight: 800,
+                  letterSpacing: "0.12em",
+                  opacity: 0.6,
+                }}
+              >
+                APPROACH {item.number}
+              </span>
+
+              <h3
+                style={{
+                  marginTop: 14,
+                  marginBottom: 10,
+                  fontSize: 21,
+                }}
+              >
+                {item.title}
+              </h3>
+
+              <p
+                className="muted"
+                style={{
+                  lineHeight: 1.7,
+                  marginBottom: 0,
+                }}
+              >
+                {item.text}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* RHYTHM + ALTITUDE */}
+
       <section
         style={{
           display: "grid",
           gridTemplateColumns:
             "repeat(auto-fit, minmax(300px, 1fr))",
           gap: 18,
-          marginTop: 38,
+          marginTop: 24,
         }}
       >
-        <div className="card" style={{ padding: 28 }}>
-          <span className="pill">PLAN YOUR RHYTHM</span>
+        <div
+          className="card"
+          style={{ padding: 28 }}
+        >
+          <span className="pill">
+            PLAN YOUR RHYTHM
+          </span>
 
           <h2
             style={{
@@ -312,17 +460,17 @@ export default function WellnessPage() {
               fontSize: 28,
             }}
           >
-            Tell us what restorative travel means to you
+            Tell us how you want Tibet to feel.
           </h2>
 
           <p
             className="muted"
             style={{ lineHeight: 1.7 }}
           >
-            Some travelers want gentle walks and quiet
-            stays. Others want challenging days balanced
-            by better recovery. Your preferred rhythm
-            should shape the itinerary.
+            Some travelers want gentle days and more
+            quiet time. Others want active experiences
+            balanced by appropriate rest. Your preferred
+            rhythm should help shape the itinerary.
           </p>
 
           <div
@@ -341,7 +489,9 @@ export default function WellnessPage() {
                   alignItems: "flex-start",
                 }}
               >
-                <strong aria-hidden="true">✓</strong>
+                <strong aria-hidden="true">
+                  ✓
+                </strong>
 
                 <span
                   className="muted"
@@ -354,8 +504,13 @@ export default function WellnessPage() {
           </div>
         </div>
 
-        <div className="card" style={{ padding: 28 }}>
-          <span className="pill">MOUNTAIN REALITY</span>
+        <div
+          className="card"
+          style={{ padding: 28 }}
+        >
+          <span className="pill">
+            HIGH-ALTITUDE REALITY
+          </span>
 
           <h2
             style={{
@@ -363,32 +518,42 @@ export default function WellnessPage() {
               fontSize: 28,
             }}
           >
-            Wellness does not remove altitude
+            Slow travel does not remove altitude.
           </h2>
 
           <p
             className="muted"
             style={{ lineHeight: 1.75 }}
           >
-            Himalayan environments still require
-            sensible acclimatization, appropriate
-            preparation and flexibility. A relaxed
-            itinerary should respect altitude, weather,
-            terrain and the advice of qualified local
-            professionals.
+            Tibet travel still requires appropriate
+            preparation, realistic pacing and attention
+            to altitude. Individual responses vary, and
+            a relaxed itinerary should remain flexible
+            when circumstances require it.
           </p>
 
-          <div className="actions" style={{ marginTop: 22 }}>
-            <Link className="btn alt" href="/himalayan-guide">
-              Himalayan Guide
+          <div
+            className="actions"
+            style={{ marginTop: 22 }}
+          >
+            <Link
+              className="btn alt"
+              href="/himalayan-guide"
+            >
+              Tibet Travel Guide
             </Link>
 
-            <Link className="btn alt" href="/weather-conditions">
-              Live conditions
+            <Link
+              className="btn alt"
+              href="/weather-conditions"
+            >
+              Tibet conditions
             </Link>
           </div>
         </div>
       </section>
+
+      {/* CULTURE */}
 
       <section
         className="card"
@@ -397,7 +562,9 @@ export default function WellnessPage() {
           padding: "clamp(24px, 4vw, 40px)",
         }}
       >
-        <span className="pill">CULTURE & RESPECT</span>
+        <span className="pill">
+          CULTURE &amp; RESPECT
+        </span>
 
         <h2
           style={{
@@ -405,7 +572,7 @@ export default function WellnessPage() {
             fontSize: "clamp(28px, 4vw, 40px)",
           }}
         >
-          The Himalaya is home, not a wellness backdrop
+          Tibet is home, not a wellness backdrop.
         </h2>
 
         <p
@@ -415,11 +582,12 @@ export default function WellnessPage() {
             lineHeight: 1.75,
           }}
         >
-          Yoga, meditation and spiritual interests
-          should be approached with respect for local
-          traditions and communities. Avoid treating
-          sacred places, ceremonies or living cultures
-          as products created for visitors.
+          Meditation, quiet reflection and personal
+          wellbeing interests should be approached with
+          respect for local communities and traditions.
+          Sacred places, religious practice and living
+          culture exist independently of the visitor&apos;s
+          personal travel goals.
         </p>
 
         <Link
@@ -427,9 +595,99 @@ export default function WellnessPage() {
           href="/responsible-travel"
           style={{ marginTop: 18 }}
         >
-          Read Responsible Travel
+          Responsible Tibet travel
         </Link>
       </section>
+
+      {/* WELLBEING NOTE */}
+
+      <section
+        className="card"
+        style={{
+          marginTop: 24,
+          padding: "clamp(24px, 4vw, 40px)",
+        }}
+      >
+        <span className="pill">
+          WELLBEING &amp; TRAVEL
+        </span>
+
+        <h2
+          style={{
+            marginTop: 14,
+            fontSize: "clamp(28px, 4vw, 40px)",
+          }}
+        >
+          Travel planning is not medical guidance.
+        </h2>
+
+        <p
+          className="muted"
+          style={{
+            maxWidth: 900,
+            lineHeight: 1.75,
+          }}
+        >
+          A slower itinerary may feel more comfortable,
+          but this page does not make medical or
+          therapeutic claims. Tibet includes
+          high-altitude environments, and personal
+          health questions should be discussed with an
+          appropriate qualified professional.
+        </p>
+      </section>
+
+      {/* CURRENT INFORMATION */}
+
+      <section
+        className="card"
+        style={{
+          marginTop: 24,
+          padding: "clamp(24px, 4vw, 40px)",
+        }}
+      >
+        <span className="pill">
+          BEFORE YOU GO
+        </span>
+
+        <h2
+          style={{
+            marginTop: 14,
+            fontSize: "clamp(28px, 4vw, 40px)",
+          }}
+        >
+          Keep the journey flexible.
+        </h2>
+
+        <p
+          className="muted"
+          style={{
+            maxWidth: 900,
+            lineHeight: 1.75,
+          }}
+        >
+          Travel documentation, permits, route access,
+          transportation, weather and local operating
+          conditions can change. Confirm current
+          information for your travel dates, nationality
+          and intended Tibet route before final
+          arrangements are made.
+        </p>
+
+        <div
+          className="actions"
+          style={{ marginTop: 20 }}
+        >
+          <Link
+            className="btn alt"
+            href="/ai-research"
+          >
+            Research current information
+          </Link>
+        </div>
+      </section>
+
+      {/* FINAL CTA */}
 
       <section
         className="card"
@@ -437,9 +695,13 @@ export default function WellnessPage() {
           marginTop: 24,
           padding: "clamp(28px, 5vw, 46px)",
           textAlign: "center",
+          background:
+            "linear-gradient(135deg, rgba(19,58,61,.9), rgba(16,35,42,.96))",
         }}
       >
-        <span className="pill">YOUR JOURNEY</span>
+        <span className="pill">
+          YOUR TIBET JOURNEY
+        </span>
 
         <h2
           style={{
@@ -448,7 +710,7 @@ export default function WellnessPage() {
             fontSize: "clamp(30px, 5vw, 46px)",
           }}
         >
-          Create more space in your Himalayan itinerary.
+          Give your Tibet itinerary more room to breathe.
         </h2>
 
         <p
@@ -459,10 +721,10 @@ export default function WellnessPage() {
             lineHeight: 1.7,
           }}
         >
-          Choose your destination, number of days,
-          accommodation preference and travel style,
-          then build a private journey around the pace
-          that works for you.
+          Choose your available days, preferred pace,
+          interests and accommodation preferences, then
+          shape a private Tibet journey around the
+          experience you want.
         </p>
 
         <div
@@ -472,12 +734,18 @@ export default function WellnessPage() {
             marginTop: 26,
           }}
         >
-          <Link className="btn" href="/custom-journey">
-            Build my wellness journey
+          <Link
+            className="btn"
+            href="/custom-journey"
+          >
+            Build my slow Tibet journey
           </Link>
 
-          <Link className="btn alt" href="/contact-book">
-            Request a trip
+          <Link
+            className="btn alt"
+            href="/contact-book"
+          >
+            Request a Tibet trip
           </Link>
         </div>
       </section>
@@ -485,14 +753,20 @@ export default function WellnessPage() {
   );
 }
 
-function SmallTag({ text }: { text: string }) {
+function SmallTag({
+  text,
+}: {
+  text: string;
+}) {
   return (
     <span
       style={{
         padding: "7px 10px",
         borderRadius: 999,
-        border: "1px solid rgba(255,255,255,0.10)",
-        background: "rgba(255,255,255,0.04)",
+        border:
+          "1px solid rgba(255,255,255,0.10)",
+        background:
+          "rgba(255,255,255,0.04)",
         fontSize: 13,
       }}
     >
