@@ -3,54 +3,60 @@ import Link from "next/link";
 const principles = [
   {
     number: "01",
-    title: "Local communities first",
-    text: "Choose local guides, locally owned services and community-based experiences wherever practical so tourism creates meaningful value in Himalayan regions.",
+    title: "Respect local communities",
+    text:
+      "Tibet is home to living communities with their own traditions, daily rhythms and cultural practices. Travel thoughtfully, listen to local guidance and remember that visitors are guests.",
   },
   {
     number: "02",
-    title: "Respect culture",
-    text: "Dress, photograph, visit sacred places and interact with communities respectfully. Local customs can differ greatly between Nepal, Bhutan, Tibet and the Indian Himalaya.",
+    title: "Respect culture & sacred places",
+    text:
+      "Monasteries, temples and pilgrimage places deserve particular care. Follow local guidance about dress, behavior, photography and access, and avoid disrupting ceremonies or religious practice.",
   },
   {
     number: "03",
-    title: "Protect mountain environments",
-    text: "Reduce single-use waste, carry out what you carry in, stay on established trails and avoid disturbing wildlife, vegetation and fragile alpine environments.",
+    title: "Protect plateau environments",
+    text:
+      "Reduce unnecessary waste, use reusable items where practical and avoid disturbing wildlife, vegetation, lakeshores and fragile high-altitude landscapes.",
   },
   {
     number: "04",
-    title: "Travel at a responsible pace",
-    text: "High-altitude journeys need realistic schedules. Proper acclimatization, rest days and flexibility are more important than rushing to complete an itinerary.",
+    title: "Travel at a thoughtful pace",
+    text:
+      "Tibet journeys take place at significant altitude. Avoid building an itinerary around speed alone. Allow appropriate time for adjustment, rest and changes in local conditions.",
   },
   {
     number: "05",
-    title: "Respect guides and porters",
-    text: "Responsible Himalayan travel includes fair treatment, appropriate working conditions, suitable equipment and respect for the people who make mountain journeys possible.",
+    title: "Respect local guidance",
+    text:
+      "Local guides and travel professionals provide important cultural, logistical and practical context. Listen carefully to their instructions, particularly around sacred places, high altitude, road travel and changing access conditions.",
   },
   {
     number: "06",
-    title: "Leave places better",
-    text: "Small decisions matter: refill water where safe, minimize unnecessary packaging, respect waste systems and avoid leaving permanent traces in remote landscapes.",
+    title: "Leave a lighter footprint",
+    text:
+      "Small decisions matter. Reduce disposable packaging, manage waste carefully, use water and energy thoughtfully and avoid leaving permanent traces in remote landscapes.",
   },
 ];
 
 const beforeTravel = [
-  "Learn basic cultural etiquette for your destination.",
-  "Choose an itinerary with realistic altitude progression.",
-  "Pack reusable items to reduce disposable waste.",
-  "Understand permit and protected-area requirements.",
+  "Learn basic cultural etiquette for Tibet before departure.",
+  "Choose a journey with realistic pacing and altitude progression.",
+  "Pack reusable items to reduce unnecessary disposable waste.",
+  "Confirm current travel documentation, permits and route requirements for your dates.",
 ];
 
 const duringTravel = [
-  "Follow your guide's instructions and established trails.",
-  "Ask permission before photographing people or ceremonies.",
-  "Use water, electricity and heating thoughtfully in remote areas.",
-  "Never leave litter, batteries or other waste on the trail.",
+  "Follow your guide's advice and respect local access rules.",
+  "Ask before photographing people, ceremonies or sensitive places.",
+  "Use water, electricity and heating thoughtfully, especially in remote areas.",
+  "Carry your waste responsibly and avoid disturbing natural environments.",
 ];
 
 const afterTravel = [
-  "Support local businesses when purchasing souvenirs.",
-  "Share photographs and stories respectfully.",
-  "Give useful, fair feedback to guides and operators.",
+  "Choose thoughtful souvenirs and support appropriate local businesses where practical.",
+  "Share photographs and cultural stories respectfully.",
+  "Give useful and fair feedback to guides and travel providers.",
   "Carry responsible travel habits into your next journey.",
 ];
 
@@ -63,44 +69,52 @@ export default function ResponsibleTravelPage() {
         paddingBottom: 90,
       }}
     >
+      {/* HERO */}
+
       <section
         className="card"
         style={{
-          padding: "clamp(28px, 5vw, 56px)",
+          padding:
+            "clamp(28px, 5vw, 56px)",
           marginBottom: 24,
+          background:
+            "radial-gradient(circle at 85% 15%, rgba(109,224,194,.12), transparent 30%), linear-gradient(145deg, rgba(18,48,55,.96), rgba(8,28,35,.98))",
         }}
       >
         <span className="pill">
-          RESPONSIBLE HIMALAYA
+          RESPONSIBLE TRAVEL · TIBET
         </span>
 
         <h1
           style={{
             marginTop: 18,
             marginBottom: 18,
-            fontSize: "clamp(42px, 7vw, 76px)",
+            fontSize:
+              "clamp(42px, 7vw, 76px)",
             lineHeight: 1,
             maxWidth: 950,
           }}
         >
           Travel with respect.
           <br />
-          Leave a positive footprint.
+          Experience Tibet thoughtfully.
         </h1>
 
         <p
           className="muted"
           style={{
-            maxWidth: 820,
+            maxWidth: 850,
             fontSize: 18,
             lineHeight: 1.75,
           }}
         >
-          The Himalaya is not only a destination.
-          It is home to communities, cultures,
-          sacred landscapes and fragile mountain
-          environments. A better journey respects
-          all of them.
+          Tibet is more than an
+          extraordinary landscape. It is
+          home to communities, cultural
+          traditions, sacred places and
+          fragile high-altitude
+          environments. A thoughtful
+          journey respects all of them.
         </p>
 
         <div
@@ -113,17 +127,19 @@ export default function ResponsibleTravelPage() {
             className="btn"
             href="/ai-trip-planner"
           >
-            Plan responsibly with AI
+            Plan Tibet with AI
           </Link>
 
           <Link
             className="btn alt"
             href="/contact-book"
           >
-            Request a journey
+            Request a Tibet journey
           </Link>
         </div>
       </section>
+
+      {/* PRINCIPLES */}
 
       <section
         style={{
@@ -143,22 +159,27 @@ export default function ResponsibleTravelPage() {
             style={{
               marginTop: 14,
               marginBottom: 8,
-              fontSize: "clamp(28px, 4vw, 42px)",
+              fontSize:
+                "clamp(28px, 4vw, 42px)",
             }}
           >
-            Six principles for better Himalayan travel
+            Six principles for thoughtful
+            travel in Tibet
           </h2>
 
           <p
             className="muted"
             style={{
-              maxWidth: 760,
+              maxWidth: 790,
               lineHeight: 1.7,
             }}
           >
-            Responsible travel begins with practical
-            choices before the journey and continues
-            throughout every day in the mountains.
+            Responsible travel begins
+            before departure and continues
+            throughout the journey. How we
+            behave, photograph, consume
+            resources and interact with
+            people all matter.
           </p>
         </div>
 
@@ -182,7 +203,8 @@ export default function ResponsibleTravelPage() {
                 style={{
                   fontSize: 13,
                   fontWeight: 800,
-                  letterSpacing: "0.12em",
+                  letterSpacing:
+                    "0.12em",
                   opacity: 0.65,
                   marginBottom: 18,
                 }}
@@ -213,11 +235,60 @@ export default function ResponsibleTravelPage() {
         </div>
       </section>
 
+      {/* CULTURAL RESPECT */}
+
       <section
         className="card"
         style={{
           marginTop: 38,
-          padding: "clamp(24px, 4vw, 40px)",
+          padding:
+            "clamp(26px, 4vw, 42px)",
+        }}
+      >
+        <span className="pill">
+          CULTURAL RESPECT
+        </span>
+
+        <h2
+          style={{
+            marginTop: 14,
+            marginBottom: 12,
+            fontSize:
+              "clamp(28px, 4vw, 42px)",
+          }}
+        >
+          Sacred places are not tourist
+          sets.
+        </h2>
+
+        <p
+          className="muted"
+          style={{
+            maxWidth: 900,
+            lineHeight: 1.8,
+            marginBottom: 0,
+          }}
+        >
+          Monasteries, temples,
+          pilgrimage routes and religious
+          practices are part of living
+          traditions. Follow instructions
+          about where visitors may enter,
+          when photography is appropriate
+          and how to behave. When unsure,
+          ask your guide rather than
+          assuming something is permitted.
+        </p>
+      </section>
+
+      {/* CHECKLIST */}
+
+      <section
+        className="card"
+        style={{
+          marginTop: 38,
+          padding:
+            "clamp(24px, 4vw, 40px)",
         }}
       >
         <span className="pill">
@@ -228,22 +299,27 @@ export default function ResponsibleTravelPage() {
           style={{
             marginTop: 14,
             marginBottom: 8,
-            fontSize: "clamp(28px, 4vw, 40px)",
+            fontSize:
+              "clamp(28px, 4vw, 40px)",
           }}
         >
-          Before, during and after your journey
+          Before, during and after your
+          Tibet journey
         </h2>
 
         <p
           className="muted"
           style={{
-            maxWidth: 760,
+            maxWidth: 780,
             lineHeight: 1.7,
           }}
         >
-          Responsible travel does not need to be
-          complicated. These simple habits can make
-          a meaningful difference.
+          Responsible travel does not
+          need to be complicated. A few
+          thoughtful habits can improve
+          both the travel experience and
+          the way visitors interact with
+          the places they encounter.
         </p>
 
         <div
@@ -272,6 +348,8 @@ export default function ResponsibleTravelPage() {
         </div>
       </section>
 
+      {/* ALTITUDE + PRIVATE */}
+
       <section
         style={{
           display: "grid",
@@ -297,7 +375,8 @@ export default function ResponsibleTravelPage() {
               fontSize: 28,
             }}
           >
-            Responsible also means safe
+            Responsible planning includes
+            realistic pacing
           </h2>
 
           <p
@@ -306,18 +385,20 @@ export default function ResponsibleTravelPage() {
               lineHeight: 1.7,
             }}
           >
-            Weather, altitude and trail conditions
-            can change quickly. Build flexibility
-            into mountain itineraries and check
-            current conditions before committing
-            to a route.
+            Tibet journeys often involve
+            significant altitude and long
+            overland routes. Build
+            flexibility into the itinerary,
+            allow time to adjust and check
+            current weather and travel
+            conditions before departure.
           </p>
 
           <Link
             className="btn alt"
             href="/weather-conditions"
           >
-            Check live conditions
+            Check Tibet conditions
           </Link>
         </div>
 
@@ -328,7 +409,7 @@ export default function ResponsibleTravelPage() {
           }}
         >
           <span className="pill">
-            CUSTOM JOURNEY
+            PRIVATE JOURNEY
           </span>
 
           <h2
@@ -337,7 +418,8 @@ export default function ResponsibleTravelPage() {
               fontSize: 28,
             }}
           >
-            Build a journey around your priorities
+            Build around your pace and
+            priorities
           </h2>
 
           <p
@@ -346,55 +428,113 @@ export default function ResponsibleTravelPage() {
               lineHeight: 1.7,
             }}
           >
-            Choose your destination, trip style,
-            accommodation and priorities, then
-            create a private Himalayan journey
-            brief.
+            Choose your Tibet journey
+            focus, trip style,
+            accommodation preference and
+            priorities, then create a
+            private journey brief around
+            what matters to you.
           </p>
 
           <Link
             className="btn"
             href="/custom-journey"
           >
-            Build my journey
+            Build my Tibet journey
           </Link>
         </div>
       </section>
+
+      {/* CURRENT REQUIREMENTS */}
 
       <section
         className="card"
         style={{
           marginTop: 24,
-          padding: "clamp(26px, 5vw, 46px)",
-          textAlign: "center",
+          padding:
+            "clamp(26px, 4vw, 40px)",
         }}
       >
         <span className="pill">
-          TRAVEL BETTER
+          PLAN WITH CURRENT INFORMATION
+        </span>
+
+        <h2
+          style={{
+            marginTop: 14,
+            marginBottom: 12,
+            fontSize:
+              "clamp(28px, 4vw, 40px)",
+          }}
+        >
+          Respect also means following
+          current requirements.
+        </h2>
+
+        <p
+          className="muted"
+          style={{
+            maxWidth: 900,
+            lineHeight: 1.8,
+            marginBottom: 0,
+          }}
+        >
+          Travel documentation, permits,
+          route access, local rules and
+          operating conditions can change.
+          Confirm the requirements that
+          apply to your nationality,
+          intended route and travel dates
+          before final arrangements are
+          made, and follow appropriate
+          local guidance throughout the
+          journey.
+        </p>
+      </section>
+
+      {/* FINAL CTA */}
+
+      <section
+        className="card"
+        style={{
+          marginTop: 24,
+          padding:
+            "clamp(26px, 5vw, 46px)",
+          textAlign: "center",
+          background:
+            "linear-gradient(135deg, rgba(19,58,61,.9), rgba(16,35,42,.96))",
+        }}
+      >
+        <span className="pill">
+          TRAVEL TIBET THOUGHTFULLY
         </span>
 
         <h2
           style={{
             marginTop: 16,
             marginBottom: 12,
-            fontSize: "clamp(30px, 5vw, 46px)",
+            fontSize:
+              "clamp(30px, 5vw, 46px)",
           }}
         >
-          A great Himalayan journey should benefit
-          more than the traveler.
+          A meaningful Tibet journey
+          begins with respect.
         </h2>
 
         <p
           className="muted"
           style={{
-            maxWidth: 760,
+            maxWidth: 790,
             margin: "0 auto",
             lineHeight: 1.7,
           }}
         >
-          Plan thoughtfully, stay flexible, respect
-          local knowledge and make choices that help
-          protect the places you came to experience.
+          Plan thoughtfully, stay
+          flexible, respect local
+          knowledge and cultural practices,
+          and make choices that help
+          protect the places you came to
+          experience.
         </p>
 
         <div
@@ -408,14 +548,14 @@ export default function ResponsibleTravelPage() {
             className="btn"
             href="/tours"
           >
-            Explore journeys
+            Explore Tibet journeys
           </Link>
 
           <Link
             className="btn alt"
             href="/contact-book"
           >
-            Plan my trip
+            Plan my Tibet trip
           </Link>
         </div>
       </section>
@@ -463,7 +603,8 @@ function ChecklistCard({
             style={{
               display: "flex",
               gap: 11,
-              alignItems: "flex-start",
+              alignItems:
+                "flex-start",
             }}
           >
             <span
