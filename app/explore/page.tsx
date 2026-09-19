@@ -2,70 +2,90 @@ import Link from "next/link";
 
 const regions = [
   {
-    name: "Nepal",
-    tag: "CLASSIC HIMALAYA",
+    name: "Lhasa",
+    tag: "CULTURAL HEART",
     description:
-      "Everest, Annapurna, Langtang, Manaslu and Mustang — Nepal offers the widest range of trekking landscapes and journey styles.",
-    href: "/nepal",
+      "Historic landmarks, monasteries and the cultural heart of many Tibet journeys, with time to begin adjusting to the altitude.",
+    href: "/tours/lhasa-classic",
   },
   {
-    name: "Bhutan",
-    tag: "CULTURE & MOUNTAINS",
+    name: "Central Tibet",
+    tag: "GYANTSE & SHIGATSE",
     description:
-      "Mountain valleys, monasteries and living traditions for travelers who want culture, scenery and a more measured pace.",
-    href: "/bhutan",
+      "Travel through Central Tibet across broad plateau landscapes, historic towns and important cultural sites.",
+    href: "/tours/lhasa-shigatse-gyantse",
   },
   {
-    name: "Tibet",
+    name: "Everest",
+    tag: "HIMALAYAN LANDSCAPES",
+    description:
+      "Journey from Lhasa across the plateau toward the dramatic high-altitude landscapes of the Tibet side of Everest.",
+    href: "/tours/lhasa-everest-base-camp",
+  },
+  {
+    name: "Mount Kailash",
+    tag: "WESTERN TIBET",
+    description:
+      "A remote high-altitude journey shaped by extraordinary landscapes, pilgrimage traditions and Mount Kailash.",
+    href: "/tours/kailash-kora",
+  },
+  {
+    name: "Namtso Lake",
     tag: "HIGH PLATEAU",
     description:
-      "Vast high-altitude landscapes, sacred places and distinctive plateau journeys that require thoughtful preparation.",
-    href: "/tibet",
+      "Experience open plateau scenery and the high-elevation landscapes surrounding one of Tibet's great lakes.",
+    href: "/tours/namtso-lake",
   },
   {
-    name: "Indian Himalaya",
-    tag: "LADAKH & BEYOND",
+    name: "High Plateau",
+    tag: "WIDE HORIZONS",
     description:
-      "High desert landscapes, mountain communities and dramatic routes across Ladakh and the Indian Himalaya.",
-    href: "/india-himalaya",
+      "Explore Tibet through expansive landscapes, long overland journeys and the distinctive character of the plateau.",
+    href: "/tours/tibet-high-plateau",
   },
 ];
 
 const styles = [
   {
     number: "01",
-    title: "Adventure",
-    text: "Trekking, high passes and active journeys designed around mountain landscapes.",
-    href: "/adventure",
+    title: "Culture & Heritage",
+    text:
+      "Historic places, monasteries, architecture and journeys shaped by Tibet's cultural landscape.",
+    href: "/culture-heritage",
   },
   {
     number: "02",
-    title: "Culture & Heritage",
-    text: "Monasteries, historic places, local traditions and journeys shaped by culture.",
-    href: "/culture-heritage",
+    title: "Adventure",
+    text:
+      "Longer routes, remote landscapes and active high-altitude experiences across Tibet.",
+    href: "/adventure",
   },
   {
     number: "03",
     title: "Photography",
-    text: "More time for landscapes, villages, changing light and meaningful photographic opportunities.",
+    text:
+      "More time for landscapes, architecture, changing light and thoughtful photographic observation.",
     href: "/photography-tours",
   },
   {
     number: "04",
     title: "Spiritual Journeys",
-    text: "Pilgrimage and contemplative travel approached with cultural respect and careful preparation.",
+    text:
+      "Sacred places and pilgrimage landscapes approached with cultural respect and careful preparation.",
     href: "/spiritual-journeys",
   },
   {
     number: "05",
-    title: "Family Himalaya",
-    text: "Sensible pacing, appropriate altitude and experiences designed around the whole family.",
-    href: "/family-himalaya",
+    title: "Private Journeys",
+    text:
+      "Shape a Tibet itinerary around your dates, interests, preferred pace and priorities.",
+    href: "/custom-journey",
   },
   {
     number: "06",
-    title: "Luxury Himalaya",
-    text: "Private logistics, better pacing and higher comfort where the destination allows it.",
+    title: "Slower & Comfortable",
+    text:
+      "Thoughtful pacing and greater comfort where available, with more time to experience each place.",
     href: "/luxury-himalaya",
   },
 ];
@@ -74,57 +94,75 @@ export default function Page() {
   return (
     <section className="section">
       <div className="container">
+        {/* HERO */}
+
         <div
           className="card"
           style={{
             padding: "clamp(32px, 6vw, 64px)",
             marginBottom: 34,
             background:
-              "linear-gradient(135deg, rgba(21,38,46,.96), rgba(24,66,73,.82))",
+              "radial-gradient(circle at 85% 15%, rgba(109,224,194,.12), transparent 30%), linear-gradient(135deg, rgba(21,38,46,.96), rgba(24,66,73,.82))",
           }}
         >
-          <div className="eyebrow">EXPLORE THE HIMALAYA</div>
+          <div className="eyebrow">
+            EXPLORE TIBET · 2026
+          </div>
 
           <h1
             style={{
               fontSize: "clamp(46px, 7vw, 76px)",
               lineHeight: 0.98,
-              maxWidth: 850,
+              maxWidth: 900,
               margin: "22px 0",
             }}
           >
-            Four regions.
+            One extraordinary plateau.
             <br />
-            Thousands of ways to travel.
+            Many ways to experience it.
           </h1>
 
           <p
             className="muted"
             style={{
-              maxWidth: 820,
+              maxWidth: 840,
               fontSize: 18,
               lineHeight: 1.7,
             }}
           >
-            Start with the place that interests you, then compare landscapes,
-            altitude, journey style and pace. From Nepal&apos;s legendary
-            trekking routes to Bhutan, Tibet and Ladakh, find the Himalayan
-            experience that fits you.
+            Explore Tibet by landscape, cultural focus and
+            journey style. From Lhasa and Central Tibet to
+            Everest, Namtso and Mount Kailash, find the
+            experience that best matches your time,
+            interests and preferred pace.
           </p>
 
-          <div className="actions" style={{ marginTop: 28 }}>
-            <Link className="btn" href="/tours">
-              Explore all tours
+          <div
+            className="actions"
+            style={{ marginTop: 28 }}
+          >
+            <Link
+              className="btn"
+              href="/tours"
+            >
+              Explore Tibet tours
             </Link>
 
-            <Link className="btn alt" href="/travel-intent">
-              Find my journey
+            <Link
+              className="btn alt"
+              href="/travel-intent"
+            >
+              Find my Tibet journey
             </Link>
           </div>
         </div>
 
+        {/* PLACES */}
+
         <div style={{ marginBottom: 58 }}>
-          <div className="eyebrow">CHOOSE A REGION</div>
+          <div className="eyebrow">
+            EXPLORE BY PLACE
+          </div>
 
           <h2
             style={{
@@ -132,25 +170,28 @@ export default function Page() {
               margin: "16px 0 10px",
             }}
           >
-            Where do you want the mountains to take you?
+            Where in Tibet do you want to go?
           </h2>
 
           <p
             className="muted"
             style={{
-              maxWidth: 760,
+              maxWidth: 780,
               lineHeight: 1.7,
               marginBottom: 26,
             }}
           >
-            Each Himalayan region has a different character. Compare the
-            atmosphere first, then explore individual journeys.
+            Tibet changes dramatically across the
+            plateau. Compare cultural centers, mountain
+            landscapes, sacred places and remote regions
+            before choosing your route.
           </p>
 
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+              gridTemplateColumns:
+                "repeat(auto-fit, minmax(260px, 1fr))",
               gap: 16,
             }}
           >
@@ -165,7 +206,9 @@ export default function Page() {
                   minHeight: 300,
                 }}
               >
-                <div className="eyebrow">{region.tag}</div>
+                <div className="eyebrow">
+                  {region.tag}
+                </div>
 
                 <h3
                   style={{
@@ -201,8 +244,12 @@ export default function Page() {
           </div>
         </div>
 
+        {/* TRAVEL STYLES */}
+
         <div style={{ marginBottom: 58 }}>
-          <div className="eyebrow">TRAVEL YOUR WAY</div>
+          <div className="eyebrow">
+            EXPERIENCE TIBET YOUR WAY
+          </div>
 
           <h2
             style={{
@@ -216,19 +263,22 @@ export default function Page() {
           <p
             className="muted"
             style={{
-              maxWidth: 760,
+              maxWidth: 780,
               lineHeight: 1.7,
               marginBottom: 26,
             }}
           >
-            You do not need to choose a destination first. Start with the kind
-            of experience you want and build the geography around it.
+            You do not need to start with a particular
+            route. Begin with the experience you want,
+            then find the part of Tibet and journey pace
+            that fits it.
           </p>
 
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+              gridTemplateColumns:
+                "repeat(auto-fit, minmax(280px, 1fr))",
               gap: 16,
             }}
           >
@@ -278,14 +328,84 @@ export default function Page() {
           </div>
         </div>
 
+        {/* JOURNEY PATHS */}
+
+        <div
+          className="card"
+          style={{
+            padding: "clamp(28px, 5vw, 46px)",
+            marginBottom: 28,
+          }}
+        >
+          <div className="eyebrow">
+            TIBET JOURNEY IDEAS
+          </div>
+
+          <h2
+            style={{
+              fontSize: "clamp(32px, 5vw, 46px)",
+              margin: "16px 0 12px",
+            }}
+          >
+            From a first visit to a deeper journey.
+          </h2>
+
+          <p
+            className="muted"
+            style={{
+              maxWidth: 800,
+              lineHeight: 1.7,
+            }}
+          >
+            A shorter journey might focus on Lhasa and
+            Central Tibet. With more time, you can explore
+            farther toward Everest, Namtso, the high
+            plateau or western Tibet. The right route
+            depends on your available days, interests,
+            pace and altitude considerations.
+          </p>
+
+          <div
+            className="actions"
+            style={{ marginTop: 24 }}
+          >
+            <Link
+              className="btn"
+              href="/tours/lhasa-classic"
+            >
+              Start with Lhasa
+            </Link>
+
+            <Link
+              className="btn alt"
+              href="/tours/lhasa-everest-base-camp"
+            >
+              Explore Everest
+            </Link>
+
+            <Link
+              className="btn alt"
+              href="/tours/kailash-kora"
+            >
+              Explore Mount Kailash
+            </Link>
+          </div>
+        </div>
+
+        {/* INTENT */}
+
         <div
           className="card"
           style={{
             padding: "clamp(28px, 5vw, 48px)",
             marginBottom: 28,
+            background:
+              "linear-gradient(135deg, rgba(19,58,61,.9), rgba(16,35,42,.96))",
           }}
         >
-          <div className="eyebrow">NOT SURE WHERE TO START?</div>
+          <div className="eyebrow">
+            NOT SURE WHERE TO START?
+          </div>
 
           <h2
             style={{
@@ -299,29 +419,45 @@ export default function Page() {
           <p
             className="muted"
             style={{
-              maxWidth: 760,
+              maxWidth: 780,
               lineHeight: 1.7,
             }}
           >
-            Tell us whether you want quiet landscapes, culture, photography,
-            adventure, comfort or a slower pace. Our Travel Intent tool can
-            match those priorities with suitable journeys.
+            Tell us whether you want quiet landscapes,
+            culture, photography, adventure, spirituality
+            or a slower pace. Our Tibet Travel Intent tool
+            can match those priorities with journeys from
+            the current collection.
           </p>
 
-          <div className="actions" style={{ marginTop: 24 }}>
-            <Link className="btn" href="/travel-intent">
-              Match my travel intent
+          <div
+            className="actions"
+            style={{ marginTop: 24 }}
+          >
+            <Link
+              className="btn"
+              href="/travel-intent"
+            >
+              Match my Tibet travel intent
             </Link>
 
-            <Link className="btn alt" href="/compare-trips">
-              Compare trips
+            <Link
+              className="btn alt"
+              href="/compare-trips"
+            >
+              Compare Tibet journeys
             </Link>
 
-            <Link className="btn alt" href="/ai-trip-planner">
-              Plan with AI
+            <Link
+              className="btn alt"
+              href="/ai-trip-planner"
+            >
+              Plan Tibet with AI
             </Link>
           </div>
         </div>
+
+        {/* PLANNING NOTE */}
 
         <div
           className="notice"
@@ -329,8 +465,12 @@ export default function Page() {
             lineHeight: 1.7,
           }}
         >
-          Himalayan conditions, permits, entry requirements and accessibility
-          can change. Check current information before confirming a journey.
+          Travel documentation, permits, route access,
+          local requirements, weather and operating
+          conditions can change. Confirm current
+          information for your travel dates, nationality
+          and intended Tibet route before final
+          arrangements are made.
         </div>
       </div>
     </section>
