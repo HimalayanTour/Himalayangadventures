@@ -1,78 +1,204 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { getTour, tours } from "@/lib/tours";
 import BookingForm from "@/components/BookingForm";
 
 const baseUrl = "https://himalayangadventures.vercel.app";
 
 const images: Record<string, string> = {
-  "everest-base-camp":
+  "lhasa-classic": "/8.jpg",
+
+  "lhasa-everest-base-camp":
     "/ChatGPT Image Sep 7, 2026, 01_05_24 AM.png",
-  "annapurna-classic": "/2.png",
-  "langtang-valley": "/3.png",
-  "manaslu-circuit": "/4.png",
-  "upper-mustang": "/5.png",
-  "bhutan-mountain-culture": "/6.png",
+
+  "lhasa-shigatse-gyantse": "/5.png",
+
   "tibet-high-plateau": "/8.jpg",
-  "ladakh-high-altitude": "/9.jpg",
+
   "kailash-mansarovar-journey": "/10.jpg",
+
+  "kailash-kora": "/10.jpg",
+
+  "namtso-lake": "/3.png",
+
+  "tibet-photography": "/9.jpg",
+
+  "tibet-culture-monasteries": "/6.png",
 };
 
 const highlights: Record<string, string[]> = {
-  "everest-base-camp": [
-    "Trek through the legendary Khumbu region",
-    "Visit Namche Bazaar and Sherpa villages",
-    "Reach Everest Base Camp",
-    "Sunrise views from Kala Patthar",
+  "lhasa-classic": [
+    "Explore the cultural heart of Lhasa",
+    "Visit important monasteries and historic quarters",
+    "Allow time for gradual altitude acclimatization",
+    "Experience Tibetan culture at a thoughtful pace",
   ],
-  "annapurna-classic": [
-    "Panoramic Annapurna mountain views",
-    "Traditional mountain villages",
-    "Beautiful valleys and forests",
-    "Classic Nepal trekking experience",
+
+  "lhasa-everest-base-camp": [
+    "Travel from Lhasa across the Tibetan Plateau",
+    "Explore Gyantse and Shigatse along the route",
+    "Cross dramatic high-altitude passes",
+    "Reach the Everest region on the north side of the Himalaya",
   ],
-  "langtang-valley": [
-    "Quiet Himalayan valley trekking",
-    "Tamang culture and villages",
-    "Mountain scenery close to Kathmandu",
-    "Great option for a shorter trek",
+
+  "lhasa-shigatse-gyantse": [
+    "Discover Lhasa's cultural landmarks",
+    "Travel through the historic town of Gyantse",
+    "Explore Shigatse and central Tibet",
+    "Experience monasteries, valleys and plateau landscapes",
   ],
-  "manaslu-circuit": [
-    "Remote high-altitude trekking",
-    "Cross dramatic mountain passes",
-    "Traditional Himalayan settlements",
-    "Less crowded than Everest and Annapurna",
-  ],
-  "upper-mustang": [
-    "Explore the ancient Mustang kingdom",
-    "Desert-like Himalayan landscapes",
-    "Monasteries and cave settlements",
-    "Unique Tibetan-influenced culture",
-  ],
-  "bhutan-mountain-culture": [
-    "Visit dramatic Himalayan monasteries",
-    "Experience Bhutanese culture",
-    "Mountain scenery and peaceful valleys",
-    "Balanced cultural and nature journey",
-  ],
+
   "tibet-high-plateau": [
-    "Travel across the Tibetan plateau",
-    "Visit monasteries and sacred landscapes",
-    "High-altitude mountain scenery",
-    "Discover Tibetan culture and traditions",
+    "Travel across the immense Tibetan Plateau",
+    "Experience high-altitude landscapes and mountain horizons",
+    "Visit monasteries and culturally significant places",
+    "Explore Tibet with time for acclimatization and local conditions",
   ],
-  "ladakh-high-altitude": [
-    "Explore India's high Himalaya",
-    "Visit monasteries and remote valleys",
-    "Dramatic desert-mountain landscapes",
-    "Discover Ladakhi culture",
-  ],
+
   "kailash-mansarovar-journey": [
-    "Journey to sacred Mount Kailash",
-    "Visit Lake Mansarovar",
-    "Experience remote Tibetan landscapes",
-    "A spiritual and cultural Himalayan journey",
+    "Journey across western Tibet toward Mount Kailash",
+    "Experience the landscape around Lake Manasarovar",
+    "Travel through remote high-altitude regions",
+    "Discover an important pilgrimage landscape",
   ],
+
+  "kailash-kora": [
+    "Journey to sacred Mount Kailash",
+    "Experience the Mount Kailash Kora route",
+    "Travel through the remote landscapes of western Tibet",
+    "Allow careful pacing for altitude and demanding terrain",
+  ],
+
+  "namtso-lake": [
+    "Travel from Lhasa toward the high plateau",
+    "Experience the landscapes around Namtso",
+    "See vast open scenery and mountain horizons",
+    "Combine cultural exploration with high-altitude nature",
+  ],
+
+  "tibet-photography": [
+    "Photograph Tibet's high-altitude landscapes",
+    "Make more time for changing light and atmosphere",
+    "Explore cultural and architectural subjects",
+    "Balance photography opportunities with realistic plateau pacing",
+  ],
+
+  "tibet-culture-monasteries": [
+    "Explore Tibetan monasteries and historic places",
+    "Spend time in Lhasa and culturally important areas",
+    "Learn about living traditions and pilgrimage culture",
+    "Travel with respect for local customs and sacred spaces",
+  ],
+};
+
+const routeFocus: Record<
+  string,
+  {
+    opening: string;
+    middle: string;
+    focus: string;
+    ending: string;
+  }
+> = {
+  "lhasa-classic": {
+    opening:
+      "Arrive in Lhasa and begin with a gentle schedule designed around altitude adjustment.",
+    middle:
+      "Explore Lhasa's historic quarters, cultural landmarks and important monasteries.",
+    focus:
+      "Spend time experiencing the city at a comfortable pace rather than rushing between sights.",
+    ending:
+      "Complete the Lhasa experience with time for final visits and onward travel arrangements.",
+  },
+
+  "lhasa-everest-base-camp": {
+    opening:
+      "Begin in Lhasa with acclimatization and cultural exploration before traveling higher.",
+    middle:
+      "Journey through central Tibet toward Gyantse and Shigatse, crossing changing plateau landscapes.",
+    focus:
+      "Continue toward the Everest region with high passes, Himalayan viewpoints and flexible pacing for altitude and conditions.",
+    ending:
+      "Complete the Everest section and continue according to the confirmed route and current access arrangements.",
+  },
+
+  "lhasa-shigatse-gyantse": {
+    opening:
+      "Begin in Lhasa with time for altitude adjustment and cultural exploration.",
+    middle:
+      "Travel through central Tibet toward Gyantse, with landscape and cultural stops along the way.",
+    focus:
+      "Continue to Shigatse and explore the historic and cultural character of the region.",
+    ending:
+      "Return or continue onward according to the final itinerary and travel arrangements.",
+  },
+
+  "tibet-high-plateau": {
+    opening:
+      "Begin with gradual acclimatization before moving deeper into the Tibetan Plateau.",
+    middle:
+      "Travel through high-altitude valleys, settlements and culturally important locations.",
+    focus:
+      "Experience the scale of the plateau with a route shaped around landscape, altitude and local conditions.",
+    ending:
+      "Complete the plateau journey with sufficient flexibility for road, weather and access conditions.",
+  },
+
+  "kailash-mansarovar-journey": {
+    opening:
+      "Begin with acclimatization and preparation before the longer journey toward western Tibet.",
+    middle:
+      "Travel west through changing plateau landscapes with carefully planned altitude progression.",
+    focus:
+      "Experience the Mount Kailash and Lake Manasarovar region with respect for its cultural and pilgrimage significance.",
+    ending:
+      "Complete the western Tibet journey and return according to the confirmed route and current access arrangements.",
+  },
+
+  "kailash-kora": {
+    opening:
+      "Begin with acclimatization and preparation before traveling toward western Tibet.",
+    middle:
+      "Cross the plateau toward Mount Kailash with gradual altitude progression and realistic travel days.",
+    focus:
+      "Undertake the Kora according to current route conditions, personal ability and local guidance.",
+    ending:
+      "Recover after the Kora and continue the return journey according to the confirmed itinerary.",
+  },
+
+  "namtso-lake": {
+    opening:
+      "Begin in Lhasa with a gentle schedule and time for altitude adjustment.",
+    middle:
+      "Explore cultural sites before traveling farther into the high plateau.",
+    focus:
+      "Journey toward Namtso and experience high-altitude lake and mountain landscapes.",
+    ending:
+      "Return toward Lhasa with flexibility for weather, road and access conditions.",
+  },
+
+  "tibet-photography": {
+    opening:
+      "Begin in Lhasa with acclimatization and introductory photography opportunities.",
+    middle:
+      "Travel through selected cultural and landscape locations with more time for observation and changing light.",
+    focus:
+      "Balance photographic opportunities with altitude, travel distances and respectful photography practices.",
+    ending:
+      "Complete the journey with final photography opportunities and onward travel arrangements.",
+  },
+
+  "tibet-culture-monasteries": {
+    opening:
+      "Begin in Lhasa with acclimatization and an introduction to Tibetan cultural heritage.",
+    middle:
+      "Visit monasteries, historic areas and culturally significant places at a thoughtful pace.",
+    focus:
+      "Explore living traditions while following local guidance around sacred spaces, photography and behavior.",
+    ending:
+      "Complete the cultural journey with time for reflection and onward travel arrangements.",
+  },
 };
 
 export function generateStaticParams() {
@@ -80,10 +206,6 @@ export function generateStaticParams() {
     slug: tour.slug,
   }));
 }
-
-/* -----------------------------
-   DYNAMIC TOUR SEO
------------------------------- */
 
 export async function generateMetadata({
   params,
@@ -104,15 +226,15 @@ export async function generateMetadata({
   }
 
   const description =
-    `Explore ${tour.name} in ${tour.country}. ` +
-    `${tour.days} Himalayan journey rated ${tour.difficulty}, ` +
-    `starting from ${tour.price}. View highlights and plan your journey.`;
+    `Explore ${tour.name}, a ${tour.days} Tibet journey rated ` +
+    `${tour.difficulty}, with planning prices starting from ${tour.price}. ` +
+    `Discover highlights and request a private Tibet journey.`;
 
   const canonicalUrl = `/tours/${tour.slug}`;
   const image = images[tour.slug];
 
   return {
-    title: `${tour.name} | ${tour.country} Himalayan Journey`,
+    title: `${tour.name} | Tibet Tour`,
 
     description,
 
@@ -130,7 +252,7 @@ export async function generateMetadata({
         ? [
             {
               url: image,
-              alt: `${tour.name} in ${tour.country}`,
+              alt: `${tour.name} in Tibet`,
             },
           ]
         : undefined,
@@ -159,14 +281,15 @@ export default async function TourPage({
 
   const image = images[tour.slug];
   const tourHighlights = highlights[tour.slug] || [];
+  const itinerary = routeFocus[tour.slug];
 
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "TouristTrip",
     name: tour.name,
-    description: `${tour.days} Himalayan journey through ${tour.country}, rated ${tour.difficulty}, starting from ${tour.price}.`,
+    description: `${tour.days} Tibet journey rated ${tour.difficulty}, with planning prices starting from ${tour.price}.`,
     url: `${baseUrl}/tours/${tour.slug}`,
-    touristType: "Himalayan adventure traveler",
+    touristType: "Tibet traveler",
     image: image ? `${baseUrl}${encodeURI(image)}` : undefined,
   };
 
@@ -179,17 +302,18 @@ export default async function TourPage({
         }}
       />
 
+      {/* HERO */}
       <section
         style={{
-          minHeight: "520px",
+          minHeight: "540px",
           display: "flex",
           alignItems: "end",
           backgroundImage: image
             ? `linear-gradient(
                 180deg,
-                rgba(3, 17, 24, 0.15) 0%,
-                rgba(3, 17, 24, 0.35) 45%,
-                rgba(3, 17, 24, 0.92) 100%
+                rgba(3, 17, 24, 0.12) 0%,
+                rgba(3, 17, 24, 0.38) 48%,
+                rgba(3, 17, 24, 0.95) 100%
               ),
               url("${image}")`
             : undefined,
@@ -197,15 +321,23 @@ export default async function TourPage({
           backgroundPosition: "center",
         }}
       >
-        <div className="container" style={{ paddingBottom: "56px" }}>
-          <span className="pill">{tour.country}</span>
+        <div
+          className="container"
+          style={{
+            paddingBottom: "58px",
+            paddingTop: "120px",
+          }}
+        >
+          <span className="pill">TIBET</span>
 
           <h1
             style={{
-              fontSize: "clamp(42px, 7vw, 80px)",
-              maxWidth: "900px",
+              fontSize: "clamp(44px, 7vw, 82px)",
+              maxWidth: "950px",
               marginTop: "16px",
-              marginBottom: "18px",
+              marginBottom: "20px",
+              lineHeight: 0.98,
+              letterSpacing: "-0.04em",
             }}
           >
             {tour.name}
@@ -220,8 +352,14 @@ export default async function TourPage({
             }}
           >
             <span className="btn">{tour.days}</span>
-            <span className="btn alt">{tour.difficulty}</span>
-            <strong style={{ fontSize: "30px" }}>{tour.price}</strong>
+
+            <span className="btn alt">
+              {tour.difficulty}
+            </span>
+
+            <strong style={{ fontSize: "30px" }}>
+              From {tour.price}
+            </strong>
           </div>
         </div>
       </section>
@@ -231,32 +369,51 @@ export default async function TourPage({
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "minmax(0, 1.5fr) minmax(280px, 0.8fr)",
+              gridTemplateColumns:
+                "repeat(auto-fit, minmax(300px, 1fr))",
               gap: "28px",
               alignItems: "start",
             }}
           >
             <div>
+              {/* OVERVIEW */}
               <div className="card">
-                <span className="eyebrow">Journey overview</span>
+                <span className="eyebrow">
+                  TIBET JOURNEY
+                </span>
 
                 <h2>About this trip</h2>
 
-                <p className="muted">
-                  This {tour.days.toLowerCase()} Himalayan journey through{" "}
-                  {tour.country} is designed for travelers looking for an
-                  immersive mountain experience with carefully planned routes,
-                  cultural encounters and professional local support.
+                <p
+                  className="muted"
+                  style={{ lineHeight: 1.8 }}
+                >
+                  This {tour.days.toLowerCase()} journey is designed as a
+                  thoughtful way to experience Tibet, balancing important
+                  places with altitude awareness, realistic travel time and
+                  cultural understanding.
                 </p>
 
-                <p className="muted">
-                  The trip is currently rated <strong>{tour.difficulty}</strong>{" "}
-                  and starts from <strong>{tour.price}</strong>.
+                <p
+                  className="muted"
+                  style={{ lineHeight: 1.8 }}
+                >
+                  The current planning level is{" "}
+                  <strong>{tour.difficulty}</strong>, with a starting planning
+                  price of <strong>{tour.price}</strong>. Final route, dates,
+                  services and price are confirmed before booking.
                 </p>
               </div>
 
-              <div className="card" style={{ marginTop: "20px" }}>
-                <span className="eyebrow">Highlights</span>
+              {/* HIGHLIGHTS */}
+              <div
+                className="card"
+                style={{ marginTop: "20px" }}
+              >
+                <span className="eyebrow">
+                  JOURNEY HIGHLIGHTS
+                </span>
+
                 <h2>What you&apos;ll experience</h2>
 
                 <div
@@ -274,8 +431,11 @@ export default async function TourPage({
                       style={{
                         padding: "18px",
                         borderRadius: "14px",
-                        border: "1px solid rgba(255,255,255,.09)",
-                        background: "rgba(255,255,255,.035)",
+                        border:
+                          "1px solid rgba(255,255,255,.09)",
+                        background:
+                          "rgba(255,255,255,.035)",
+                        lineHeight: 1.6,
                       }}
                     >
                       {item}
@@ -284,54 +444,147 @@ export default async function TourPage({
                 </div>
               </div>
 
-              <div className="card" style={{ marginTop: "20px" }}>
-                <span className="eyebrow">Sample itinerary</span>
-                <h2>How the journey unfolds</h2>
+              {/* ROUTE */}
+              {itinerary && (
+                <div
+                  className="card"
+                  style={{ marginTop: "20px" }}
+                >
+                  <span className="eyebrow">
+                    ROUTE OUTLINE
+                  </span>
 
-                <div style={{ display: "grid", gap: "14px", marginTop: "20px" }}>
-                  <div>
-                    <strong>Days 1–2</strong>
-                    <p className="muted">
-                      Arrival, orientation and preparation with the local team.
-                    </p>
-                  </div>
+                  <h2>How the journey unfolds</h2>
 
-                  <div>
-                    <strong>Early journey</strong>
-                    <p className="muted">
-                      Gradual travel into the mountains with time for
-                      acclimatization and cultural stops.
-                    </p>
-                  </div>
+                  <p
+                    className="muted"
+                    style={{
+                      lineHeight: 1.7,
+                      marginBottom: 24,
+                    }}
+                  >
+                    This is a planning outline rather than a confirmed
+                    day-by-day itinerary. The final route depends on your
+                    dates, current access requirements and confirmed travel
+                    arrangements.
+                  </p>
 
-                  <div>
-                    <strong>Core experience</strong>
-                    <p className="muted">
-                      Trekking or touring through the main highlights of the
-                      route, with flexible pacing based on local conditions.
-                    </p>
-                  </div>
+                  <div
+                    style={{
+                      display: "grid",
+                      gap: "18px",
+                    }}
+                  >
+                    <div>
+                      <strong>01 · ARRIVAL & ACCLIMATIZATION</strong>
+                      <p
+                        className="muted"
+                        style={{ lineHeight: 1.7 }}
+                      >
+                        {itinerary.opening}
+                      </p>
+                    </div>
 
-                  <div>
-                    <strong>Final days</strong>
-                    <p className="muted">
-                      Complete the route and return for a final night and trip
-                      debrief.
-                    </p>
+                    <div>
+                      <strong>02 · JOURNEY INTO TIBET</strong>
+                      <p
+                        className="muted"
+                        style={{ lineHeight: 1.7 }}
+                      >
+                        {itinerary.middle}
+                      </p>
+                    </div>
+
+                    <div>
+                      <strong>03 · CORE EXPERIENCE</strong>
+                      <p
+                        className="muted"
+                        style={{ lineHeight: 1.7 }}
+                      >
+                        {itinerary.focus}
+                      </p>
+                    </div>
+
+                    <div>
+                      <strong>04 · COMPLETION</strong>
+                      <p
+                        className="muted"
+                        style={{ lineHeight: 1.7 }}
+                      >
+                        {itinerary.ending}
+                      </p>
+                    </div>
                   </div>
+                </div>
+              )}
+
+              {/* PLANNING */}
+              <div
+                className="card"
+                style={{ marginTop: "20px" }}
+              >
+                <span className="eyebrow">
+                  BEFORE YOU GO
+                </span>
+
+                <h2>Plan for the plateau</h2>
+
+                <p
+                  className="muted"
+                  style={{ lineHeight: 1.8 }}
+                >
+                  Tibet is a high-altitude destination. Acclimatization,
+                  weather, road conditions, travel documentation, permits and
+                  route access can affect the final itinerary.
+                </p>
+
+                <p
+                  className="muted"
+                  style={{ lineHeight: 1.8 }}
+                >
+                  Current requirements should be confirmed for your
+                  nationality, dates and intended route before booking or
+                  departure.
+                </p>
+
+                <div
+                  className="actions"
+                  style={{ marginTop: 20 }}
+                >
+                  <Link
+                    className="btn alt"
+                    href="/weather-conditions"
+                  >
+                    Check conditions
+                  </Link>
+
+                  <Link
+                    className="btn alt"
+                    href="/tibet"
+                  >
+                    Explore Tibet
+                  </Link>
                 </div>
               </div>
 
-              <div className="card" style={{ marginTop: "20px" }}>
-                <span className="eyebrow">Location</span>
-                <h2>Route coordinates</h2>
+              {/* LOCATION */}
+              <div
+                className="card"
+                style={{ marginTop: "20px" }}
+              >
+                <span className="eyebrow">
+                  LOCATION
+                </span>
+
+                <h2>Journey reference</h2>
 
                 <p className="muted">
-                  Approximate route reference: {tour.lat}, {tour.lng}
+                  Approximate geographic reference: {tour.lat},{" "}
+                  {tour.lng}
                 </p>
 
                 <a
-                  className="btn"
+                  className="btn alt"
                   href={`https://www.openstreetmap.org/?mlat=${tour.lat}&mlon=${tour.lng}#map=7/${tour.lat}/${tour.lng}`}
                   target="_blank"
                   rel="noreferrer"
@@ -341,11 +594,22 @@ export default async function TourPage({
               </div>
             </div>
 
+            {/* BOOKING */}
             <aside>
-              <div className="card" style={{ position: "sticky", top: "100px" }}>
-                <span className="eyebrow">Plan your journey</span>
+              <div
+                className="card"
+                style={{
+                  position: "sticky",
+                  top: "100px",
+                }}
+              >
+                <span className="eyebrow">
+                  PLAN THIS JOURNEY
+                </span>
 
-                <h2>{tour.price}</h2>
+                <h2 style={{ marginBottom: 8 }}>
+                  From {tour.price}
+                </h2>
 
                 <p className="muted">
                   {tour.days} · {tour.difficulty}
@@ -355,10 +619,16 @@ export default async function TourPage({
 
                 <p
                   className="muted"
-                  style={{ marginTop: "16px", fontSize: "13px" }}
+                  style={{
+                    marginTop: "16px",
+                    fontSize: "13px",
+                    lineHeight: 1.6,
+                  }}
                 >
-                  Final dates, permits, accommodation and availability are
-                  confirmed by the booking team.
+                  Sending a request does not confirm a reservation or require
+                  payment. Final dates, itinerary, travel requirements,
+                  services, availability and price are confirmed before
+                  booking.
                 </p>
               </div>
             </aside>
