@@ -18,6 +18,12 @@ const regions = [
     href: "/tibet",
   },
   {
+    name: "Lhoka (Southern Tibet)",
+    label: "VALLEYS · HERITAGE · SOUTHERN TIBET",
+    text: "Explore the valleys, cultural heritage and historic landscapes of Lhoka, a quieter journey through southern Tibet beyond Lhasa.",
+    href: "/tours/lhoka-southern-tibet",
+  },
+  {
     name: "Everest",
     label: "PLATEAU · HIMALAYA · BASE CAMP",
     text: "Cross the Tibetan Plateau toward the north side of Mount Everest through high passes, monasteries and vast mountain landscapes.",
@@ -283,7 +289,7 @@ export default function Home() {
                   margin: 0,
                 }}
               >
-                Explore Lhasa, Shigatse, Everest, Namtso, Mount Kailash and
+                Explore Lhasa, Lhoka, Shigatse, Everest, Namtso, Mount Kailash and
                 remote plateau landscapes through journeys shaped around
                 altitude, culture, scenery and your preferred pace.
               </p>
@@ -526,7 +532,7 @@ export default function Home() {
                   }}
                 >
                   Explore the locations behind our journeys, from Lhasa and
-                  Shigatse to Everest, Namtso and Mount Kailash.
+                  Lhoka to Shigatse, Everest, Namtso and Mount Kailash.
                 </p>
               </div>
 
