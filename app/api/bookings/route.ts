@@ -83,8 +83,8 @@ function formatTourName(
     "lhasa-everest-base-camp":
       "Lhasa to Everest Base Camp",
 
-    "lhasa-shigatse-gyantse":
-      "Lhasa, Gyantse & Shigatse",
+    "lhoka-southern-tibet":
+      "Lhoka (Southern Tibet)",
 
     "tibet-high-plateau":
       "Tibet High Plateau",
