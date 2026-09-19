@@ -2,48 +2,86 @@ import Link from "next/link";
 
 const storyThemes = [
   {
-    region: "EVEREST • NEPAL",
-    title: "The journey is bigger than the summit",
-    text: "A Himalayan journey can be remembered through early mornings, mountain villages, changing landscapes and the gradual rhythm of moving higher.",
-    route: "Everest Base Camp",
-    href: "/tours/everest-base-camp",
+    region: "LHASA · TIBET",
+    title: "The first morning on the plateau",
+    text:
+      "A Tibet journey can be remembered through early light, historic streets, cultural places and the gradual realization that the plateau has its own rhythm.",
+    route: "Lhasa Classic Journey",
+    href: "/tours/lhasa-classic",
   },
   {
-    region: "ANNAPURNA • NEPAL",
-    title: "Finding the right pace in the mountains",
-    text: "Some of the strongest travel memories come from slowing down — sharing trails, watching the landscape change and allowing enough time to experience each place.",
-    route: "Annapurna Classic",
-    href: "/tours/annapurna-classic",
+    region: "EVEREST · TIBET",
+    title: "The road becomes part of the story",
+    text:
+      "Traveling from Lhasa toward Everest is not only about the final mountain view. Central Tibet, changing landscapes and the scale of the plateau become part of the experience.",
+    route: "Lhasa to Everest Base Camp",
+    href: "/tours/lhasa-everest-base-camp",
   },
   {
-    region: "BHUTAN",
-    title: "Mountains, monasteries and quiet moments",
-    text: "Himalayan travel does not always need to be about reaching the highest point. Culture, landscape and meaningful encounters can define the journey.",
-    route: "Bhutan Mountain & Culture",
-    href: "/tours/bhutan-mountain-culture",
+    region: "MOUNT KAILASH · TIBET",
+    title: "A journey shaped by a sacred landscape",
+    text:
+      "Mount Kailash can give a journey a very different character, combining remote high-altitude travel with pilgrimage traditions and a landscape of deep cultural significance.",
+    route: "Mount Kailash Kora",
+    href: "/tours/kailash-kora",
   },
 ];
 
 const moments = [
   {
     number: "01",
-    title: "The first mountain morning",
-    text: "Cold air, changing light and the first clear view of the mountains can become one of the defining memories of a journey.",
+    title: "The first plateau morning",
+    text:
+      "Cold air, changing light and the scale of the Tibetan landscape can make an ordinary morning one of the memorable moments of a journey.",
   },
   {
     number: "02",
-    title: "People along the trail",
-    text: "Guides, hosts, lodge owners and local communities are often as memorable as the landscapes themselves.",
+    title: "Understanding a place",
+    text:
+      "Guides, local context, monasteries, historic places and everyday observations can become as memorable as the major landscapes.",
   },
   {
     number: "03",
     title: "Learning to slow down",
-    text: "At altitude, patience matters. A slower pace can create space for acclimatization, observation and a deeper experience.",
+    text:
+      "At altitude, patience matters. A measured pace can create more room for adjustment, observation and a deeper experience of Tibet.",
   },
   {
     number: "04",
     title: "The unexpected day",
-    text: "Weather and mountain conditions sometimes change the plan. Flexibility can turn an unexpected day into part of the story.",
+    text:
+      "Weather, roads and local conditions can change a plan. Flexibility is part of high-altitude travel and sometimes becomes part of the story itself.",
+  },
+];
+
+const storyDirections = [
+  {
+    number: "01",
+    title: "Culture",
+    text:
+      "A story shaped by Lhasa, monasteries, historic places and time spent understanding Tibet's cultural context.",
+    href: "/culture-heritage",
+  },
+  {
+    number: "02",
+    title: "Landscape",
+    text:
+      "A journey remembered through plateau roads, lakes, Himalayan horizons, changing weather and enormous open spaces.",
+    href: "/tours/tibet-high-plateau",
+  },
+  {
+    number: "03",
+    title: "Photography",
+    text:
+      "A journey with more time to observe architecture, landscapes and changing light instead of moving quickly between stops.",
+    href: "/tours/tibet-photography",
+  },
+  {
+    number: "04",
+    title: "Pilgrimage",
+    text:
+      "A journey shaped by sacred landscapes, monasteries, religious traditions and respectful encounters with pilgrimage places.",
+    href: "/spiritual-journeys",
   },
 ];
 
@@ -56,15 +94,19 @@ export default function TravelerStoriesPage() {
         paddingBottom: 90,
       }}
     >
+      {/* HERO */}
+
       <section
         className="card"
         style={{
           padding: "clamp(28px, 5vw, 56px)",
           marginBottom: 38,
+          background:
+            "radial-gradient(circle at 85% 15%, rgba(109,224,194,.12), transparent 30%), linear-gradient(145deg, rgba(18,48,55,.96), rgba(8,28,35,.98))",
         }}
       >
         <span className="pill">
-          TRAVELER STORIES
+          TIBET TRAVELER STORIES
         </span>
 
         <h1
@@ -73,27 +115,27 @@ export default function TravelerStoriesPage() {
             marginBottom: 18,
             fontSize: "clamp(42px, 7vw, 76px)",
             lineHeight: 1,
-            maxWidth: 950,
+            maxWidth: 980,
           }}
         >
-          Every Himalayan journey
+          Every Tibet journey
           <br />
-          becomes a story.
+          becomes its own story.
         </h1>
 
         <p
           className="muted"
           style={{
-            maxWidth: 820,
+            maxWidth: 850,
             fontSize: 18,
             lineHeight: 1.75,
           }}
         >
-          The mountains are only one part of the
-          experience. The people you meet, the pace
-          of the trail and the unexpected moments
-          along the way are often what travelers
-          remember most.
+          The famous places are only one part of the
+          experience. Changing landscapes, cultural
+          context, quiet moments and unexpected days can
+          become the memories that define a Tibet
+          journey.
         </p>
 
         <div
@@ -104,17 +146,19 @@ export default function TravelerStoriesPage() {
             className="btn"
             href="/tours"
           >
-            Explore journeys
+            Explore Tibet journeys
           </Link>
 
           <Link
             className="btn alt"
             href="/custom-journey"
           >
-            Create your journey
+            Create your Tibet journey
           </Link>
         </div>
       </section>
+
+      {/* STORY THEMES */}
 
       <section>
         <span className="pill">
@@ -128,20 +172,20 @@ export default function TravelerStoriesPage() {
             fontSize: "clamp(28px, 4vw, 42px)",
           }}
         >
-          Stories that begin with a place
+          Stories that begin with a place.
         </h2>
 
         <p
           className="muted"
           style={{
-            maxWidth: 800,
+            maxWidth: 820,
             lineHeight: 1.7,
           }}
         >
-          These are journey themes inspired by
-          Himalayan travel, not published customer
-          testimonials. Real guest stories can be
-          added here as your traveler community grows.
+          These are Tibet journey themes created for
+          inspiration, not published customer
+          testimonials. Real guest stories can be added
+          here later as your traveler community grows.
         </p>
 
         <div
@@ -161,7 +205,7 @@ export default function TravelerStoriesPage() {
                 padding: 26,
                 display: "flex",
                 flexDirection: "column",
-                minHeight: 340,
+                minHeight: 360,
               }}
             >
               <span
@@ -224,6 +268,8 @@ export default function TravelerStoriesPage() {
         </div>
       </section>
 
+      {/* MOMENTS */}
+
       <section
         className="card"
         style={{
@@ -242,19 +288,18 @@ export default function TravelerStoriesPage() {
             fontSize: "clamp(28px, 4vw, 40px)",
           }}
         >
-          What makes a journey memorable?
+          What makes a Tibet journey memorable?
         </h2>
 
         <p
           className="muted"
           style={{
-            maxWidth: 760,
+            maxWidth: 780,
             lineHeight: 1.7,
           }}
         >
-          Himalayan travel is often defined by
-          smaller moments between the major
-          destinations.
+          Travel is often remembered through the smaller
+          moments between the major destinations.
         </p>
 
         <div
@@ -313,13 +358,108 @@ export default function TravelerStoriesPage() {
         </div>
       </section>
 
+      {/* WHAT KIND OF STORY */}
+
+      <section style={{ marginTop: 38 }}>
+        <span className="pill">
+          WHAT WILL SHAPE YOUR JOURNEY?
+        </span>
+
+        <h2
+          style={{
+            marginTop: 14,
+            marginBottom: 8,
+            fontSize: "clamp(28px, 4vw, 40px)",
+          }}
+        >
+          Different interests create different stories.
+        </h2>
+
+        <p
+          className="muted"
+          style={{
+            maxWidth: 820,
+            lineHeight: 1.7,
+          }}
+        >
+          Start with what draws you to Tibet, then use
+          those interests to choose or build the journey.
+        </p>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(230px, 1fr))",
+            gap: 16,
+            marginTop: 24,
+          }}
+        >
+          {storyDirections.map((item) => (
+            <article
+              className="card"
+              key={item.number}
+              style={{
+                padding: 24,
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 13,
+                  fontWeight: 800,
+                  letterSpacing: "0.12em",
+                  opacity: 0.6,
+                }}
+              >
+                DIRECTION {item.number}
+              </span>
+
+              <h3
+                style={{
+                  marginTop: 14,
+                  marginBottom: 10,
+                  fontSize: 22,
+                }}
+              >
+                {item.title}
+              </h3>
+
+              <p
+                className="muted"
+                style={{
+                  lineHeight: 1.7,
+                  flex: 1,
+                }}
+              >
+                {item.text}
+              </p>
+
+              <Link
+                className="btn alt"
+                href={item.href}
+                style={{
+                  alignSelf: "flex-start",
+                  marginTop: 12,
+                }}
+              >
+                Explore
+              </Link>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      {/* PREPARE + CONDITIONS */}
+
       <section
         style={{
           display: "grid",
           gridTemplateColumns:
             "repeat(auto-fit, minmax(300px, 1fr))",
           gap: 18,
-          marginTop: 24,
+          marginTop: 38,
         }}
       >
         <div
@@ -336,23 +476,23 @@ export default function TravelerStoriesPage() {
               fontSize: 28,
             }}
           >
-            Prepare for your own story
+            Prepare for your own Tibet story.
           </h2>
 
           <p
             className="muted"
             style={{ lineHeight: 1.7 }}
           >
-            Learn about altitude, packing, permits,
-            weather and pacing before you head into
-            the mountains.
+            Learn about altitude, packing, current
+            travel requirements, weather and pacing
+            before your Tibet journey.
           </p>
 
           <Link
             className="btn alt"
             href="/himalayan-guide"
           >
-            Read Himalayan Guide
+            Read Tibet Travel Guide
           </Link>
         </div>
 
@@ -370,25 +510,156 @@ export default function TravelerStoriesPage() {
               fontSize: 28,
             }}
           >
-            Know what the mountains are doing
+            See what the plateau is doing.
           </h2>
 
           <p
             className="muted"
             style={{ lineHeight: 1.7 }}
           >
-            Check live weather and the 7-day planning
-            outlook for key Himalayan regions.
+            Check current regional weather and the
+            7-day planning outlook for key Tibet
+            locations.
           </p>
 
           <Link
             className="btn"
             href="/weather-conditions"
           >
-            Check live weather
+            Check Tibet conditions
           </Link>
         </div>
       </section>
+
+      {/* REAL STORIES POLICY */}
+
+      <section
+        className="card"
+        style={{
+          marginTop: 24,
+          padding: "clamp(24px, 4vw, 40px)",
+        }}
+      >
+        <span className="pill">
+          REAL TRAVELER STORIES
+        </span>
+
+        <h2
+          style={{
+            marginTop: 14,
+            fontSize: "clamp(28px, 4vw, 40px)",
+          }}
+        >
+          Real stories will come from real travelers.
+        </h2>
+
+        <p
+          className="muted"
+          style={{
+            maxWidth: 900,
+            lineHeight: 1.75,
+          }}
+        >
+          We do not present fictional reviews as customer
+          testimonials. As travelers complete journeys
+          and choose to share their experiences, genuine
+          stories can be added here with appropriate
+          permission.
+        </p>
+      </section>
+
+      {/* RESPONSIBLE TRAVEL */}
+
+      <section
+        className="card"
+        style={{
+          marginTop: 24,
+          padding: "clamp(24px, 4vw, 40px)",
+        }}
+      >
+        <span className="pill">
+          TRAVEL WITH RESPECT
+        </span>
+
+        <h2
+          style={{
+            marginTop: 14,
+            fontSize: "clamp(28px, 4vw, 40px)",
+          }}
+        >
+          The traveler is only one part of the story.
+        </h2>
+
+        <p
+          className="muted"
+          style={{
+            maxWidth: 900,
+            lineHeight: 1.75,
+          }}
+        >
+          Tibet is not simply a backdrop for a personal
+          travel story. Respect local communities,
+          religious practice, sacred places and
+          photography guidance while experiencing the
+          journey.
+        </p>
+
+        <Link
+          className="btn alt"
+          href="/responsible-travel"
+          style={{ marginTop: 18 }}
+        >
+          Responsible Tibet travel
+        </Link>
+      </section>
+
+      {/* CURRENT INFORMATION */}
+
+      <section
+        className="card"
+        style={{
+          marginTop: 24,
+          padding: "clamp(24px, 4vw, 40px)",
+        }}
+      >
+        <span className="pill">
+          BEFORE YOU GO
+        </span>
+
+        <h2
+          style={{
+            marginTop: 14,
+            fontSize: "clamp(28px, 4vw, 40px)",
+          }}
+        >
+          Every journey depends on current conditions.
+        </h2>
+
+        <p
+          className="muted"
+          style={{
+            maxWidth: 900,
+            lineHeight: 1.75,
+          }}
+        >
+          Travel documentation, permits, route access,
+          transportation, weather and local operating
+          conditions can change. Confirm current
+          information for your nationality, travel dates
+          and intended Tibet route before final
+          arrangements are made.
+        </p>
+
+        <Link
+          className="btn alt"
+          href="/ai-research"
+          style={{ marginTop: 18 }}
+        >
+          Research current Tibet information
+        </Link>
+      </section>
+
+      {/* FINAL CTA */}
 
       <section
         className="card"
@@ -396,6 +667,8 @@ export default function TravelerStoriesPage() {
           marginTop: 24,
           padding: "clamp(28px, 5vw, 46px)",
           textAlign: "center",
+          background:
+            "linear-gradient(135deg, rgba(19,58,61,.9), rgba(16,35,42,.96))",
         }}
       >
         <span className="pill">
@@ -409,20 +682,20 @@ export default function TravelerStoriesPage() {
             fontSize: "clamp(30px, 5vw, 46px)",
           }}
         >
-          What will your Himalayan story be?
+          What will your Tibet story be?
         </h2>
 
         <p
           className="muted"
           style={{
-            maxWidth: 720,
+            maxWidth: 760,
             margin: "0 auto",
             lineHeight: 1.7,
           }}
         >
-          Start with an existing journey or create a
-          private itinerary around your dates, pace
-          and priorities.
+          Start with an existing Tibet journey or create
+          a private itinerary around your dates, pace,
+          interests and priorities.
         </p>
 
         <div
@@ -436,14 +709,14 @@ export default function TravelerStoriesPage() {
             className="btn"
             href="/custom-journey"
           >
-            Build my journey
+            Build my Tibet journey
           </Link>
 
           <Link
             className="btn alt"
             href="/contact-book"
           >
-            Request a trip
+            Request a Tibet trip
           </Link>
         </div>
       </section>
