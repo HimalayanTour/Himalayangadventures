@@ -9,9 +9,9 @@ const highlights = [
     text: "Begin in Lhasa with time to acclimatize while exploring historic quarters, monasteries and some of Tibet's most important cultural landmarks.",
   },
   {
-    label: "CENTRAL TIBET",
-    title: "Gyantse & Shigatse",
-    text: "Travel through valleys, high passes and historic towns while connecting Lhasa with the wider landscapes of central Tibet.",
+    label: "LHOKA · SOUTHERN TIBET",
+    title: "Valleys & heritage",
+    text: "Travel south of Lhasa into Lhoka, exploring broad valleys, historic places and cultural landscapes in one of Tibet's most important heritage regions.",
   },
   {
     label: "EVEREST",
@@ -94,8 +94,8 @@ export default function Page() {
               maxWidth: 880,
             }}
           >
-            Discover Tibet through journeys connecting Lhasa, Gyantse,
-            Shigatse, Everest, Namtso, Mount Kailash and the immense landscapes
+            Discover Tibet through journeys connecting Lhasa, Lhoka,
+            Everest, Namtso, Mount Kailash and the immense landscapes
             of the Tibetan Plateau — with altitude, culture and thoughtful
             pacing at the center of the experience.
           </p>
@@ -259,8 +259,8 @@ export default function Page() {
                   marginBottom: 0,
                 }}
               >
-                From shorter cultural journeys around Lhasa to Everest and
-                longer expeditions toward Mount Kailash, explore different
+                From shorter cultural journeys around Lhasa and Lhoka to Everest
+                and longer expeditions toward Mount Kailash, explore different
                 ways to experience Tibet.
               </p>
             </div>
