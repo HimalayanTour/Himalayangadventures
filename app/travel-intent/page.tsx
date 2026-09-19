@@ -122,13 +122,13 @@ const tours: TourMatch[] = [
     ],
   },
   {
-    name: "Lhasa, Gyantse & Shigatse",
-    slug: "lhasa-shigatse-gyantse",
+    name: "Lhoka (Southern Tibet)",
+    slug: "lhoka-southern-tibet",
     destination: "Tibet",
     duration: "7 days",
     difficulty: "Easy–Moderate",
     reason:
-      "A balanced cultural journey through Lhasa and central Tibet with historic towns, monasteries and beautiful overland scenery.",
+      "A quieter cultural journey through Lhoka in southern Tibet, with historic places, monasteries, broad valleys and heritage landscapes.",
     tags: [
       "culture",
       "spiritual",
