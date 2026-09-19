@@ -2,28 +2,31 @@ import Link from "next/link";
 
 const culturalJourneys = [
   {
-    region: "BHUTAN",
-    title: "Bhutan Mountain & Culture",
-    days: "9 days",
-    price: "From $2,490",
-    text: "Experience Bhutan through mountain landscapes, monasteries, traditional architecture and living cultural traditions.",
-    href: "/tours/bhutan-mountain-culture",
+    region: "CENTRAL TIBET",
+    title: "Lhasa Classic Journey",
+    days: "5 days",
+    price: "From $1,290",
+    text:
+      "Begin in Lhasa with a journey focused on cultural landmarks, historic places and time to experience the city at a thoughtful pace.",
+    href: "/tours/lhasa-classic",
+  },
+  {
+    region: "CENTRAL TIBET",
+    title: "Lhasa, Gyantse & Shigatse",
+    days: "7 days",
+    price: "From $1,590",
+    text:
+      "Travel beyond Lhasa through Central Tibet, connecting historic towns, cultural landscapes and important religious places.",
+    href: "/tours/lhasa-shigatse-gyantse",
   },
   {
     region: "TIBET",
-    title: "Tibet High Plateau",
-    days: "12 days",
-    price: "From $2,190",
-    text: "Explore the Tibetan Plateau through historic settlements, sacred places, dramatic landscapes and distinctive high-altitude culture.",
-    href: "/tours/tibet-high-plateau",
-  },
-  {
-    region: "NEPAL",
-    title: "Upper Mustang",
-    days: "11 days",
-    price: "From $1,790",
-    text: "Travel through a remarkable Himalayan region shaped by ancient settlements, Buddhist traditions and high-desert landscapes.",
-    href: "/tours/upper-mustang",
+    title: "Tibet Culture & Monasteries",
+    days: "9 days",
+    price: "From $1,990",
+    text:
+      "Explore Tibet through monasteries, cultural heritage, historic places and the living traditions that give context to the plateau.",
+    href: "/tours/tibet-culture-monasteries",
   },
 ];
 
@@ -31,32 +34,36 @@ const experiences = [
   {
     number: "01",
     title: "Monasteries & sacred places",
-    text: "Visit religious and sacred sites thoughtfully, following local guidance on dress, photography, ceremonies and access.",
+    text:
+      "Visit monasteries, temples and sacred places thoughtfully, following local guidance about access, behavior, photography and religious practice.",
   },
   {
     number: "02",
-    title: "Historic settlements",
-    text: "Explore towns and villages where architecture, trade routes and generations of local life reveal another side of the Himalaya.",
+    title: "Historic cities & towns",
+    text:
+      "Explore Lhasa, Gyantse, Shigatse and other places where architecture, history and generations of local life add depth to the journey.",
   },
   {
     number: "03",
     title: "Living traditions",
-    text: "Culture is not a museum exhibit. Food, language, craft, music, religion and everyday routines continue to evolve across Himalayan communities.",
+    text:
+      "Culture is not a museum exhibit. Language, religion, food, craft, pilgrimage and everyday routines continue as part of contemporary life in Tibet.",
   },
   {
     number: "04",
-    title: "Local storytelling",
-    text: "Guides and hosts can add context that landscapes alone cannot provide, connecting places with history, belief and personal experience.",
+    title: "Local context",
+    text:
+      "Experienced guides can help connect architecture and landscapes with history, belief, etiquette and the cultural meaning of the places you visit.",
   },
 ];
 
 const respectfulTravel = [
   "Ask before photographing people, ceremonies or private spaces.",
-  "Follow local rules at monasteries, temples and sacred sites.",
-  "Dress appropriately where local customs or religious traditions require it.",
-  "Avoid treating religious objects or ceremonies as entertainment.",
-  "Support locally made crafts when purchasing souvenirs.",
-  "Listen to local guides when cultural expectations differ from your own.",
+  "Follow local guidance at monasteries, temples and sacred places.",
+  "Dress and behave appropriately where religious or cultural traditions require it.",
+  "Avoid treating religious practice, ceremonies or sacred objects as entertainment.",
+  "Choose souvenirs thoughtfully and support appropriate local craftsmanship where practical.",
+  "Listen to your guide when cultural expectations or access rules are unfamiliar.",
 ];
 
 export default function CultureHeritagePage() {
@@ -68,15 +75,19 @@ export default function CultureHeritagePage() {
         paddingBottom: 90,
       }}
     >
+      {/* HERO */}
+
       <section
         className="card"
         style={{
           padding: "clamp(28px, 5vw, 56px)",
           marginBottom: 38,
+          background:
+            "radial-gradient(circle at 85% 15%, rgba(109,224,194,.12), transparent 30%), linear-gradient(145deg, rgba(18,48,55,.96), rgba(8,28,35,.98))",
         }}
       >
         <span className="pill">
-          CULTURE & HERITAGE
+          TIBET CULTURE &amp; HERITAGE
         </span>
 
         <h1
@@ -88,22 +99,22 @@ export default function CultureHeritagePage() {
             maxWidth: 980,
           }}
         >
-          Beyond the mountains,
+          Beyond the landscape,
           <br />
-          discover the people and places.
+          discover living Tibet.
         </h1>
 
         <p
           className="muted"
           style={{
-            maxWidth: 840,
+            maxWidth: 850,
             fontSize: 18,
             lineHeight: 1.75,
           }}
         >
-          Explore monasteries, historic settlements,
-          sacred landscapes and living traditions
-          across Himalayan regions — with curiosity,
+          Explore Tibet through historic cities,
+          monasteries, sacred places, architecture and
+          living cultural traditions—with curiosity,
           context and respect.
         </p>
 
@@ -113,9 +124,9 @@ export default function CultureHeritagePage() {
         >
           <Link
             className="btn"
-            href="/tours"
+            href="/tours/tibet-culture-monasteries"
           >
-            Explore cultural journeys
+            Explore culture journey
           </Link>
 
           <Link
@@ -127,9 +138,11 @@ export default function CultureHeritagePage() {
         </div>
       </section>
 
+      {/* FEATURED JOURNEYS */}
+
       <section>
         <span className="pill">
-          FEATURED JOURNEYS
+          FEATURED TIBET JOURNEYS
         </span>
 
         <h2
@@ -145,13 +158,14 @@ export default function CultureHeritagePage() {
         <p
           className="muted"
           style={{
-            maxWidth: 780,
+            maxWidth: 800,
             lineHeight: 1.7,
           }}
         >
-          These journeys combine Himalayan landscapes
-          with opportunities to experience historic,
-          cultural and spiritual traditions.
+          These Tibet journeys give cultural places and
+          historic landscapes a central role rather than
+          treating them as brief stops between scenic
+          highlights.
         </p>
 
         <div
@@ -231,6 +245,8 @@ export default function CultureHeritagePage() {
         </div>
       </section>
 
+      {/* CULTURAL EXPERIENCES */}
+
       <section
         className="card"
         style={{
@@ -255,13 +271,14 @@ export default function CultureHeritagePage() {
         <p
           className="muted"
           style={{
-            maxWidth: 780,
+            maxWidth: 800,
             lineHeight: 1.7,
           }}
         >
-          A cultural journey becomes more meaningful
-          when there is time to understand the places
-          and communities along the route.
+          A cultural journey becomes more meaningful when
+          there is enough time to understand the places,
+          traditions and communities encountered along the
+          route.
         </p>
 
         <div
@@ -320,6 +337,8 @@ export default function CultureHeritagePage() {
         </div>
       </section>
 
+      {/* CULTURAL APPROACH */}
+
       <section
         style={{
           display: "grid",
@@ -350,9 +369,10 @@ export default function CultureHeritagePage() {
             className="muted"
             style={{ lineHeight: 1.7 }}
           >
-            Cultural experiences are strongest when
-            travelers approach communities as guests,
-            not simply as attractions.
+            Cultural experiences are more meaningful when
+            travelers approach Tibet&apos;s communities,
+            monasteries and sacred places as guests rather
+            than simply as attractions.
           </p>
 
           <div
@@ -394,7 +414,7 @@ export default function CultureHeritagePage() {
               marginTop: 24,
             }}
           >
-            Responsible travel guide
+            Responsible Tibet travel
           </Link>
         </div>
 
@@ -412,7 +432,7 @@ export default function CultureHeritagePage() {
               fontSize: 28,
             }}
           >
-            Give culture enough time
+            Give cultural places enough time
           </h2>
 
           <p
@@ -421,20 +441,80 @@ export default function CultureHeritagePage() {
               lineHeight: 1.75,
             }}
           >
-            A private itinerary can create more room
-            for monasteries, heritage sites, local
-            communities, photography and slower travel
-            rather than rushing between highlights.
+            A private Tibet journey can be shaped around
+            your interests in monasteries, historic places,
+            photography, architecture and slower travel
+            rather than trying to rush between highlights.
           </p>
 
           <Link
             className="btn"
             href="/custom-journey"
           >
-            Build cultural journey
+            Build cultural Tibet journey
           </Link>
         </div>
       </section>
+
+      {/* CULTURE + LANDSCAPE */}
+
+      <section
+        className="card"
+        style={{
+          marginTop: 24,
+          padding: "clamp(26px, 4vw, 40px)",
+        }}
+      >
+        <span className="pill">
+          CULTURE &amp; LANDSCAPE
+        </span>
+
+        <h2
+          style={{
+            marginTop: 14,
+            marginBottom: 12,
+            fontSize: "clamp(28px, 4vw, 40px)",
+          }}
+        >
+          The landscape and culture are connected.
+        </h2>
+
+        <p
+          className="muted"
+          style={{
+            maxWidth: 880,
+            lineHeight: 1.75,
+          }}
+        >
+          Tibet&apos;s cultural experience extends beyond
+          individual buildings or monuments. Historic
+          settlements, pilgrimage landscapes, monasteries,
+          high mountain routes and the plateau itself form
+          part of the context through which a journey can
+          be understood.
+        </p>
+
+        <div
+          className="actions"
+          style={{ marginTop: 22 }}
+        >
+          <Link
+            className="btn alt"
+            href="/tibet"
+          >
+            Explore Tibet
+          </Link>
+
+          <Link
+            className="btn alt"
+            href="/tours"
+          >
+            View Tibet journeys
+          </Link>
+        </div>
+      </section>
+
+      {/* BEFORE YOU GO */}
 
       <section
         className="card"
@@ -453,22 +533,23 @@ export default function CultureHeritagePage() {
             fontSize: "clamp(28px, 4vw, 40px)",
           }}
         >
-          Understand the destination before arrival
+          Understand the journey before arrival
         </h2>
 
         <p
           className="muted"
           style={{
-            maxWidth: 850,
+            maxWidth: 880,
             lineHeight: 1.75,
           }}
         >
-          Entry requirements, permits, cultural
-          expectations and access to particular sites
-          can vary by region and may change. Research
-          current requirements before travel and
-          follow the guidance of local authorities,
-          hosts and experienced guides.
+          Travel documentation, permits, route access,
+          local requirements and access to particular
+          places can change. Cultural expectations and
+          photography rules can also vary by location.
+          Confirm current information before travel and
+          follow appropriate local guidance throughout
+          your journey.
         </p>
 
         <div
@@ -479,17 +560,19 @@ export default function CultureHeritagePage() {
             className="btn alt"
             href="/himalayan-guide"
           >
-            Read Himalayan Guide
+            Read Tibet Travel Guide
           </Link>
 
           <Link
             className="btn alt"
-            href="/ai-trip-planner"
+            href="/ai-research"
           >
-            Research with AI
+            Research current information
           </Link>
         </div>
       </section>
+
+      {/* FINAL CTA */}
 
       <section
         className="card"
@@ -497,10 +580,12 @@ export default function CultureHeritagePage() {
           marginTop: 24,
           padding: "clamp(28px, 5vw, 46px)",
           textAlign: "center",
+          background:
+            "linear-gradient(135deg, rgba(19,58,61,.9), rgba(16,35,42,.96))",
         }}
       >
         <span className="pill">
-          TRAVEL DEEPER
+          EXPERIENCE TIBET DEEPER
         </span>
 
         <h2
@@ -510,20 +595,20 @@ export default function CultureHeritagePage() {
             fontSize: "clamp(30px, 5vw, 46px)",
           }}
         >
-          Discover the Himalaya through its stories.
+          Discover Tibet through culture and place.
         </h2>
 
         <p
           className="muted"
           style={{
-            maxWidth: 730,
+            maxWidth: 760,
             margin: "0 auto",
             lineHeight: 1.7,
           }}
         >
-          Tell us which places, traditions and
-          experiences interest you, and build a
-          journey around what you want to understand.
+          Tell us which places, traditions and experiences
+          interest you, then shape a Tibet journey around
+          what you want to see, experience and understand.
         </p>
 
         <div
@@ -537,14 +622,14 @@ export default function CultureHeritagePage() {
             className="btn"
             href="/custom-journey"
           >
-            Create my journey
+            Create my Tibet journey
           </Link>
 
           <Link
             className="btn alt"
             href="/contact-book"
           >
-            Request a trip
+            Request a Tibet trip
           </Link>
         </div>
       </section>
