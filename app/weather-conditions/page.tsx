@@ -1,6 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 
 type WeatherData = {
   current?: {
@@ -41,52 +45,58 @@ type LocationOption = {
 
 const locations: LocationOption[] = [
   {
-    id: "everest",
-    name: "Everest Region",
-    region: "Nepal",
-    lat: 27.9881,
-    lng: 86.925,
-    note: "Useful for Everest Base Camp planning and high-altitude conditions.",
-  },
-  {
-    id: "annapurna",
-    name: "Annapurna Region",
-    region: "Nepal",
-    lat: 28.596,
-    lng: 83.82,
-    note: "Useful for Annapurna trekking conditions and mountain weather.",
-  },
-  {
-    id: "langtang",
-    name: "Langtang Region",
-    region: "Nepal",
-    lat: 28.211,
-    lng: 85.568,
-    note: "Useful for Langtang Valley planning and short-term weather checks.",
-  },
-  {
-    id: "bhutan",
-    name: "Paro / Bhutan",
-    region: "Bhutan",
-    lat: 27.43,
-    lng: 89.416,
-    note: "A useful reference point for Bhutan mountain and cultural journeys.",
-  },
-  {
     id: "lhasa",
-    name: "Lhasa / Tibet",
-    region: "Tibet",
+    name: "Lhasa",
+    region: "Central Tibet",
     lat: 29.652,
     lng: 91.172,
-    note: "A useful reference point for Tibet high-plateau travel.",
+    note:
+      "A useful weather reference for Lhasa and the beginning of many Central Tibet journeys.",
   },
   {
-    id: "ladakh",
-    name: "Leh / Ladakh",
-    region: "India",
-    lat: 34.1526,
-    lng: 77.5771,
-    note: "A useful reference point for Ladakh high-altitude journeys.",
+    id: "shigatse",
+    name: "Shigatse",
+    region: "Central Tibet",
+    lat: 29.267,
+    lng: 88.881,
+    note:
+      "A useful reference for journeys through Shigatse and the western part of Central Tibet.",
+  },
+  {
+    id: "everest-tibet",
+    name: "Everest Region",
+    region: "Tibet",
+    lat: 28.193,
+    lng: 86.829,
+    note:
+      "A high-altitude reference point for Tibet-side Everest journeys. Local mountain conditions can differ substantially from regional forecasts.",
+  },
+  {
+    id: "namtso",
+    name: "Namtso Lake",
+    region: "High Plateau",
+    lat: 30.718,
+    lng: 90.643,
+    note:
+      "A high-elevation reference for Namtso and surrounding plateau travel, where wind and temperature can change quickly.",
+  },
+  {
+    id: "kailash",
+    name: "Mount Kailash",
+    region: "Western Tibet",
+    lat: 31.0675,
+    lng: 81.3119,
+    note:
+      "A regional weather reference for Mount Kailash and western Tibet. Remote high-altitude conditions require additional local verification.",
+  },
+  {
+    id: "plateau",
+    name: "Tibet High Plateau",
+    region: "Tibet",
+    lat: 30.2,
+    lng: 86.3,
+    note:
+      "A broad plateau reference. Conditions vary greatly across Tibet, so use the nearest relevant location whenever possible.",
   },
 ];
 
@@ -94,29 +104,70 @@ function weatherLabel(code?: number) {
   if (code === undefined) return "Unknown";
 
   if (code === 0) return "Clear sky";
-  if ([1, 2].includes(code)) return "Mostly clear";
+  if ([1, 2].includes(code))
+    return "Mostly clear";
   if (code === 3) return "Overcast";
-  if ([45, 48].includes(code)) return "Fog";
-  if ([51, 53, 55].includes(code)) return "Drizzle";
-  if ([61, 63, 65].includes(code)) return "Rain";
-  if ([71, 73, 75, 77].includes(code)) return "Snow";
-  if ([80, 81, 82].includes(code)) return "Rain showers";
-  if ([85, 86].includes(code)) return "Snow showers";
-  if ([95, 96, 99].includes(code)) return "Thunderstorms";
+  if ([45, 48].includes(code))
+    return "Fog";
+  if ([51, 53, 55].includes(code))
+    return "Drizzle";
+  if ([61, 63, 65].includes(code))
+    return "Rain";
+  if (
+    [71, 73, 75, 77].includes(code)
+  )
+    return "Snow";
+  if (
+    [80, 81, 82].includes(code)
+  )
+    return "Rain showers";
+  if ([85, 86].includes(code))
+    return "Snow showers";
+  if (
+    [95, 96, 99].includes(code)
+  )
+    return "Thunderstorms";
 
   return "Variable conditions";
 }
 
 function weatherSymbol(code?: number) {
   if (code === 0) return "☀";
-  if ([1, 2].includes(code ?? -1)) return "◐";
+
+  if (
+    [1, 2].includes(code ?? -1)
+  )
+    return "◐";
+
   if (code === 3) return "☁";
-  if ([45, 48].includes(code ?? -1)) return "≋";
-  if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code ?? -1)) {
+
+  if (
+    [45, 48].includes(code ?? -1)
+  )
+    return "≋";
+
+  if (
+    [
+      51, 53, 55, 61, 63, 65,
+      80, 81, 82,
+    ].includes(code ?? -1)
+  ) {
     return "☂";
   }
-  if ([71, 73, 75, 77, 85, 86].includes(code ?? -1)) return "❄";
-  if ([95, 96, 99].includes(code ?? -1)) return "ϟ";
+
+  if (
+    [
+      71, 73, 75, 77, 85, 86,
+    ].includes(code ?? -1)
+  )
+    return "❄";
+
+  if (
+    [95, 96, 99].includes(
+      code ?? -1
+    )
+  )
+    return "ϟ";
 
   return "○";
 }
@@ -124,69 +175,107 @@ function weatherSymbol(code?: number) {
 function formatDate(date?: string) {
   if (!date) return "";
 
-  const parsed = new Date(`${date}T00:00:00`);
+  const parsed = new Date(
+    `${date}T00:00:00`
+  );
 
-  return parsed.toLocaleDateString(undefined, {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-  });
+  return parsed.toLocaleDateString(
+    undefined,
+    {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    }
+  );
 }
 
 export default function WeatherConditionsPage() {
-  const [selectedId, setSelectedId] = useState("everest");
-  const [data, setData] = useState<WeatherData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [selectedId, setSelectedId] =
+    useState("lhasa");
+
+  const [data, setData] =
+    useState<WeatherData | null>(
+      null
+    );
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState("");
 
   const selectedLocation =
-    locations.find((location) => location.id === selectedId) || locations[0];
+    locations.find(
+      (location) =>
+        location.id === selectedId
+    ) || locations[0];
 
-  const loadWeather = useCallback(async () => {
-    setLoading(true);
-    setError("");
+  const loadWeather =
+    useCallback(async () => {
+      setLoading(true);
+      setError("");
 
-    try {
-      const response = await fetch(
-        `/api/weather?lat=${selectedLocation.lat}&lng=${selectedLocation.lng}`,
-        {
-          cache: "no-store",
+      try {
+        const response =
+          await fetch(
+            `/api/weather?lat=${selectedLocation.lat}&lng=${selectedLocation.lng}`,
+            {
+              cache: "no-store",
+            }
+          );
+
+        const result =
+          (await response.json()) as WeatherData;
+
+        if (
+          !response.ok ||
+          result.error
+        ) {
+          setData(null);
+
+          setError(
+            result.error ||
+              "Weather information could not be loaded."
+          );
+
+          return;
         }
-      );
 
-      const result = (await response.json()) as WeatherData;
-
-      if (!response.ok || result.error) {
-        setData(null);
-        setError(
-          result.error || "Weather information could not be loaded."
+        setData(result);
+      } catch (requestError) {
+        console.error(
+          "Weather request failed:",
+          requestError
         );
-        return;
+
+        setData(null);
+
+        setError(
+          "Weather information could not be loaded."
+        );
+      } finally {
+        setLoading(false);
       }
-
-      setData(result);
-    } catch (requestError) {
-      console.error("Weather request failed:", requestError);
-
-      setData(null);
-      setError("Weather information could not be loaded.");
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedLocation.lat, selectedLocation.lng]);
+    }, [
+      selectedLocation.lat,
+      selectedLocation.lng,
+    ]);
 
   useEffect(() => {
     loadWeather();
   }, [loadWeather]);
 
-  const forecastDays = data?.daily?.time || [];
+  const forecastDays =
+    data?.daily?.time || [];
 
   return (
     <main>
       {/* HERO */}
+
       <section
         style={{
-          padding: "clamp(58px, 8vw, 100px) 0 48px",
+          padding:
+            "clamp(58px, 8vw, 100px) 0 48px",
           background:
             "radial-gradient(circle at 75% 10%, rgba(109,224,194,.13), transparent 32%)",
         }}
@@ -199,19 +288,20 @@ export default function WeatherConditionsPage() {
               letterSpacing: ".18em",
             }}
           >
-            LIVE HIMALAYAN CONDITIONS
+            LIVE TIBET CONDITIONS
           </div>
 
           <h1
             style={{
-              fontSize: "clamp(48px, 8vw, 88px)",
+              fontSize:
+                "clamp(48px, 8vw, 88px)",
               lineHeight: 0.94,
               letterSpacing: "-.055em",
               maxWidth: 1000,
               margin: 0,
             }}
           >
-            Know the mountains
+            Know the plateau
             <br />
             before you go.
           </h1>
@@ -219,20 +309,25 @@ export default function WeatherConditionsPage() {
           <p
             className="muted"
             style={{
-              maxWidth: 820,
+              maxWidth: 830,
               fontSize: 18,
               lineHeight: 1.8,
               marginTop: 24,
               marginBottom: 0,
             }}
           >
-            Explore current weather and a seven-day planning outlook for key
-            Himalayan regions across Nepal, Bhutan, Tibet and Ladakh.
+            Explore current weather and a
+            seven-day planning outlook for
+            key Tibet journey areas,
+            including Lhasa, Shigatse,
+            Everest, Namtso and Mount
+            Kailash.
           </p>
         </div>
       </section>
 
       {/* LOCATION SELECTOR */}
+
       <section className="section">
         <div className="container">
           <div
@@ -242,7 +337,7 @@ export default function WeatherConditionsPage() {
               letterSpacing: ".15em",
             }}
           >
-            SELECT A REGION
+            SELECT A TIBET LOCATION
           </div>
 
           <div
@@ -253,56 +348,73 @@ export default function WeatherConditionsPage() {
               gap: 12,
             }}
           >
-            {locations.map((location) => {
-              const active = selectedId === location.id;
+            {locations.map(
+              (location) => {
+                const active =
+                  selectedId ===
+                  location.id;
 
-              return (
-                <button
-                  key={location.id}
-                  type="button"
-                  onClick={() => setSelectedId(location.id)}
-                  aria-pressed={active}
-                  style={{
-                    textAlign: "left",
-                    minHeight: 100,
-                    padding: "17px",
-                    borderRadius: 17,
-                    border: active
-                      ? "1px solid rgba(109,224,194,.75)"
-                      : "1px solid rgba(255,255,255,.09)",
-                    background: active
-                      ? "linear-gradient(145deg, rgba(109,224,194,.16), rgba(109,224,194,.06))"
-                      : "rgba(255,255,255,.035)",
-                    color: "inherit",
-                    cursor: "pointer",
-                    transition:
-                      "border-color .2s ease, background .2s ease, transform .2s ease",
-                  }}
-                >
-                  <span
+                return (
+                  <button
+                    key={location.id}
+                    type="button"
+                    onClick={() =>
+                      setSelectedId(
+                        location.id
+                      )
+                    }
+                    aria-pressed={
+                      active
+                    }
                     style={{
-                      display: "block",
-                      color: active ? "#6de0c2" : "#8fa5aa",
-                      fontSize: 10,
-                      fontWeight: 900,
-                      letterSpacing: ".13em",
-                      marginBottom: 8,
+                      textAlign: "left",
+                      minHeight: 100,
+                      padding: "17px",
+                      borderRadius: 17,
+                      border: active
+                        ? "1px solid rgba(109,224,194,.75)"
+                        : "1px solid rgba(255,255,255,.09)",
+                      background:
+                        active
+                          ? "linear-gradient(145deg, rgba(109,224,194,.16), rgba(109,224,194,.06))"
+                          : "rgba(255,255,255,.035)",
+                      color: "inherit",
+                      cursor:
+                        "pointer",
+                      transition:
+                        "border-color .2s ease, background .2s ease, transform .2s ease",
                     }}
                   >
-                    {location.region.toUpperCase()}
-                  </span>
+                    <span
+                      style={{
+                        display:
+                          "block",
+                        color: active
+                          ? "#6de0c2"
+                          : "#8fa5aa",
+                        fontSize: 10,
+                        fontWeight: 900,
+                        letterSpacing:
+                          ".13em",
+                        marginBottom: 8,
+                      }}
+                    >
+                      {location.region.toUpperCase()}
+                    </span>
 
-                  <strong
-                    style={{
-                      display: "block",
-                      fontSize: 16,
-                    }}
-                  >
-                    {location.name}
-                  </strong>
-                </button>
-              );
-            })}
+                    <strong
+                      style={{
+                        display:
+                          "block",
+                        fontSize: 16,
+                      }}
+                    >
+                      {location.name}
+                    </strong>
+                  </button>
+                );
+              }
+            )}
           </div>
 
           <p
@@ -319,6 +431,7 @@ export default function WeatherConditionsPage() {
       </section>
 
       {/* LOADING */}
+
       {loading && (
         <section className="section">
           <div className="container">
@@ -327,9 +440,12 @@ export default function WeatherConditionsPage() {
               style={{
                 minHeight: 220,
                 display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                textAlign: "center",
+                alignItems:
+                  "center",
+                justifyContent:
+                  "center",
+                textAlign:
+                  "center",
               }}
             >
               <div>
@@ -342,7 +458,10 @@ export default function WeatherConditionsPage() {
                   ◌
                 </div>
 
-                <strong>Loading live conditions...</strong>
+                <strong>
+                  Loading live Tibet
+                  conditions...
+                </strong>
 
                 <p
                   className="muted"
@@ -350,7 +469,10 @@ export default function WeatherConditionsPage() {
                     marginBottom: 0,
                   }}
                 >
-                  Checking {selectedLocation.name}
+                  Checking{" "}
+                  {
+                    selectedLocation.name
+                  }
                 </p>
               </div>
             </div>
@@ -359,11 +481,14 @@ export default function WeatherConditionsPage() {
       )}
 
       {/* ERROR */}
+
       {!loading && error && (
         <section className="section">
           <div className="container">
             <div className="card">
-              <div className="notice">{error}</div>
+              <div className="notice">
+                {error}
+              </div>
 
               <button
                 className="btn"
@@ -381,6 +506,7 @@ export default function WeatherConditionsPage() {
       )}
 
       {/* WEATHER DASHBOARD */}
+
       {!loading && data && (
         <>
           <section className="section">
@@ -391,77 +517,107 @@ export default function WeatherConditionsPage() {
                   gridTemplateColumns:
                     "repeat(auto-fit, minmax(280px, 1fr))",
                   gap: 18,
-                  alignItems: "stretch",
+                  alignItems:
+                    "stretch",
                 }}
               >
-                {/* MAIN CURRENT WEATHER */}
+                {/* CURRENT WEATHER */}
+
                 <div
                   className="card"
                   style={{
-                    padding: "clamp(26px, 4vw, 42px)",
+                    padding:
+                      "clamp(26px, 4vw, 42px)",
                     background:
                       "radial-gradient(circle at 85% 10%, rgba(109,224,194,.18), transparent 35%), linear-gradient(145deg, rgba(19,55,62,.96), rgba(10,28,35,.98))",
                   }}
                 >
                   <div
                     className="eyebrow"
-                    style={{ marginBottom: 14 }}
+                    style={{
+                      marginBottom: 14,
+                    }}
                   >
                     CURRENT CONDITIONS
                   </div>
 
                   <h2
                     style={{
-                      fontSize: "clamp(30px, 4vw, 44px)",
+                      fontSize:
+                        "clamp(30px, 4vw, 44px)",
                       marginTop: 0,
                       marginBottom: 28,
                     }}
                   >
-                    {selectedLocation.name}
+                    {
+                      selectedLocation.name
+                    }
                   </h2>
 
                   <div
                     style={{
                       display: "flex",
-                      alignItems: "center",
+                      alignItems:
+                        "center",
                       gap: 22,
-                      flexWrap: "wrap",
+                      flexWrap:
+                        "wrap",
                     }}
                   >
                     <div
                       aria-hidden="true"
                       style={{
-                        fontSize: "clamp(54px, 8vw, 86px)",
+                        fontSize:
+                          "clamp(54px, 8vw, 86px)",
                         lineHeight: 1,
-                        color: "#6de0c2",
+                        color:
+                          "#6de0c2",
                       }}
                     >
-                      {weatherSymbol(data.current?.weather_code)}
+                      {weatherSymbol(
+                        data.current
+                          ?.weather_code
+                      )}
                     </div>
 
                     <div>
                       <strong
                         style={{
-                          display: "block",
-                          fontSize: "clamp(52px, 8vw, 84px)",
-                          lineHeight: 0.9,
-                          letterSpacing: "-.055em",
+                          display:
+                            "block",
+                          fontSize:
+                            "clamp(52px, 8vw, 84px)",
+                          lineHeight:
+                            0.9,
+                          letterSpacing:
+                            "-.055em",
                         }}
                       >
-                        {data.current?.temperature_2m !== undefined
-                          ? `${data.current.temperature_2m}${data.current_units?.temperature_2m || "°C"}`
+                        {data.current
+                          ?.temperature_2m !==
+                        undefined
+                          ? `${data.current.temperature_2m}${
+                              data
+                                .current_units
+                                ?.temperature_2m ||
+                              "°C"
+                            }`
                           : "—"}
                       </strong>
 
                       <span
                         className="muted"
                         style={{
-                          display: "block",
+                          display:
+                            "block",
                           marginTop: 12,
                           fontSize: 17,
                         }}
                       >
-                        {weatherLabel(data.current?.weather_code)}
+                        {weatherLabel(
+                          data.current
+                            ?.weather_code
+                        )}
                       </span>
                     </div>
                   </div>
@@ -475,12 +631,14 @@ export default function WeatherConditionsPage() {
                         fontSize: 13,
                       }}
                     >
-                      Forecast timezone: {data.timezone}
+                      Forecast timezone:{" "}
+                      {data.timezone}
                     </p>
                   )}
                 </div>
 
-                {/* CURRENT DETAILS */}
+                {/* DETAILS */}
+
                 <div
                   style={{
                     display: "grid",
@@ -492,9 +650,14 @@ export default function WeatherConditionsPage() {
                   <ConditionCard
                     label="Wind"
                     value={
-                      data.current?.wind_speed_10m !== undefined
+                      data.current
+                        ?.wind_speed_10m !==
+                      undefined
                         ? `${data.current.wind_speed_10m} ${
-                            data.current_units?.wind_speed_10m || "km/h"
+                            data
+                              .current_units
+                              ?.wind_speed_10m ||
+                            "km/h"
                           }`
                         : "Unavailable"
                     }
@@ -503,9 +666,14 @@ export default function WeatherConditionsPage() {
                   <ConditionCard
                     label="Precipitation"
                     value={
-                      data.current?.precipitation !== undefined
+                      data.current
+                        ?.precipitation !==
+                      undefined
                         ? `${data.current.precipitation}${
-                            data.current_units?.precipitation || " mm"
+                            data
+                              .current_units
+                              ?.precipitation ||
+                            " mm"
                           }`
                         : "Unavailable"
                     }
@@ -513,12 +681,17 @@ export default function WeatherConditionsPage() {
 
                   <ConditionCard
                     label="Weather"
-                    value={weatherLabel(data.current?.weather_code)}
+                    value={weatherLabel(
+                      data.current
+                        ?.weather_code
+                    )}
                   />
 
                   <ConditionCard
-                    label="Region"
-                    value={selectedLocation.region}
+                    label="Tibet region"
+                    value={
+                      selectedLocation.region
+                    }
                   />
                 </div>
               </div>
@@ -526,13 +699,15 @@ export default function WeatherConditionsPage() {
           </section>
 
           {/* 7 DAY FORECAST */}
+
           <section className="section">
             <div className="container">
               <div
                 className="eyebrow"
                 style={{
                   marginBottom: 14,
-                  letterSpacing: ".15em",
+                  letterSpacing:
+                    ".15em",
                 }}
               >
                 SEVEN-DAY OUTLOOK
@@ -540,25 +715,32 @@ export default function WeatherConditionsPage() {
 
               <h2
                 style={{
-                  fontSize: "clamp(36px, 5vw, 54px)",
+                  fontSize:
+                    "clamp(36px, 5vw, 54px)",
                   marginTop: 0,
                   marginBottom: 14,
                 }}
               >
-                Plan for changing conditions.
+                Plan for changing
+                conditions.
               </h2>
 
               <p
                 className="muted"
                 style={{
-                  maxWidth: 760,
+                  maxWidth: 790,
                   lineHeight: 1.8,
                   marginBottom: 28,
                 }}
               >
-                Use the forecast as an early planning reference. Conditions at
-                higher elevations can differ significantly from regional
-                forecasts.
+                Use this forecast as a
+                planning reference. Tibet
+                covers a vast high-altitude
+                area, and conditions at
+                mountain passes, remote
+                roads and higher elevations
+                can differ significantly
+                from a regional forecast.
               </p>
 
               <div
@@ -569,123 +751,153 @@ export default function WeatherConditionsPage() {
                   gap: 12,
                 }}
               >
-                {forecastDays.map((date, index) => (
-                  <div
-                    className="card"
-                    key={date}
-                    style={{
-                      padding: 18,
-                    }}
-                  >
-                    <strong
-                      style={{
-                        display: "block",
-                        fontSize: 15,
-                      }}
-                    >
-                      {formatDate(date)}
-                    </strong>
-
+                {forecastDays.map(
+                  (date, index) => (
                     <div
-                      aria-hidden="true"
+                      className="card"
+                      key={date}
                       style={{
-                        color: "#6de0c2",
-                        fontSize: 34,
-                        marginTop: 18,
-                        marginBottom: 10,
-                      }}
-                    >
-                      {weatherSymbol(
-                        data.daily?.weather_code?.[index]
-                      )}
-                    </div>
-
-                    <div
-                      className="muted"
-                      style={{
-                        minHeight: 42,
-                        fontSize: 13,
-                        lineHeight: 1.5,
-                      }}
-                    >
-                      {weatherLabel(
-                        data.daily?.weather_code?.[index]
-                      )}
-                    </div>
-
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: 8,
-                        marginTop: 15,
-                        alignItems: "baseline",
+                        padding: 18,
                       }}
                     >
                       <strong
                         style={{
-                          fontSize: 20,
+                          display:
+                            "block",
+                          fontSize: 15,
                         }}
                       >
-                        {data.daily?.temperature_2m_max?.[index] !==
-                        undefined
-                          ? `${data.daily.temperature_2m_max[index]}${
-                              data.daily_units?.temperature_2m_max || "°C"
-                            }`
-                          : "—"}
+                        {formatDate(
+                          date
+                        )}
                       </strong>
 
-                      <span className="muted">
-                        /
-                        {data.daily?.temperature_2m_min?.[index] !==
-                        undefined
-                          ? ` ${data.daily.temperature_2m_min[index]}${
-                              data.daily_units?.temperature_2m_min || "°C"
-                            }`
-                          : " —"}
-                      </span>
-                    </div>
-
-                    <div
-                      className="muted"
-                      style={{
-                        borderTop:
-                          "1px solid rgba(255,255,255,.08)",
-                        marginTop: 15,
-                        paddingTop: 12,
-                        fontSize: 12,
-                      }}
-                    >
-                      Precipitation{" "}
-                      <strong
+                      <div
+                        aria-hidden="true"
                         style={{
-                          color: "#eef6f7",
+                          color:
+                            "#6de0c2",
+                          fontSize: 34,
+                          marginTop: 18,
+                          marginBottom: 10,
                         }}
                       >
-                        {data.daily
-                          ?.precipitation_probability_max?.[index] !==
-                        undefined
-                          ? `${data.daily.precipitation_probability_max[index]}${
-                              data.daily_units
-                                ?.precipitation_probability_max || "%"
-                            }`
-                          : "—"}
-                      </strong>
+                        {weatherSymbol(
+                          data.daily
+                            ?.weather_code?.[
+                            index
+                          ]
+                        )}
+                      </div>
+
+                      <div
+                        className="muted"
+                        style={{
+                          minHeight: 42,
+                          fontSize: 13,
+                          lineHeight: 1.5,
+                        }}
+                      >
+                        {weatherLabel(
+                          data.daily
+                            ?.weather_code?.[
+                            index
+                          ]
+                        )}
+                      </div>
+
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: 8,
+                          marginTop: 15,
+                          alignItems:
+                            "baseline",
+                        }}
+                      >
+                        <strong
+                          style={{
+                            fontSize: 20,
+                          }}
+                        >
+                          {data.daily
+                            ?.temperature_2m_max?.[
+                            index
+                          ] !== undefined
+                            ? `${data.daily.temperature_2m_max[index]}${
+                                data
+                                  .daily_units
+                                  ?.temperature_2m_max ||
+                                "°C"
+                              }`
+                            : "—"}
+                        </strong>
+
+                        <span className="muted">
+                          /
+                          {data.daily
+                            ?.temperature_2m_min?.[
+                            index
+                          ] !== undefined
+                            ? ` ${data.daily.temperature_2m_min[index]}${
+                                data
+                                  .daily_units
+                                  ?.temperature_2m_min ||
+                                "°C"
+                              }`
+                            : " —"}
+                        </span>
+                      </div>
+
+                      <div
+                        className="muted"
+                        style={{
+                          borderTop:
+                            "1px solid rgba(255,255,255,.08)",
+                          marginTop: 15,
+                          paddingTop: 12,
+                          fontSize: 12,
+                        }}
+                      >
+                        Precipitation{" "}
+                        <strong
+                          style={{
+                            color:
+                              "#eef6f7",
+                          }}
+                        >
+                          {data.daily
+                            ?.precipitation_probability_max?.[
+                            index
+                          ] !==
+                          undefined
+                            ? `${data.daily.precipitation_probability_max[index]}${
+                                data
+                                  .daily_units
+                                  ?.precipitation_probability_max ||
+                                "%"
+                              }`
+                            : "—"}
+                        </strong>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                )}
               </div>
             </div>
           </section>
         </>
       )}
 
-      {/* SAFETY */}
+      {/* PLANNING REALITY */}
+
       <section className="section">
         <div className="container">
           <div
             className="card"
             style={{
-              padding: "clamp(28px, 5vw, 48px)",
+              padding:
+                "clamp(28px, 5vw, 48px)",
               background:
                 "linear-gradient(135deg, rgba(20,52,58,.9), rgba(9,27,34,.96))",
             }}
@@ -697,13 +909,14 @@ export default function WeatherConditionsPage() {
                 letterSpacing: ".15em",
               }}
             >
-              MOUNTAIN REALITY
+              HIGH-ALTITUDE REALITY
             </div>
 
             <h2
               style={{
-                fontSize: "clamp(34px, 5vw, 50px)",
-                maxWidth: 760,
+                fontSize:
+                  "clamp(34px, 5vw, 50px)",
+                maxWidth: 780,
                 marginTop: 0,
                 marginBottom: 16,
               }}
@@ -716,16 +929,23 @@ export default function WeatherConditionsPage() {
             <p
               className="muted"
               style={{
-                maxWidth: 900,
+                maxWidth: 920,
                 lineHeight: 1.8,
                 marginBottom: 0,
               }}
             >
-              Himalayan weather can change quickly, especially at altitude.
-              Forecasts should not replace official safety information or
-              experienced local guidance. Before travel, confirm trail,
-              avalanche, road, flight, border and local access conditions with
-              appropriate official sources and local professionals.
+              Conditions across Tibet can
+              change quickly, especially
+              at high elevations and on
+              remote routes. A regional
+              forecast should not be
+              treated as a guarantee of
+              road, route or travel
+              conditions. Confirm current
+              weather, transportation,
+              route access and relevant
+              local requirements before
+              departure.
             </p>
           </div>
         </div>
@@ -749,7 +969,8 @@ function ConditionCard({
         padding: 20,
         display: "flex",
         flexDirection: "column",
-        justifyContent: "space-between",
+        justifyContent:
+          "space-between",
       }}
     >
       <span
@@ -766,7 +987,8 @@ function ConditionCard({
         style={{
           display: "block",
           marginTop: 18,
-          fontSize: "clamp(19px, 3vw, 27px)",
+          fontSize:
+            "clamp(19px, 3vw, 27px)",
           lineHeight: 1.2,
         }}
       >
