@@ -59,10 +59,10 @@ export default function Map() {
       }}
     >
       <MapContainer
-        center={[28.3, 85.5]}
+        center={[30.2, 86.3]}
         zoom={5}
         minZoom={4}
-        maxZoom={10}
+        maxZoom={11}
         zoomControl={false}
         scrollWheelZoom={false}
         style={{
@@ -84,10 +84,10 @@ export default function Map() {
             position={[tour.lat, tour.lng]}
             icon={markerIcon}
           >
-            <Popup minWidth={220} maxWidth={280}>
+            <Popup minWidth={230} maxWidth={290}>
               <div
                 style={{
-                  padding: "4px",
+                  padding: "5px",
                   color: "#07131a",
                 }}
               >
@@ -95,13 +95,13 @@ export default function Map() {
                   style={{
                     fontSize: "11px",
                     fontWeight: 800,
-                    letterSpacing: ".1em",
+                    letterSpacing: ".12em",
                     textTransform: "uppercase",
                     color: "#267c6c",
                     marginBottom: "7px",
                   }}
                 >
-                  {tour.country}
+                  TIBET JOURNEY
                 </div>
 
                 <strong
@@ -119,7 +119,7 @@ export default function Map() {
                   style={{
                     fontSize: "13px",
                     lineHeight: 1.6,
-                    marginBottom: "11px",
+                    marginBottom: "12px",
                     color: "#526066",
                   }}
                 >
@@ -138,7 +138,7 @@ export default function Map() {
                     textDecoration: "none",
                   }}
                 >
-                  Explore journey →
+                  Explore this journey →
                 </Link>
               </div>
             </Popup>
@@ -146,13 +146,14 @@ export default function Map() {
         ))}
       </MapContainer>
 
+      {/* MAP LABEL */}
       <div
         style={{
           position: "absolute",
           zIndex: 500,
           top: "16px",
           left: "16px",
-          padding: "10px 13px",
+          padding: "11px 14px",
           borderRadius: "12px",
           background: "rgba(7,19,26,.88)",
           border: "1px solid rgba(255,255,255,.12)",
@@ -160,6 +161,7 @@ export default function Map() {
           backdropFilter: "blur(12px)",
           WebkitBackdropFilter: "blur(12px)",
           pointerEvents: "none",
+          boxShadow: "0 10px 30px rgba(0,0,0,.2)",
         }}
       >
         <div
@@ -167,11 +169,11 @@ export default function Map() {
             color: "#6de0c2",
             fontSize: "10px",
             fontWeight: 900,
-            letterSpacing: ".14em",
-            marginBottom: "3px",
+            letterSpacing: ".15em",
+            marginBottom: "4px",
           }}
         >
-          HIMALAYAN JOURNEYS
+          EXPLORE TIBET
         </div>
 
         <div
@@ -180,7 +182,37 @@ export default function Map() {
             fontWeight: 700,
           }}
         >
-          Select a marker to explore
+          Select a journey marker
+        </div>
+      </div>
+
+      {/* MAP INFO */}
+      <div
+        style={{
+          position: "absolute",
+          zIndex: 500,
+          left: "16px",
+          bottom: "16px",
+          maxWidth: "250px",
+          padding: "10px 13px",
+          borderRadius: "12px",
+          background: "rgba(7,19,26,.84)",
+          border: "1px solid rgba(255,255,255,.1)",
+          color: "#eef6f7",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
+          pointerEvents: "none",
+        }}
+      >
+        <div
+          style={{
+            fontSize: "11px",
+            lineHeight: 1.5,
+            color: "rgba(238,246,247,.72)",
+          }}
+        >
+          {tours.length} Tibet journeys · Lhasa · Everest · Namtso · Mount
+          Kailash · High Plateau
         </div>
       </div>
     </div>
