@@ -2,32 +2,36 @@ import Link from "next/link";
 
 const photographyJourneys = [
   {
-    region: "NEPAL",
-    title: "Everest Base Camp",
-    focus: "MOUNTAIN LANDSCAPES",
-    text: "Photograph dramatic Himalayan terrain, Sherpa settlements, monasteries and changing light along the Everest trail.",
-    href: "/tours/everest-base-camp",
-  },
-  {
-    region: "NEPAL",
-    title: "Upper Mustang",
-    focus: "CULTURE & LANDSCAPE",
-    text: "High-desert landscapes, traditional settlements, monasteries and distinctive architecture create a very different Himalayan visual story.",
-    href: "/tours/upper-mustang",
-  },
-  {
-    region: "BHUTAN",
-    title: "Bhutan Mountain & Culture",
-    focus: "CULTURAL PHOTOGRAPHY",
-    text: "Combine mountain scenery with monasteries, traditional architecture and carefully approached cultural photography.",
-    href: "/tours/bhutan-mountain-culture",
-  },
-  {
     region: "TIBET",
+    title: "Tibet Photography Journey",
+    focus: "PHOTOGRAPHY FOCUS",
+    text:
+      "A Tibet journey designed around landscape, architecture, cultural context and more time to observe changing light across the plateau.",
+    href: "/tours/tibet-photography",
+  },
+  {
+    region: "EVEREST · TIBET",
+    title: "Lhasa to Everest Base Camp",
+    focus: "MOUNTAIN LANDSCAPES",
+    text:
+      "Travel from Lhasa toward Everest through expansive plateau scenery, Himalayan horizons and dramatic high-altitude landscapes.",
+    href: "/tours/lhasa-everest-base-camp",
+  },
+  {
+    region: "HIGH PLATEAU",
     title: "Tibet High Plateau",
-    focus: "HIGH PLATEAU",
-    text: "Explore expansive plateau landscapes, historic places and high-altitude environments with time to observe changing conditions.",
+    focus: "LANDSCAPE",
+    text:
+      "Explore wide plateau landscapes, distant mountain ranges and changing high-altitude conditions with a slower visual approach.",
     href: "/tours/tibet-high-plateau",
+  },
+  {
+    region: "NAMTSO · TIBET",
+    title: "Lhasa & Namtso Lake",
+    focus: "LAKE & PLATEAU",
+    text:
+      "Combine Lhasa with the open landscapes around Namtso, where water, sky, mountains and changing light create a distinctive visual environment.",
+    href: "/tours/namtso-lake",
   },
 ];
 
@@ -35,32 +39,36 @@ const photoPriorities = [
   {
     number: "01",
     title: "Light before schedule",
-    text: "Photography-focused itineraries need room for early starts, evening light and waiting when conditions are more important than covering distance quickly.",
+    text:
+      "Photography-focused itineraries need room for early starts, evening light and waiting when conditions matter more than covering distance quickly.",
   },
   {
     number: "02",
-    title: "Location with context",
-    text: "The strongest images often come from understanding a place, its landscape and its people rather than simply reaching a viewpoint.",
+    title: "Place with context",
+    text:
+      "Strong travel photography comes from understanding the landscape, architecture, culture and meaning of a place rather than simply reaching a viewpoint.",
   },
   {
     number: "03",
     title: "Weather flexibility",
-    text: "Cloud, snow, wind and visibility can change rapidly. Flexible planning gives photographers more options when mountain conditions shift.",
+    text:
+      "Cloud, wind, visibility and light can change across the plateau. Flexible planning gives photographers more options when conditions shift.",
   },
   {
     number: "04",
     title: "Respectful photography",
-    text: "Ask before photographing people, ceremonies or sensitive places, and follow local guidance where photography is restricted.",
+    text:
+      "Ask before photographing people where appropriate and follow local guidance at monasteries, ceremonies, sacred places and other sensitive locations.",
   },
 ];
 
 const packingNotes = [
-  "Bring equipment you can comfortably carry at altitude.",
-  "Protect batteries from cold temperatures.",
-  "Carry weather protection for cameras and lenses.",
-  "Use a practical lens selection rather than excessive equipment.",
-  "Keep spare batteries and memory cards accessible.",
-  "Consider dust protection in dry high-altitude regions.",
+  "Bring camera equipment you can comfortably manage at altitude.",
+  "Carry spare batteries and keep them protected from cold conditions.",
+  "Use practical weather and dust protection for cameras and lenses.",
+  "Choose a useful lens combination rather than carrying unnecessary equipment.",
+  "Keep memory cards, batteries and essential accessories easily accessible.",
+  "Plan for strong sunlight, wind and dry high-altitude conditions.",
 ];
 
 export default function PhotographyToursPage() {
@@ -72,14 +80,20 @@ export default function PhotographyToursPage() {
         paddingBottom: 90,
       }}
     >
+      {/* HERO */}
+
       <section
         className="card"
         style={{
           padding: "clamp(28px, 5vw, 56px)",
           marginBottom: 38,
+          background:
+            "radial-gradient(circle at 85% 15%, rgba(109,224,194,.12), transparent 30%), linear-gradient(145deg, rgba(18,48,55,.96), rgba(8,28,35,.98))",
         }}
       >
-        <span className="pill">PHOTOGRAPHY TOURS</span>
+        <span className="pill">
+          TIBET PHOTOGRAPHY · 2026
+        </span>
 
         <h1
           style={{
@@ -92,36 +106,49 @@ export default function PhotographyToursPage() {
         >
           Follow the light
           <br />
-          across the Himalaya.
+          across Tibet.
         </h1>
 
         <p
           className="muted"
           style={{
-            maxWidth: 840,
+            maxWidth: 850,
             fontSize: 18,
             lineHeight: 1.75,
           }}
         >
-          Build a Himalayan journey with more time for
-          landscapes, villages, mountain culture and
-          changing light — instead of rushing from one
-          destination to the next.
+          Experience Tibet with more time for landscape,
+          architecture, cultural context and changing
+          light—instead of rushing from one destination
+          to the next.
         </p>
 
-        <div className="actions" style={{ marginTop: 28 }}>
-          <Link className="btn" href="/custom-journey">
-            Build a photography journey
+        <div
+          className="actions"
+          style={{ marginTop: 28 }}
+        >
+          <Link
+            className="btn"
+            href="/tours/tibet-photography"
+          >
+            View photography journey
           </Link>
 
-          <Link className="btn alt" href="/ai-trip-planner">
-            Plan with AI
+          <Link
+            className="btn alt"
+            href="/custom-journey"
+          >
+            Build private photo journey
           </Link>
         </div>
       </section>
 
+      {/* JOURNEYS */}
+
       <section>
-        <span className="pill">PHOTOGRAPHIC JOURNEYS</span>
+        <span className="pill">
+          PHOTOGRAPHIC TIBET
+        </span>
 
         <h2
           style={{
@@ -130,7 +157,7 @@ export default function PhotographyToursPage() {
             fontSize: "clamp(28px, 4vw, 42px)",
           }}
         >
-          Different landscapes. Different stories.
+          Different landscapes. Different visual stories.
         </h2>
 
         <p
@@ -140,9 +167,10 @@ export default function PhotographyToursPage() {
             lineHeight: 1.7,
           }}
         >
-          Start with an existing Himalayan route and
-          adapt the pace around the subjects and
-          photography opportunities that matter to you.
+          Start with our dedicated Tibet Photography
+          Journey or explore other Tibet routes that can
+          provide strong landscape and cultural
+          photography opportunities.
         </p>
 
         <div
@@ -172,7 +200,10 @@ export default function PhotographyToursPage() {
                   gap: 8,
                 }}
               >
-                <span className="pill">{journey.region}</span>
+                <span className="pill">
+                  {journey.region}
+                </span>
+
                 <SmallTag text={journey.focus} />
               </div>
 
@@ -212,6 +243,8 @@ export default function PhotographyToursPage() {
         </div>
       </section>
 
+      {/* PHOTOGRAPHER PRIORITIES */}
+
       <section
         className="card"
         style={{
@@ -219,7 +252,9 @@ export default function PhotographyToursPage() {
           padding: "clamp(24px, 4vw, 40px)",
         }}
       >
-        <span className="pill">BUILT FOR PHOTOGRAPHERS</span>
+        <span className="pill">
+          BUILT FOR PHOTOGRAPHERS
+        </span>
 
         <h2
           style={{
@@ -240,8 +275,8 @@ export default function PhotographyToursPage() {
         >
           Photography travel works differently from a
           standard sightseeing itinerary. Time,
-          patience and flexibility become part of the
-          route design.
+          observation, patience and flexibility become
+          part of the journey design.
         </p>
 
         <div
@@ -259,8 +294,10 @@ export default function PhotographyToursPage() {
               style={{
                 padding: 22,
                 borderRadius: 18,
-                border: "1px solid rgba(255,255,255,0.10)",
-                background: "rgba(255,255,255,0.03)",
+                border:
+                  "1px solid rgba(255,255,255,0.10)",
+                background:
+                  "rgba(255,255,255,0.03)",
               }}
             >
               <span
@@ -298,6 +335,8 @@ export default function PhotographyToursPage() {
         </div>
       </section>
 
+      {/* CAMERA + CONDITIONS */}
+
       <section
         style={{
           display: "grid",
@@ -307,8 +346,13 @@ export default function PhotographyToursPage() {
           marginTop: 24,
         }}
       >
-        <div className="card" style={{ padding: 28 }}>
-          <span className="pill">CAMERA PREPARATION</span>
+        <div
+          className="card"
+          style={{ padding: 28 }}
+        >
+          <span className="pill">
+            CAMERA PREPARATION
+          </span>
 
           <h2
             style={{
@@ -316,17 +360,16 @@ export default function PhotographyToursPage() {
               fontSize: 28,
             }}
           >
-            Pack for the environment
+            Pack for the plateau
           </h2>
 
           <p
             className="muted"
             style={{ lineHeight: 1.7 }}
           >
-            Mountain photography equipment needs to
-            remain practical when temperatures,
-            altitude and daily movement become part of
-            the journey.
+            Photography equipment should remain practical
+            when altitude, wind, temperature and daily
+            travel become part of the Tibet journey.
           </p>
 
           <div
@@ -345,11 +388,15 @@ export default function PhotographyToursPage() {
                   alignItems: "flex-start",
                 }}
               >
-                <strong aria-hidden="true">✓</strong>
+                <strong aria-hidden="true">
+                  ✓
+                </strong>
 
                 <span
                   className="muted"
-                  style={{ lineHeight: 1.55 }}
+                  style={{
+                    lineHeight: 1.55,
+                  }}
                 >
                   {item}
                 </span>
@@ -362,12 +409,17 @@ export default function PhotographyToursPage() {
             href="/himalayan-guide"
             style={{ marginTop: 24 }}
           >
-            Read Himalayan Guide
+            Read Tibet Travel Guide
           </Link>
         </div>
 
-        <div className="card" style={{ padding: 28 }}>
-          <span className="pill">LIGHT & WEATHER</span>
+        <div
+          className="card"
+          style={{ padding: 28 }}
+        >
+          <span className="pill">
+            LIGHT &amp; WEATHER
+          </span>
 
           <h2
             style={{
@@ -380,19 +432,26 @@ export default function PhotographyToursPage() {
 
           <p
             className="muted"
-            style={{ lineHeight: 1.75 }}
+            style={{
+              lineHeight: 1.75,
+            }}
           >
-            Mountain weather affects visibility,
-            light, temperature and access. Use current
-            forecasts as one planning input and remain
-            flexible when conditions change.
+            Weather affects visibility, light,
+            temperature and travel conditions. Use
+            current forecasts as one planning input and
+            remain flexible when conditions change.
           </p>
 
-          <Link className="btn" href="/weather-conditions">
-            Check live weather
+          <Link
+            className="btn"
+            href="/weather-conditions"
+          >
+            Check Tibet conditions
           </Link>
         </div>
       </section>
+
+      {/* SUBJECTS */}
 
       <section
         className="card"
@@ -401,7 +460,67 @@ export default function PhotographyToursPage() {
           padding: "clamp(24px, 4vw, 40px)",
         }}
       >
-        <span className="pill">PHOTOGRAPH WITH RESPECT</span>
+        <span className="pill">
+          WHAT DO YOU WANT TO PHOTOGRAPH?
+        </span>
+
+        <h2
+          style={{
+            marginTop: 14,
+            marginBottom: 12,
+            fontSize: "clamp(28px, 4vw, 40px)",
+          }}
+        >
+          Build the route around your visual priorities.
+        </h2>
+
+        <p
+          className="muted"
+          style={{
+            maxWidth: 880,
+            lineHeight: 1.75,
+          }}
+        >
+          Your ideal Tibet photography journey may focus
+          on broad plateau landscapes, Himalayan
+          mountains, monasteries and architecture,
+          cultural context, sacred places or a combination
+          of subjects. A private journey can give those
+          priorities more room in the itinerary.
+        </p>
+
+        <div
+          className="actions"
+          style={{ marginTop: 22 }}
+        >
+          <Link
+            className="btn"
+            href="/custom-journey"
+          >
+            Build my photography journey
+          </Link>
+
+          <Link
+            className="btn alt"
+            href="/ai-trip-planner"
+          >
+            Plan Tibet with AI
+          </Link>
+        </div>
+      </section>
+
+      {/* RESPECT */}
+
+      <section
+        className="card"
+        style={{
+          marginTop: 24,
+          padding: "clamp(24px, 4vw, 40px)",
+        }}
+      >
+        <span className="pill">
+          PHOTOGRAPH WITH RESPECT
+        </span>
 
         <h2
           style={{
@@ -419,13 +538,13 @@ export default function PhotographyToursPage() {
             lineHeight: 1.75,
           }}
         >
-          Ask permission before photographing people
-          where appropriate, respect requests not to
-          be photographed, and follow local rules at
+          Ask before photographing people where
+          appropriate, respect requests not to be
+          photographed and follow local guidance at
           monasteries, ceremonies and sacred places.
-          A meaningful photograph should not come at
-          the expense of the people or communities
-          being visited.
+          Photography restrictions may vary by location.
+          A meaningful image should not come at the
+          expense of the people or places being visited.
         </p>
 
         <Link
@@ -433,9 +552,61 @@ export default function PhotographyToursPage() {
           href="/responsible-travel"
           style={{ marginTop: 18 }}
         >
-          Read Responsible Travel
+          Responsible Tibet travel
         </Link>
       </section>
+
+      {/* CURRENT INFORMATION */}
+
+      <section
+        className="card"
+        style={{
+          marginTop: 24,
+          padding: "clamp(24px, 4vw, 40px)",
+        }}
+      >
+        <span className="pill">
+          BEFORE YOU GO
+        </span>
+
+        <h2
+          style={{
+            marginTop: 14,
+            fontSize: "clamp(28px, 4vw, 40px)",
+          }}
+        >
+          Keep the photography plan flexible.
+        </h2>
+
+        <p
+          className="muted"
+          style={{
+            maxWidth: 900,
+            lineHeight: 1.75,
+          }}
+        >
+          Travel documentation, permits, route access,
+          photography restrictions, weather and local
+          operating conditions can change. Confirm
+          current information for your travel dates and
+          intended route before final arrangements are
+          made.
+        </p>
+
+        <div
+          className="actions"
+          style={{ marginTop: 22 }}
+        >
+          <Link
+            className="btn alt"
+            href="/ai-research"
+          >
+            Research current information
+          </Link>
+        </div>
+      </section>
+
+      {/* FINAL CTA */}
 
       <section
         className="card"
@@ -443,9 +614,13 @@ export default function PhotographyToursPage() {
           marginTop: 24,
           padding: "clamp(28px, 5vw, 46px)",
           textAlign: "center",
+          background:
+            "linear-gradient(135deg, rgba(19,58,61,.9), rgba(16,35,42,.96))",
         }}
       >
-        <span className="pill">YOUR PHOTOGRAPHY JOURNEY</span>
+        <span className="pill">
+          YOUR TIBET PHOTOGRAPHY JOURNEY
+        </span>
 
         <h2
           style={{
@@ -454,21 +629,22 @@ export default function PhotographyToursPage() {
             fontSize: "clamp(30px, 5vw, 46px)",
           }}
         >
-          Build the itinerary around what you want to capture.
+          Build the journey around what you want to
+          capture.
         </h2>
 
         <p
           className="muted"
           style={{
-            maxWidth: 750,
+            maxWidth: 760,
             margin: "0 auto",
             lineHeight: 1.7,
           }}
         >
           Tell us whether your priority is landscapes,
-          culture, villages, mountain portraits or a
-          combination, and use that as the starting
-          point for a private journey.
+          architecture, culture, sacred places, Himalayan
+          scenery or a combination, then use that as the
+          starting point for your Tibet journey.
         </p>
 
         <div
@@ -478,12 +654,18 @@ export default function PhotographyToursPage() {
             marginTop: 26,
           }}
         >
-          <Link className="btn" href="/custom-journey">
-            Build photography journey
+          <Link
+            className="btn"
+            href="/tours/tibet-photography"
+          >
+            View Tibet Photography Journey
           </Link>
 
-          <Link className="btn alt" href="/contact-book">
-            Request a trip
+          <Link
+            className="btn alt"
+            href="/contact-book"
+          >
+            Request a Tibet trip
           </Link>
         </div>
       </section>
@@ -491,14 +673,20 @@ export default function PhotographyToursPage() {
   );
 }
 
-function SmallTag({ text }: { text: string }) {
+function SmallTag({
+  text,
+}: {
+  text: string;
+}) {
   return (
     <span
       style={{
         padding: "7px 10px",
         borderRadius: 999,
-        border: "1px solid rgba(255,255,255,0.10)",
-        background: "rgba(255,255,255,0.04)",
+        border:
+          "1px solid rgba(255,255,255,0.10)",
+        background:
+          "rgba(255,255,255,0.04)",
         fontSize: 13,
       }}
     >
