@@ -3,27 +3,39 @@ import Link from "next/link";
 import type { Tour } from "@/lib/tours";
 
 const images: Record<string, string> = {
-  "everest-base-camp":
+  "lhasa-classic":
+    "/8.jpg",
+
+  "lhasa-everest-base-camp":
     "/ChatGPT Image Sep 7, 2026, 01_05_24 AM.png",
 
-  "annapurna-classic": "/2.png",
+  "lhasa-shigatse-gyantse":
+    "/5.png",
 
-  "langtang-valley": "/3.png",
+  "tibet-high-plateau":
+    "/8.jpg",
 
-  "manaslu-circuit": "/4.png",
+  "kailash-mansarovar-journey":
+    "/10.jpg",
 
-  "upper-mustang": "/5.png",
+  "kailash-kora":
+    "/10.jpg",
 
-  "bhutan-mountain-culture": "/6.png",
+  "namtso-lake":
+    "/3.png",
 
-  "tibet-high-plateau": "/8.jpg",
+  "tibet-photography":
+    "/9.jpg",
 
-  "ladakh-high-altitude": "/9.jpg",
-
-  "kailash-mansarovar-journey": "/10.jpg",
+  "tibet-culture-monasteries":
+    "/6.png",
 };
 
-export default function TourCard({ tour }: { tour: Tour }) {
+export default function TourCard({
+  tour,
+}: {
+  tour: Tour;
+}) {
   const image = images[tour.slug];
 
   return (
@@ -41,7 +53,7 @@ export default function TourCard({ tour }: { tour: Tour }) {
         >
           <Image
             src={image}
-            alt={`${tour.name} in ${tour.country}`}
+            alt={`${tour.name} in Tibet`}
             fill
             sizes="(max-width: 600px) 92vw, (max-width: 900px) 46vw, 33vw"
             style={{
@@ -51,7 +63,9 @@ export default function TourCard({ tour }: { tour: Tour }) {
         </div>
       )}
 
-      <span className="pill">{tour.country}</span>
+      <span className="pill">
+        TIBET
+      </span>
 
       <h3>{tour.name}</h3>
 
@@ -59,10 +73,15 @@ export default function TourCard({ tour }: { tour: Tour }) {
         {tour.days} · {tour.difficulty}
       </p>
 
-      <div className="price">{tour.price}</div>
+      <div className="price">
+        From {tour.price}
+      </div>
 
-      <Link className="btn" href={`/tours/${tour.slug}`}>
-        View details
+      <Link
+        className="btn"
+        href={`/tours/${tour.slug}`}
+      >
+        View journey
       </Link>
     </article>
   );
