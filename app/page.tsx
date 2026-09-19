@@ -10,64 +10,64 @@ const Map = dynamic(() => import("@/components/Map"), {
   ssr: false,
 });
 
-const destinations = [
+const regions = [
   {
-    name: "Nepal",
-    label: "EVEREST · ANNAPURNA · MANASLU",
-    text: "Classic trekking routes, remote mountain circuits and some of the Himalaya's most recognized landscapes.",
-    href: "/nepal",
-  },
-  {
-    name: "Bhutan",
-    label: "MOUNTAINS · CULTURE",
-    text: "Thoughtfully paced journeys combining Himalayan landscapes with Bhutan's distinctive cultural experience.",
-    href: "/bhutan",
-  },
-  {
-    name: "Tibet",
-    label: "HIGH PLATEAU · KAILASH",
-    text: "High-altitude landscapes and culturally significant journeys across the Tibetan Plateau.",
+    name: "Lhasa",
+    label: "PALACES · MONASTERIES · CULTURE",
+    text: "Begin in Tibet's historic capital with time for acclimatization, architecture, monasteries and everyday Tibetan culture.",
     href: "/tibet",
   },
   {
-    name: "India Himalaya",
-    label: "LADAKH · HIGH ALTITUDE",
-    text: "Explore the dramatic landscapes and mountain cultures of Ladakh and the Indian Himalaya.",
-    href: "/india-himalaya",
+    name: "Everest",
+    label: "PLATEAU · HIMALAYA · BASE CAMP",
+    text: "Cross the Tibetan Plateau toward the north side of Mount Everest through high passes, monasteries and vast mountain landscapes.",
+    href: "/tours/lhasa-everest-base-camp",
+  },
+  {
+    name: "Mount Kailash",
+    label: "KORA · PILGRIMAGE · WESTERN TIBET",
+    text: "Journey across western Tibet toward Mount Kailash and experience one of the plateau's most significant pilgrimage landscapes.",
+    href: "/tours/kailash-kora",
+  },
+  {
+    name: "Namtso & the Plateau",
+    label: "LAKES · NOMADIC LANDSCAPES · HIGH ALTITUDE",
+    text: "Discover high-altitude lakes, open grasslands and the immense scale of the Tibetan Plateau beyond the major cities.",
+    href: "/tours/namtso-lake",
   },
 ];
 
 const travelStyles = [
   {
-    label: "ADVENTURE",
-    title: "Go further",
-    text: "Trekking routes, remote landscapes and challenging journeys.",
-    href: "/adventure",
-  },
-  {
     label: "CULTURE",
     title: "Travel deeper",
-    text: "Build cultural understanding into the journey.",
+    text: "Explore monasteries, historic cities, pilgrimage traditions and Tibetan cultural landscapes.",
     href: "/culture-heritage",
+  },
+  {
+    label: "ADVENTURE",
+    title: "Go further",
+    text: "Cross high passes and remote plateau landscapes on carefully paced high-altitude journeys.",
+    href: "/adventure",
   },
   {
     label: "PHOTOGRAPHY",
     title: "Follow the light",
-    text: "Travel with more time for landscapes, atmosphere and place.",
+    text: "Make more time for Himalayan landscapes, monasteries, lakes and the changing light of the plateau.",
     href: "/photography-tours",
   },
   {
-    label: "COMFORT",
-    title: "Travel at your pace",
-    text: "Private planning, better pacing and greater comfort.",
-    href: "/luxury-himalaya",
+    label: "PRIVATE",
+    title: "Travel your way",
+    text: "Build a private Tibet journey around your dates, interests, pace and preferred level of comfort.",
+    href: "/custom-journey",
   },
 ];
 
 export default function Home() {
   return (
     <main>
-      {/* CINEMATIC HERO */}
+      {/* HERO */}
       <section
         style={{
           minHeight: "calc(100vh - 74px)",
@@ -78,14 +78,14 @@ export default function Home() {
           backgroundImage: `
             linear-gradient(
               90deg,
-              rgba(3, 14, 20, 0.92) 0%,
-              rgba(3, 14, 20, 0.72) 42%,
-              rgba(3, 14, 20, 0.28) 72%,
+              rgba(3, 14, 20, 0.94) 0%,
+              rgba(3, 14, 20, 0.74) 42%,
+              rgba(3, 14, 20, 0.3) 72%,
               rgba(3, 14, 20, 0.18) 100%
             ),
             linear-gradient(
               0deg,
-              rgba(3, 14, 20, 0.75) 0%,
+              rgba(3, 14, 20, 0.78) 0%,
               transparent 42%
             ),
             url("/home-hero.jpg")
@@ -99,7 +99,7 @@ export default function Home() {
             position: "absolute",
             inset: 0,
             background:
-              "radial-gradient(circle at 72% 35%, rgba(109,224,194,.08), transparent 30%)",
+              "radial-gradient(circle at 72% 35%, rgba(109,224,194,.09), transparent 30%)",
             pointerEvents: "none",
           }}
         />
@@ -113,7 +113,7 @@ export default function Home() {
             paddingBottom: "70px",
           }}
         >
-          <div style={{ maxWidth: "900px" }}>
+          <div style={{ maxWidth: "920px" }}>
             <div
               className="eyebrow"
               style={{
@@ -121,7 +121,7 @@ export default function Home() {
                 letterSpacing: ".2em",
               }}
             >
-              HIMALAYAN JOURNEYS · 2026
+              TIBET JOURNEYS · 2026
             </div>
 
             <h1
@@ -130,18 +130,18 @@ export default function Home() {
                 lineHeight: 0.88,
                 letterSpacing: "-0.065em",
                 margin: 0,
-                maxWidth: "900px",
+                maxWidth: "920px",
                 textShadow: "0 8px 40px rgba(0,0,0,.35)",
               }}
             >
-              Go beyond
+              Journey across
               <br />
-              the ordinary.
+              the high plateau.
             </h1>
 
             <p
               style={{
-                maxWidth: "720px",
+                maxWidth: "730px",
                 marginTop: "30px",
                 marginBottom: 0,
                 fontSize: "clamp(17px, 2vw, 21px)",
@@ -150,9 +150,9 @@ export default function Home() {
                 textShadow: "0 3px 20px rgba(0,0,0,.4)",
               }}
             >
-              Thoughtfully designed Himalayan journeys across Nepal, Bhutan,
-              Tibet and the Indian Himalaya — combining mountain experience,
-              cultural understanding and smarter trip planning.
+              Thoughtfully designed journeys through Tibet — from Lhasa and
+              Everest to Mount Kailash, sacred lakes, monasteries and the vast
+              landscapes of the Tibetan Plateau.
             </p>
 
             <div
@@ -165,11 +165,11 @@ export default function Home() {
               }}
             >
               <Link className="btn" href="/ai-trip-planner">
-                Build my journey
+                Plan my Tibet journey
               </Link>
 
               <Link className="btn alt" href="/tours">
-                Explore the Himalaya
+                Explore Tibet tours
               </Link>
             </div>
           </div>
@@ -196,7 +196,7 @@ export default function Home() {
               >
                 {tours.length}
               </strong>
-              <span className="muted">Curated journeys</span>
+              <span className="muted">Tibet journeys</span>
             </div>
 
             <div>
@@ -207,9 +207,9 @@ export default function Home() {
                   marginBottom: "4px",
                 }}
               >
-                4
+                1
               </strong>
-              <span className="muted">Himalayan regions</span>
+              <span className="muted">Specialist destination</span>
             </div>
 
             <div>
@@ -238,7 +238,7 @@ export default function Home() {
             writingMode: "vertical-rl",
           }}
         >
-          EXPLORE THE HIMALAYA
+          EXPLORE TIBET
         </div>
       </section>
 
@@ -259,7 +259,7 @@ export default function Home() {
                 className="eyebrow"
                 style={{ marginBottom: "14px", letterSpacing: ".16em" }}
               >
-                THE HIMALAYA, YOUR WAY
+                TIBET, YOUR WAY
               </div>
 
               <h2
@@ -270,7 +270,7 @@ export default function Home() {
                   maxWidth: "720px",
                 }}
               >
-                Extraordinary places deserve thoughtful journeys.
+                One extraordinary destination. Many ways to experience it.
               </h2>
             </div>
 
@@ -283,14 +283,14 @@ export default function Home() {
                   margin: 0,
                 }}
               >
-                From Everest and Annapurna to Bhutan, Tibet and Ladakh, explore
-                routes shaped around landscape, culture, altitude and the way
-                you want to travel.
+                Explore Lhasa, Shigatse, Everest, Namtso, Mount Kailash and
+                remote plateau landscapes through journeys shaped around
+                altitude, culture, scenery and your preferred pace.
               </p>
 
               <div className="actions" style={{ marginTop: "22px" }}>
-                <Link className="btn alt" href="/explore">
-                  Start exploring
+                <Link className="btn alt" href="/tibet">
+                  Discover Tibet
                 </Link>
 
                 <Link className="btn alt" href="/travel-intent">
@@ -320,7 +320,7 @@ export default function Home() {
                 className="eyebrow"
                 style={{ marginBottom: "14px", letterSpacing: ".16em" }}
               >
-                SIGNATURE JOURNEYS
+                SIGNATURE TIBET JOURNEYS
               </div>
 
               <h2
@@ -341,8 +341,8 @@ export default function Home() {
                   marginBottom: 0,
                 }}
               >
-                Discover classic Himalayan routes and culturally rich journeys,
-                then adapt the experience around your own dates and priorities.
+                Start with Tibet's classic routes, then shape the journey
+                around your dates, interests, altitude experience and pace.
               </p>
             </div>
 
@@ -359,7 +359,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* DESTINATIONS */}
+      {/* TIBET REGIONS */}
       <section className="section">
         <div className="container">
           <div
@@ -374,7 +374,7 @@ export default function Home() {
               className="eyebrow"
               style={{ marginBottom: "14px", letterSpacing: ".16em" }}
             >
-              FOUR HIMALAYAN REGIONS
+              EXPLORE TIBET
             </div>
 
             <h2
@@ -385,9 +385,9 @@ export default function Home() {
                 marginBottom: "18px",
               }}
             >
-              One mountain world.
+              From Lhasa to the
               <br />
-              Many ways to experience it.
+              far western plateau.
             </h2>
 
             <p
@@ -398,8 +398,9 @@ export default function Home() {
                 marginBottom: "32px",
               }}
             >
-              Compare landscapes, cultures, altitude and journey styles before
-              choosing where your Himalayan experience should begin.
+              Explore different sides of Tibet — historic cities, Himalayan
+              viewpoints, sacred landscapes, high-altitude lakes and remote
+              plateau routes.
             </p>
 
             <div
@@ -410,10 +411,10 @@ export default function Home() {
                 gap: "14px",
               }}
             >
-              {destinations.map((destination) => (
+              {regions.map((region) => (
                 <Link
-                  key={destination.name}
-                  href={destination.href}
+                  key={region.name}
+                  href={region.href}
                   style={{
                     display: "block",
                     padding: "24px",
@@ -432,7 +433,7 @@ export default function Home() {
                       fontSize: "10px",
                     }}
                   >
-                    {destination.label}
+                    {region.label}
                   </div>
 
                   <h3
@@ -442,7 +443,7 @@ export default function Home() {
                       marginBottom: "12px",
                     }}
                   >
-                    {destination.name}
+                    {region.name}
                   </h3>
 
                   <p
@@ -452,7 +453,7 @@ export default function Home() {
                       margin: 0,
                     }}
                   >
-                    {destination.text}
+                    {region.text}
                   </p>
                 </Link>
               ))}
@@ -468,7 +469,7 @@ export default function Home() {
             className="eyebrow"
             style={{ marginBottom: "14px", letterSpacing: ".16em" }}
           >
-            INTELLIGENT TRAVEL PLANNING
+            INTELLIGENT TIBET PLANNING
           </div>
 
           <h2
@@ -479,7 +480,7 @@ export default function Home() {
               marginBottom: "14px",
             }}
           >
-            Inspiration meets useful information.
+            Turn an idea into a smarter Tibet journey.
           </h2>
 
           <p
@@ -490,9 +491,9 @@ export default function Home() {
               marginBottom: "32px",
             }}
           >
-            Use the planning assistant to explore destinations, compare ideas
-            and turn a vague travel wish into a more useful Himalayan journey.
-            Then see where those journeys sit across the mountain region.
+            Use the planning assistant to explore routes, compare journey
+            ideas and think through duration, altitude, interests and pacing.
+            Then see how the journeys connect across Tibet.
           </p>
 
           <div className="layout2">
@@ -510,11 +511,11 @@ export default function Home() {
                   className="eyebrow"
                   style={{ marginBottom: "10px" }}
                 >
-                  INTERACTIVE HIMALAYAN MAP
+                  INTERACTIVE TIBET MAP
                 </div>
 
                 <h3 style={{ marginBottom: "10px" }}>
-                  Understand the landscape.
+                  Understand the plateau.
                 </h3>
 
                 <p
@@ -524,8 +525,8 @@ export default function Home() {
                     margin: 0,
                   }}
                 >
-                  Explore the locations behind our journeys and connect each
-                  destination with the wider Himalayan region.
+                  Explore the locations behind our journeys, from Lhasa and
+                  Shigatse to Everest, Namtso and Mount Kailash.
                 </p>
               </div>
 
@@ -552,7 +553,7 @@ export default function Home() {
               marginBottom: "30px",
             }}
           >
-            The mountains are only the beginning.
+            Experience Tibet your way.
           </h2>
 
           <div
@@ -630,7 +631,7 @@ export default function Home() {
                 letterSpacing: ".18em",
               }}
             >
-              YOUR HIMALAYA
+              YOUR TIBET JOURNEY
             </div>
 
             <h2
@@ -641,7 +642,7 @@ export default function Home() {
                 lineHeight: 1,
               }}
             >
-              Start with a dream.
+              Start with an idea.
               <br />
               Build the right journey.
             </h2>
@@ -655,9 +656,9 @@ export default function Home() {
                 fontSize: "17px",
               }}
             >
-              Explore our journeys, compare routes or tell us what matters to
-              you and begin creating a Himalayan experience around your own
-              priorities.
+              Explore our Tibet journeys, compare routes or tell us what
+              matters to you and begin creating a journey around your dates,
+              interests and preferred pace.
             </p>
 
             <div
@@ -668,7 +669,7 @@ export default function Home() {
               }}
             >
               <Link className="btn" href="/ai-trip-planner">
-                Plan with AI
+                Plan Tibet with AI
               </Link>
 
               <Link className="btn alt" href="/custom-journey">
@@ -676,7 +677,7 @@ export default function Home() {
               </Link>
 
               <Link className="btn alt" href="/contact-book">
-                Request a trip
+                Request a Tibet trip
               </Link>
             </div>
           </div>
