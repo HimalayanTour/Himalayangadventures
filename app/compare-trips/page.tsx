@@ -41,16 +41,16 @@ const tours: Tour[] = [
       "Everest scenery, overland travel and a more adventurous route",
   },
   {
-    name: "Lhasa, Gyantse & Shigatse",
-    slug: "lhasa-shigatse-gyantse",
-    region: "Central Tibet",
+    name: "Lhoka (Southern Tibet)",
+    slug: "lhoka-southern-tibet",
+    region: "Lhoka · Southern Tibet",
     duration: 7,
     price: 1590,
     difficulty: "Easy–Moderate",
     altitude: "High altitude",
-    style: "Culture & heritage",
+    style: "Culture, valleys & heritage",
     bestFor:
-      "Historic towns, monasteries and a balanced cultural journey",
+      "Southern Tibet, historic places, monasteries and a quieter cultural journey",
   },
   {
     name: "Tibet High Plateau",
