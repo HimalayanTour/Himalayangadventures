@@ -7,25 +7,26 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://himalayangadventures.vercel.app"),
 
   title: {
-    default: "Himalayan Adventures | Nepal, Bhutan, Tibet & India",
+    default: "Himalayan Adventures | Tibet Tours & Private Journeys",
     template: "%s | Himalayan Adventures",
   },
 
   description:
-    "Plan Himalayan journeys across Nepal, Bhutan, Tibet and the Indian Himalaya. Explore trekking routes, cultural journeys, current conditions and AI-assisted trip planning.",
+    "Explore thoughtfully designed Tibet tours and private journeys through Lhasa, Shigatse, Everest, Mount Kailash, Namtso and the Tibetan Plateau, with AI-assisted trip planning and human guidance.",
 
   keywords: [
-    "Himalayan tours",
-    "Himalaya travel",
-    "Nepal trekking",
-    "Everest Base Camp",
-    "Annapurna trekking",
-    "Bhutan tours",
     "Tibet tours",
-    "India Himalaya tours",
-    "Ladakh tours",
-    "Himalayan adventure",
-    "Himalayan trekking",
+    "Tibet travel",
+    "Tibet private tours",
+    "Tibet tour 2026",
+    "Lhasa tours",
+    "Tibet Everest Base Camp",
+    "Mount Kailash tour",
+    "Kailash Kora",
+    "Namtso Lake tour",
+    "Tibetan Plateau",
+    "Tibet cultural tours",
+    "Tibet photography tours",
   ],
 
   authors: [
@@ -46,24 +47,24 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "/",
     siteName: "Himalayan Adventures",
-    title: "Himalayan Adventures | Nepal, Bhutan, Tibet & India",
+    title: "Himalayan Adventures | Tibet Tours & Private Journeys",
     description:
-      "Explore Himalayan journeys, trekking routes and cultural experiences across Nepal, Bhutan, Tibet and the Indian Himalaya.",
+      "Explore Tibet through thoughtfully designed journeys to Lhasa, Everest, Mount Kailash, Namtso and across the Tibetan Plateau.",
     images: [
       {
         url: "/ChatGPT Image Sep 7, 2026, 12_42_57 AM.png",
         width: 1200,
         height: 630,
-        alt: "Himalayan Adventures",
+        alt: "Tibet journeys with Himalayan Adventures",
       },
     ],
   },
 
   twitter: {
     card: "summary_large_image",
-    title: "Himalayan Adventures | Nepal, Bhutan, Tibet & India",
+    title: "Himalayan Adventures | Tibet Tours & Private Journeys",
     description:
-      "Explore Himalayan journeys across Nepal, Bhutan, Tibet and the Indian Himalaya.",
+      "Explore thoughtfully designed journeys through Lhasa, Everest, Mount Kailash and the Tibetan Plateau.",
     images: ["/ChatGPT Image Sep 7, 2026, 12_42_57 AM.png"],
   },
 
@@ -94,15 +95,15 @@ export default function RootLayout({
           </Link>
 
           <nav className="navlinks" aria-label="Main navigation">
-            <Link href="/explore">Explore</Link>
-            <Link href="/tours">Tours</Link>
+            <Link href="/tibet">Explore Tibet</Link>
+            <Link href="/tours">Tibet Tours</Link>
             <Link href="/ai-trip-planner">AI Planner</Link>
             <Link href="/weather-conditions">Conditions</Link>
             <Link href="/about">About</Link>
           </nav>
 
           <Link href="/contact-book" className="btn desktopPlanButton">
-            Plan my trip
+            Plan my Tibet trip
           </Link>
 
           <MobileNav />
@@ -119,25 +120,28 @@ export default function RootLayout({
             </div>
 
             <p>
-              Thoughtful journeys through the world&apos;s highest mountains,
-              designed with current information and human guidance.
+              Thoughtfully designed journeys across Tibet, combining cultural
+              understanding, high-altitude landscapes, smarter planning and
+              human guidance.
             </p>
           </div>
 
           <div className="list">
-            <strong>Explore</strong>
+            <strong>Explore Tibet</strong>
 
-            <Link href="/nepal">Nepal</Link>
-            <Link href="/bhutan">Bhutan</Link>
-            <Link href="/tibet">Tibet</Link>
-            <Link href="/india-himalaya">India Himalaya</Link>
+            <Link href="/tibet">Discover Tibet</Link>
+            <Link href="/tours">Tibet Tours</Link>
+            <Link href="/culture-heritage">Culture &amp; Heritage</Link>
+            <Link href="/photography-tours">Photography</Link>
+            <Link href="/weather-conditions">Travel Conditions</Link>
           </div>
 
           <div className="list">
-            <strong>Plan</strong>
+            <strong>Plan your journey</strong>
 
             <Link href="/ai-trip-planner">AI Trip Planner</Link>
-            <Link href="/custom-journey">Custom Journey</Link>
+            <Link href="/compare-trips">Compare Journeys</Link>
+            <Link href="/custom-journey">Private Journey</Link>
             <Link href="/contact-book">Contact &amp; Book</Link>
           </div>
         </div>
