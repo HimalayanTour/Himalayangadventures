@@ -1,4 +1,4 @@
- "use client";
+"use client";
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -24,44 +24,44 @@ const moods: IntentOption[] = [
     id: "quiet",
     label: "Quiet & Scenic",
     description:
-      "Peaceful landscapes, slower travel and fewer crowds.",
+      "Wide plateau landscapes, slower pacing and time to absorb Tibet.",
   },
   {
     id: "adventure",
     label: "Adventure & Challenge",
     description:
-      "High mountains, trekking and a strong sense of achievement.",
+      "High-altitude routes, remote landscapes and physically demanding experiences.",
   },
   {
     id: "culture",
     label: "Culture & Heritage",
     description:
-      "Monasteries, villages, traditions and local history.",
+      "Historic towns, monasteries, traditions and Tibetan cultural experiences.",
   },
   {
     id: "spiritual",
     label: "Spiritual & Reflective",
     description:
-      "Sacred places, monasteries and meaningful journeys.",
+      "Sacred landscapes, monasteries, pilgrimage traditions and meaningful travel.",
   },
   {
-    id: "luxury",
-    label: "Comfort & Luxury",
+    id: "comfort",
+    label: "Comfort & Pace",
     description:
-      "Beautiful scenery with a more comfortable travel style.",
+      "A more measured Tibet journey with comfortable accommodation and sensible pacing.",
   },
   {
     id: "photography",
     label: "Photography",
     description:
-      "Dramatic landscapes, culture and time for photography.",
+      "Plateau landscapes, architecture, culture and more time for photography.",
   },
 ];
 
 const difficultyOptions = [
   {
     id: "easy",
-    label: "Easy",
+    label: "Easy–Moderate",
   },
   {
     id: "moderate",
@@ -76,11 +76,11 @@ const difficultyOptions = [
 const durationOptions = [
   {
     id: "short",
-    label: "Up to 9 days",
+    label: "Up to 7 days",
   },
   {
     id: "medium",
-    label: "10–12 days",
+    label: "8–12 days",
   },
   {
     id: "long",
@@ -90,100 +90,50 @@ const durationOptions = [
 
 const tours: TourMatch[] = [
   {
-    name: "Everest Base Camp",
-    slug: "everest-base-camp",
-    destination: "Nepal",
-    duration: "14 days",
-    difficulty: "Challenging",
+    name: "Lhasa Classic Journey",
+    slug: "lhasa-classic",
+    destination: "Tibet",
+    duration: "5 days",
+    difficulty: "Easy–Moderate",
     reason:
-      "A classic choice for travelers seeking adventure, iconic mountain scenery and a major trekking achievement.",
+      "A focused introduction to Lhasa for travelers interested in Tibetan culture, monasteries and a shorter journey with measured pacing.",
     tags: [
-      "adventure",
-      "photography",
-      "challenging",
-      "long",
-    ],
-  },
-  {
-    name: "Annapurna Classic",
-    slug: "annapurna-classic",
-    destination: "Nepal",
-    duration: "10 days",
-    difficulty: "Moderate",
-    reason:
-      "A balanced Himalayan journey combining scenery, villages and approachable trekking.",
-    tags: [
-      "quiet",
-      "adventure",
       "culture",
-      "photography",
-      "moderate",
-      "medium",
-    ],
-  },
-  {
-    name: "Langtang Valley",
-    slug: "langtang-valley",
-    destination: "Nepal",
-    duration: "8 days",
-    difficulty: "Moderate",
-    reason:
-      "A shorter, quieter trek with mountain scenery, villages and a more relaxed atmosphere.",
-    tags: [
-      "quiet",
-      "culture",
-      "photography",
-      "moderate",
+      "spiritual",
+      "comfort",
+      "easy",
       "short",
     ],
   },
   {
-    name: "Manaslu Circuit",
-    slug: "manaslu-circuit",
-    destination: "Nepal",
-    duration: "15 days",
-    difficulty: "Challenging",
-    reason:
-      "Ideal for experienced travelers wanting remote landscapes, fewer crowds and a demanding trek.",
-    tags: [
-      "quiet",
-      "adventure",
-      "photography",
-      "challenging",
-      "long",
-    ],
-  },
-  {
-    name: "Upper Mustang",
-    slug: "upper-mustang",
-    destination: "Nepal",
-    duration: "11 days",
+    name: "Lhasa to Everest Base Camp",
+    slug: "lhasa-everest-base-camp",
+    destination: "Tibet",
+    duration: "8 days",
     difficulty: "Moderate",
     reason:
-      "A distinctive journey through dramatic landscapes, ancient settlements and Tibetan-influenced culture.",
+      "A strong choice for travelers drawn to Everest, dramatic Himalayan scenery, central Tibet and a more adventurous high-altitude route.",
     tags: [
-      "quiet",
-      "culture",
-      "spiritual",
+      "adventure",
       "photography",
+      "culture",
       "moderate",
       "medium",
     ],
   },
   {
-    name: "Bhutan Mountain & Culture",
-    slug: "bhutan-mountain-culture",
-    destination: "Bhutan",
-    duration: "9 days",
+    name: "Lhasa, Gyantse & Shigatse",
+    slug: "lhasa-shigatse-gyantse",
+    destination: "Tibet",
+    duration: "7 days",
     difficulty: "Easy–Moderate",
     reason:
-      "A strong match for culture, spirituality, mountain scenery and a more comfortable pace.",
+      "A balanced cultural journey through Lhasa and central Tibet with historic towns, monasteries and beautiful overland scenery.",
     tags: [
-      "quiet",
       "culture",
       "spiritual",
-      "luxury",
       "photography",
+      "comfort",
       "easy",
       "short",
     ],
@@ -195,46 +145,98 @@ const tours: TourMatch[] = [
     duration: "12 days",
     difficulty: "Moderate",
     reason:
-      "A high-altitude cultural journey with monasteries, dramatic plateau landscapes and strong photography potential.",
+      "Designed for travelers who want more time with Tibet's expansive plateau landscapes, culture and high-altitude environment.",
     tags: [
-      "culture",
-      "spiritual",
-      "photography",
-      "moderate",
-      "medium",
-    ],
-  },
-  {
-    name: "Ladakh High Altitude",
-    slug: "ladakh-high-altitude",
-    destination: "India",
-    duration: "10 days",
-    difficulty: "Moderate",
-    reason:
-      "Excellent for mountain scenery, Buddhist culture, photography and high-altitude exploration.",
-    tags: [
+      "quiet",
       "adventure",
       "culture",
-      "spiritual",
       "photography",
       "moderate",
       "medium",
     ],
   },
   {
-    name: "Kailash Mansarovar Journey",
+    name: "Kailash & Mansarovar Journey",
     slug: "kailash-mansarovar-journey",
     destination: "Tibet",
     duration: "15 days",
     difficulty: "Moderate",
     reason:
-      "Best suited to travelers seeking a meaningful spiritual journey through one of the Himalaya’s most sacred regions.",
+      "A longer western Tibet journey centered on sacred landscapes, Mount Kailash and Lake Manasarovar for travelers seeking reflection and pilgrimage context.",
     tags: [
       "spiritual",
       "culture",
       "quiet",
+      "photography",
       "moderate",
       "long",
+    ],
+  },
+  {
+    name: "Mount Kailash Kora",
+    slug: "kailash-kora",
+    destination: "Tibet",
+    duration: "13 days",
+    difficulty: "Challenging",
+    reason:
+      "The strongest match for travelers seeking a physically demanding, high-altitude journey centered on the Mount Kailash Kora.",
+    tags: [
+      "adventure",
+      "spiritual",
+      "culture",
+      "photography",
+      "challenging",
+      "long",
+    ],
+  },
+  {
+    name: "Lhasa & Namtso Lake",
+    slug: "namtso-lake",
+    destination: "Tibet",
+    duration: "7 days",
+    difficulty: "Moderate",
+    reason:
+      "A scenic Tibet journey combining Lhasa with the dramatic high-altitude landscapes around Namtso Lake.",
+    tags: [
+      "quiet",
+      "photography",
+      "culture",
+      "moderate",
+      "short",
+    ],
+  },
+  {
+    name: "Tibet Photography Journey",
+    slug: "tibet-photography",
+    destination: "Tibet",
+    duration: "10 days",
+    difficulty: "Moderate",
+    reason:
+      "Built for travelers who want more time to photograph Tibetan landscapes, architecture, culture and everyday visual details.",
+    tags: [
+      "photography",
+      "quiet",
+      "culture",
+      "comfort",
+      "moderate",
+      "medium",
+    ],
+  },
+  {
+    name: "Tibet Culture & Monasteries",
+    slug: "tibet-culture-monasteries",
+    destination: "Tibet",
+    duration: "9 days",
+    difficulty: "Easy–Moderate",
+    reason:
+      "A culture-led journey focused on Tibetan heritage, monasteries and traditions with a more measured travel style.",
+    tags: [
+      "culture",
+      "spiritual",
+      "comfort",
+      "photography",
+      "easy",
+      "medium",
     ],
   },
 ];
@@ -308,46 +310,52 @@ export default function TravelIntentPage() {
         paddingBottom: 90,
       }}
     >
+      {/* HERO */}
       <section
         className="card"
         style={{
           marginBottom: 24,
+          padding: "clamp(28px, 5vw, 52px)",
+          background:
+            "radial-gradient(circle at 85% 15%, rgba(93,229,201,.12), transparent 28%), linear-gradient(145deg, rgba(17,48,56,.92), rgba(8,27,34,.97))",
         }}
       >
         <span className="pill">
-          TRAVEL INTENT
+          TIBET TRAVEL INTENT
         </span>
 
         <h1
           style={{
             marginTop: 16,
+            marginBottom: 0,
             fontSize:
               "clamp(40px, 7vw, 76px)",
             lineHeight: 1,
             maxWidth: 950,
           }}
         >
-          Start with how you want to feel.
+          Start with how you want Tibet to feel.
         </h1>
 
         <p
           className="muted"
           style={{
-            maxWidth: 780,
+            maxWidth: 800,
             fontSize: 18,
             lineHeight: 1.7,
-            marginTop: 18,
+            marginTop: 20,
+            marginBottom: 0,
           }}
         >
-          You do not need to know the name of
-          a trek. Tell us the experience you
-          want, your preferred difficulty and
-          how much time you have. Himalayan26
-          will suggest the journeys that fit
-          you best.
+          You do not need to know which Tibet route is right
+          for you. Choose the experience you want, your
+          preferred difficulty and how much time you have.
+          Himalayan26 will match you with journeys from our
+          Tibet collection.
         </p>
       </section>
 
+      {/* STEP 1 */}
       <section className="card">
         <span className="pill">
           STEP 1
@@ -358,8 +366,19 @@ export default function TravelIntentPage() {
             marginTop: 14,
           }}
         >
-          What kind of experience do you want?
+          What kind of Tibet experience do you want?
         </h2>
+
+        <p
+          className="muted"
+          style={{
+            maxWidth: 700,
+            lineHeight: 1.65,
+          }}
+        >
+          Choose the feeling or travel style that matters most
+          to you.
+        </p>
 
         <div
           style={{
@@ -385,6 +404,7 @@ export default function TravelIntentPage() {
                 style={{
                   textAlign: "left",
                   padding: 18,
+                  minHeight: 135,
                   borderRadius: 16,
                   border: active
                     ? "1px solid rgba(93,229,201,0.75)"
@@ -421,6 +441,7 @@ export default function TravelIntentPage() {
         </div>
       </section>
 
+      {/* STEP 2 */}
       <section
         className="card"
         style={{
@@ -436,8 +457,20 @@ export default function TravelIntentPage() {
             marginTop: 14,
           }}
         >
-          How challenging should it feel?
+          How challenging should your journey feel?
         </h2>
+
+        <p
+          className="muted"
+          style={{
+            maxWidth: 720,
+            lineHeight: 1.65,
+          }}
+        >
+          Tibet is naturally high altitude, so difficulty is
+          about more than walking distance. Route altitude,
+          pacing and physical activity all matter.
+        </p>
 
         <div
           style={{
@@ -484,6 +517,7 @@ export default function TravelIntentPage() {
         </div>
       </section>
 
+      {/* STEP 3 */}
       <section
         className="card"
         style={{
@@ -501,6 +535,18 @@ export default function TravelIntentPage() {
         >
           How much time do you have?
         </h2>
+
+        <p
+          className="muted"
+          style={{
+            maxWidth: 720,
+            lineHeight: 1.65,
+          }}
+        >
+          More time can allow for slower pacing, additional
+          acclimatization and journeys farther across the
+          Tibetan Plateau.
+        </p>
 
         <div
           style={{
@@ -545,6 +591,7 @@ export default function TravelIntentPage() {
         </div>
       </section>
 
+      {/* ACTIONS */}
       <section
         className="card"
         style={{
@@ -556,6 +603,7 @@ export default function TravelIntentPage() {
             display: "flex",
             gap: 12,
             flexWrap: "wrap",
+            alignItems: "center",
           }}
         >
           <button
@@ -568,7 +616,7 @@ export default function TravelIntentPage() {
               !duration
             }
           >
-            Find my best journeys
+            Find my Tibet journeys
           </button>
 
           <button
@@ -591,6 +639,7 @@ export default function TravelIntentPage() {
         </div>
       </section>
 
+      {/* RESULTS */}
       {showResults && (
         <section
           className="card"
@@ -599,7 +648,7 @@ export default function TravelIntentPage() {
           }}
         >
           <span className="pill">
-            YOUR MATCHES
+            YOUR TIBET MATCHES
           </span>
 
           <h2
@@ -607,7 +656,7 @@ export default function TravelIntentPage() {
               marginTop: 14,
             }}
           >
-            Journeys that match your intent
+            Journeys that match your travel intent
           </h2>
 
           <p
@@ -617,9 +666,10 @@ export default function TravelIntentPage() {
               lineHeight: 1.7,
             }}
           >
-            These recommendations are based
-            on the experience, difficulty and
-            duration you selected.
+            These suggestions are based on the experience,
+            difficulty and duration you selected. They are a
+            starting point for planning rather than a final
+            recommendation.
           </p>
 
           <div
@@ -657,7 +707,7 @@ export default function TravelIntentPage() {
                   >
                     {index === 0 && (
                       <span className="pill">
-                        BEST MATCH
+                        CLOSEST MATCH
                       </span>
                     )}
 
@@ -667,7 +717,7 @@ export default function TravelIntentPage() {
                         fontSize: 14,
                       }}
                     >
-                      {tour.destination}
+                      TIBET
                     </span>
                   </div>
 
@@ -713,12 +763,14 @@ export default function TravelIntentPage() {
                       className="btn"
                       href={`/tours/${tour.slug}`}
                     >
-                      View this tour
+                      View this journey
                     </Link>
 
                     <Link
                       className="btn alt"
-                      href="/ai-trip-planner"
+                      href={`/ai-trip-planner?prompt=${encodeURIComponent(
+                        `Help me plan the ${tour.name} in Tibet. I am interested in this journey and want to refine the itinerary, pacing and travel style.`
+                      )}`}
                     >
                       Refine with AI
                     </Link>
@@ -730,10 +782,14 @@ export default function TravelIntentPage() {
         </section>
       )}
 
+      {/* CUSTOM */}
       <section
         className="card"
         style={{
           marginTop: 24,
+          padding: "clamp(24px, 4vw, 38px)",
+          background:
+            "linear-gradient(135deg, rgba(19,51,58,.92), rgba(8,27,34,.97))",
         }}
       >
         <span className="pill">
@@ -745,7 +801,7 @@ export default function TravelIntentPage() {
             marginTop: 14,
           }}
         >
-          Turn your intent into a custom journey
+          Turn your intent into a private Tibet journey
         </h2>
 
         <p
@@ -755,10 +811,10 @@ export default function TravelIntentPage() {
             lineHeight: 1.7,
           }}
         >
-          If none of these journeys feels
-          exactly right, our AI planner can
-          help refine the trip or you can
-          request a custom Himalayan journey.
+          If none of these journeys feels exactly right, use
+          the AI planner to refine your priorities or request
+          a private Tibet journey built around your dates,
+          interests and preferred pace.
         </p>
 
         <div
@@ -773,16 +829,39 @@ export default function TravelIntentPage() {
             className="btn"
             href="/ai-trip-planner"
           >
-            Ask the AI planner
+            Plan Tibet with AI
           </Link>
 
           <Link
             className="btn alt"
-            href="/contact-book"
+            href="/custom-journey"
           >
-            Request a custom trip
+            Create a private journey
           </Link>
         </div>
+      </section>
+
+      {/* PLANNING NOTE */}
+      <section
+        style={{
+          marginTop: 24,
+          padding: "0 4px",
+        }}
+      >
+        <p
+          className="muted"
+          style={{
+            maxWidth: 900,
+            margin: 0,
+            fontSize: 13,
+            lineHeight: 1.7,
+          }}
+        >
+          Journey matching is a planning tool. Final itinerary,
+          travel documentation, permits, route access,
+          availability, local conditions and pricing should be
+          confirmed for your actual travel dates before booking.
+        </p>
       </section>
     </main>
   );
