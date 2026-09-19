@@ -7,20 +7,19 @@ import BookingForm from "@/components/BookingForm";
 const baseUrl = "https://himalayangadventures.vercel.app";
 
 const images: Record<string, string> = {
-  "lhasa-classic": "/8.jpg",
+  "lhasa-classic": "/lhasa.jpg",
 
-  "lhasa-everest-base-camp":
-    "/ChatGPT Image Sep 7, 2026, 01_05_24 AM.png",
+  "lhasa-everest-base-camp": "/tibet-everest.jpg",
 
   "lhasa-shigatse-gyantse": "/5.png",
 
   "tibet-high-plateau": "/8.jpg",
 
-  "kailash-mansarovar-journey": "/10.jpg",
+  "kailash-mansarovar-journey": "/mount-kailash.jpg",
 
-  "kailash-kora": "/10.jpg",
+  "kailash-kora": "/mount-kailash.jpg",
 
-  "namtso-lake": "/3.png",
+  "namtso-lake": "/namtso.jpg",
 
   "tibet-photography": "/9.jpg",
 
@@ -476,7 +475,9 @@ export default async function TourPage({
                     }}
                   >
                     <div>
-                      <strong>01 · ARRIVAL & ACCLIMATIZATION</strong>
+                      <strong>
+                        01 · ARRIVAL &amp; ACCLIMATIZATION
+                      </strong>
                       <p
                         className="muted"
                         style={{ lineHeight: 1.7 }}
@@ -486,7 +487,9 @@ export default async function TourPage({
                     </div>
 
                     <div>
-                      <strong>02 · JOURNEY INTO TIBET</strong>
+                      <strong>
+                        02 · JOURNEY INTO TIBET
+                      </strong>
                       <p
                         className="muted"
                         style={{ lineHeight: 1.7 }}
@@ -496,7 +499,9 @@ export default async function TourPage({
                     </div>
 
                     <div>
-                      <strong>03 · CORE EXPERIENCE</strong>
+                      <strong>
+                        03 · CORE EXPERIENCE
+                      </strong>
                       <p
                         className="muted"
                         style={{ lineHeight: 1.7 }}
@@ -506,7 +511,9 @@ export default async function TourPage({
                     </div>
 
                     <div>
-                      <strong>04 · COMPLETION</strong>
+                      <strong>
+                        04 · COMPLETION
+                      </strong>
                       <p
                         className="muted"
                         style={{ lineHeight: 1.7 }}
