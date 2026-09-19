@@ -104,17 +104,32 @@ function formatTourName(
   slug: string | null
 ) {
   if (!slug) {
-    return "Custom Himalayan Journey";
+    return "Custom Tibet Journey";
   }
 
-  return slug
-    .split("-")
-    .map(
-      (word) =>
-        word.charAt(0).toUpperCase() +
-        word.slice(1)
-    )
-    .join(" ");
+  const tourNames: Record<string, string> = {
+    "lhasa-classic": "Lhasa Classic Journey",
+    "lhasa-everest-base-camp": "Lhasa to Everest Base Camp",
+    "lhoka-southern-tibet": "Lhoka (Southern Tibet)",
+    "tibet-high-plateau": "Tibet High Plateau",
+    "kailash-mansarovar-journey": "Kailash & Mansarovar Journey",
+    "kailash-kora": "Mount Kailash Kora",
+    "namtso-lake": "Lhasa & Namtso Lake",
+    "tibet-photography": "Tibet Photography Journey",
+    "tibet-culture-monasteries": "Tibet Culture & Monasteries",
+  };
+
+  return (
+    tourNames[slug] ||
+    slug
+      .split("-")
+      .map(
+        (word) =>
+          word.charAt(0).toUpperCase() +
+          word.slice(1)
+      )
+      .join(" ")
+  );
 }
 
 function parseBookingMessage(
@@ -324,7 +339,7 @@ function buildTemplate({
   ) {
     return {
       subject:
-        "We received your Himalayan tour booking request",
+        "We received your Tibet journey request",
 
       text: `Hello ${booking.name},
 
@@ -349,7 +364,7 @@ Himalayan26`,
   ) {
     return {
       subject:
-        "More information needed for your Himalayan journey",
+        "More information needed for your Tibet journey",
 
       text: `Hello ${booking.name},
 
@@ -363,7 +378,7 @@ To help us prepare the right journey for you, could you please send us any missi
 • Special interests or requirements
 • Preferred accommodation level
 
-Once we receive these details, we can prepare the next steps for your Himalayan journey.
+Once we receive these details, we can prepare the next steps for your Tibet journey.
 
 Best regards,
 Himalayan26`,
@@ -372,11 +387,11 @@ Himalayan26`,
 
   return {
     subject:
-      "Your Himalayan tour booking is confirmed",
+      "Your Tibet journey is confirmed",
 
     text: `Hello ${booking.name},
 
-We are pleased to confirm your Himalayan journey.
+We are pleased to confirm your Tibet journey.
 
 Tour: ${tourName}
 Preferred dates: ${booking.dates || "To be confirmed"}
@@ -971,7 +986,7 @@ export default async function BookingPage({
   const customLink =
     makeEmailLink(
       booking.email,
-      "Your Himalayan tour booking request",
+      "Your Tibet journey request",
       ""
     );
 
