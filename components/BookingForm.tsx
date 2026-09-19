@@ -10,6 +10,27 @@ type BookingFormProps = {
   tourSlug?: string;
 };
 
+const tourNames: Record<string, string> = {
+  "lhasa-classic":
+    "Lhasa Classic Journey",
+  "lhasa-everest-base-camp":
+    "Lhasa to Everest Base Camp",
+  "lhasa-shigatse-gyantse":
+    "Lhasa, Gyantse & Shigatse",
+  "tibet-high-plateau":
+    "Tibet High Plateau",
+  "kailash-mansarovar-journey":
+    "Kailash & Mansarovar Journey",
+  "kailash-kora":
+    "Mount Kailash Kora",
+  "namtso-lake":
+    "Lhasa & Namtso Lake",
+  "tibet-photography":
+    "Tibet Photography Journey",
+  "tibet-culture-monasteries":
+    "Tibet Culture & Monasteries",
+};
+
 export default function BookingForm({
   tourSlug = "",
 }: BookingFormProps) {
@@ -195,8 +216,7 @@ export default function BookingForm({
       phone,
       country,
       dates,
-      travelers:
-        travelerCount,
+      travelers: travelerCount,
       tripStyle:
         selectedTripStyle,
       accommodation:
@@ -235,7 +255,7 @@ export default function BookingForm({
       if (!response.ok) {
         setStatusMessage(
           result.error ||
-            "Could not send your booking request. Please try again."
+            "Could not send your Tibet trip request. Please try again."
         );
 
         return;
@@ -245,7 +265,7 @@ export default function BookingForm({
 
       setStatusMessage(
         result.message ||
-          "Thank you! Your booking request has been received. Our Himalayan travel team will contact you soon."
+          "Thank you! Your Tibet trip request has been received. Our travel team will contact you soon."
       );
     } catch (error) {
       console.error(
@@ -270,6 +290,14 @@ export default function BookingForm({
     padding: "14px",
     borderRadius: "12px",
   };
+
+  const selectedTourName =
+    tourNames[tourSlug] ||
+    tourSlug
+      .replace(/-/g, " ")
+      .replace(/\b\w/g, (letter) =>
+        letter.toUpperCase()
+      );
 
   return (
     <form
@@ -303,7 +331,7 @@ export default function BookingForm({
           }}
         >
           <span className="pill">
-            BOOKING REQUEST
+            TIBET TRIP REQUEST
           </span>
 
           <h2
@@ -315,7 +343,7 @@ export default function BookingForm({
               lineHeight: 1.08,
             }}
           >
-            Start your Himalayan
+            Start planning your Tibet
             journey
           </h2>
 
@@ -328,10 +356,10 @@ export default function BookingForm({
             }}
           >
             Share a few details about
-            your plans. This is a
-            booking request, not a
-            payment or final
-            reservation.
+            your plans. This sends a
+            Tibet trip request—it does
+            not require payment or create
+            a confirmed reservation.
           </p>
         </div>
 
@@ -378,20 +406,15 @@ export default function BookingForm({
               marginBottom: 6,
             }}
           >
-            SELECTED JOURNEY
+            SELECTED TIBET JOURNEY
           </div>
 
           <strong
             style={{
               fontSize: 17,
-              textTransform:
-                "capitalize",
             }}
           >
-            {tourSlug.replace(
-              /-/g,
-              " "
-            )}
+            {selectedTourName}
           </strong>
         </div>
       )}
@@ -440,8 +463,8 @@ export default function BookingForm({
                 fontSize: 13,
               }}
             >
-              How our travel team can
-              reach you
+              How our Tibet travel team
+              can reach you
             </span>
           </div>
         </div>
@@ -506,7 +529,7 @@ export default function BookingForm({
 
           <div className="field">
             <label htmlFor="booking-country">
-              Country
+              Your country
             </label>
 
             <input
@@ -566,7 +589,7 @@ export default function BookingForm({
                 fontSize: 19,
               }}
             >
-              Your journey
+              Your Tibet journey
             </strong>
 
             <span
@@ -575,8 +598,8 @@ export default function BookingForm({
                 fontSize: 13,
               }}
             >
-              When, where and how long
-              you want to travel
+              When, how long and how many
+              people are traveling
             </span>
           </div>
         </div>
@@ -592,7 +615,7 @@ export default function BookingForm({
           {destination && (
             <div className="field">
               <label htmlFor="booking-destination">
-                Destination / region
+                Tibet journey focus
               </label>
 
               <input
@@ -606,7 +629,7 @@ export default function BookingForm({
                   )
                 }
                 disabled={sent}
-                placeholder="Nepal, Bhutan, Tibet..."
+                placeholder="Tibet"
               />
             </div>
           )}
@@ -724,8 +747,8 @@ export default function BookingForm({
                 fontSize: 13,
               }}
             >
-              Help us shape the right
-              experience
+              Help us understand the Tibet
+              experience you want
             </span>
           </div>
         </div>
@@ -740,7 +763,7 @@ export default function BookingForm({
         >
           <div className="field">
             <label htmlFor="booking-trip-style">
-              Trip style
+              Travel style
             </label>
 
             <select
@@ -756,51 +779,39 @@ export default function BookingForm({
               style={selectStyle}
             >
               <option value="">
-                Select trip style
+                Select travel style
+              </option>
+
+              <option value="Culture">
+                Culture & heritage
               </option>
 
               <option value="Adventure">
                 Adventure
               </option>
 
-              <option value="Culture">
-                Culture
-              </option>
-
               <option value="Spiritual">
-                Spiritual
+                Spiritual & pilgrimage
               </option>
 
               <option value="Photography">
                 Photography
               </option>
 
-              <option value="Luxury">
-                Luxury
+              <option value="Comfort">
+                Comfort & slower pace
               </option>
 
               <option value="Family">
                 Family
               </option>
 
-              <option value="Wellness">
-                Wellness
+              <option value="Private">
+                Private journey
               </option>
 
-              <option value="Private tour">
-                Private tour
-              </option>
-
-              <option value="Small group">
-                Small group
-              </option>
-
-              <option value="Adventure trekking">
-                Adventure trekking
-              </option>
-
-              <option value="Culture and heritage">
-                Culture & heritage
+              <option value="Not sure">
+                Not sure yet
               </option>
             </select>
           </div>
@@ -826,14 +837,6 @@ export default function BookingForm({
                 Select accommodation
               </option>
 
-              <option value="Standard">
-                Standard
-              </option>
-
-              <option value="Comfort">
-                Comfort
-              </option>
-
               <option value="Comfortable">
                 Comfortable
               </option>
@@ -842,8 +845,8 @@ export default function BookingForm({
                 Premium
               </option>
 
-              <option value="Luxury">
-                Luxury
+              <option value="Best available">
+                Best available
               </option>
 
               <option value="Best available in remote areas">
@@ -864,7 +867,7 @@ export default function BookingForm({
           }}
         >
           <label htmlFor="booking-message">
-            Tell us about your trip
+            Tell us about your Tibet trip
           </label>
 
           <textarea
@@ -878,7 +881,7 @@ export default function BookingForm({
               )
             }
             disabled={sent}
-            placeholder="Tell us about your interests, fitness level, preferred pace, special requirements or anything else we should know."
+            placeholder="Tell us what interests you in Tibet—Lhasa, Everest, Mount Kailash, Namtso, monasteries, culture, photography, preferred pace, accommodation, previous altitude experience or anything else we should know."
             style={{
               minHeight: 170,
             }}
@@ -911,8 +914,8 @@ export default function BookingForm({
             }}
           >
             {sending
-              ? "Sending your request..."
-              : "Send booking request"}
+              ? "Sending your Tibet request..."
+              : "Send Tibet trip request"}
           </button>
 
           <p
@@ -926,9 +929,11 @@ export default function BookingForm({
             }}
           >
             No payment is required.
-            Submitting this form does
-            not create a confirmed
-            reservation.
+            Submitting this form does not
+            create a confirmed reservation.
+            Final itinerary, availability,
+            travel requirements and pricing
+            are confirmed separately.
           </p>
         </div>
       )}
@@ -975,7 +980,7 @@ export default function BookingForm({
               fontSize: 25,
             }}
           >
-            Request received
+            Tibet trip request received
           </h3>
 
           <p
@@ -988,7 +993,7 @@ export default function BookingForm({
             }}
           >
             {statusMessage ||
-              "Thank you. Your booking request has been received and our Himalayan travel team will contact you soon."}
+              "Thank you. Your Tibet trip request has been received and our travel team will contact you soon."}
           </p>
         </div>
       )}
