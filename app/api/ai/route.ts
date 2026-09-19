@@ -151,12 +151,12 @@ Current Tibet journey collection:
 - Starting planning price: $1,890
 - Focus: Lhasa, Gyantse, Shigatse, Tibetan Plateau and Everest region
 
-3. Lhasa, Gyantse & Shigatse
-- Slug: lhasa-shigatse-gyantse
+3. Lhoka (Southern Tibet)
+- Slug: lhoka-southern-tibet
 - Duration: 7 days
 - Difficulty: Easy–Moderate
 - Starting planning price: $1,590
-- Focus: central Tibet, culture, monasteries and historic towns
+- Focus: southern Tibet, Lhoka, culture, valleys, monasteries and historic places
 
 4. Tibet High Plateau
 - Slug: tibet-high-plateau
