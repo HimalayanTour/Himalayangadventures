@@ -4,59 +4,90 @@ const spiritualPrinciples = [
   {
     number: "01",
     title: "Travel with humility",
-    text: "Sacred places are living religious and cultural spaces. Visit with curiosity and respect rather than treating them simply as attractions.",
+    text:
+      "Sacred places are living religious and cultural spaces. Visit with curiosity and respect rather than treating them simply as attractions.",
   },
   {
     number: "02",
     title: "Respect local practice",
-    text: "Dress, photography, movement and behavior may follow local customs. Listen to guides, hosts and religious communities when visiting sacred places.",
+    text:
+      "Dress, photography, movement and behavior may follow local customs. Listen to guides and appropriate local guidance when visiting monasteries and sacred places.",
   },
   {
     number: "03",
     title: "Leave time for reflection",
-    text: "A contemplative journey benefits from slower days and space between experiences rather than moving rapidly from one important place to another.",
+    text:
+      "A contemplative Tibet journey benefits from slower days and space between experiences rather than moving rapidly from one important place to another.",
   },
   {
     number: "04",
     title: "Prepare for altitude",
-    text: "Many Himalayan pilgrimage routes reach significant elevations. Spiritual purpose does not remove the need for acclimatization, sensible pacing and preparation.",
+    text:
+      "Many Tibet pilgrimage journeys take place at significant elevation. Spiritual purpose does not remove the need for realistic pacing, preparation and appropriate altitude awareness.",
   },
 ];
 
 const journeys = [
   {
-    region: "TIBET",
-    title: "Kailash Mansarovar Journey",
+    region: "WESTERN TIBET",
+    title: "Kailash & Mansarovar Journey",
     days: "15 days",
     style: "PILGRIMAGE",
-    text: "A high-altitude journey associated with one of Asia's most significant sacred landscapes, requiring thoughtful preparation and respectful travel.",
+    price: "From $2,890",
+    text:
+      "A high-altitude journey into western Tibet centered on the sacred landscape of Mount Kailash and the wider Mansarovar region.",
     href: "/tours/kailash-mansarovar-journey",
   },
   {
-    region: "BHUTAN",
-    title: "Bhutan Mountain & Culture",
-    days: "9 days",
-    style: "MONASTERIES + CULTURE",
-    text: "Experience Himalayan landscapes alongside monasteries, historic places and Bhutanese cultural traditions.",
-    href: "/tours/bhutan-mountain-culture",
+    region: "MOUNT KAILASH",
+    title: "Mount Kailash Kora",
+    days: "13 days",
+    style: "KORA · PILGRIMAGE",
+    price: "From $2,690",
+    text:
+      "A physically demanding high-altitude journey focused on the pilgrimage landscape and kora around Mount Kailash.",
+    href: "/tours/kailash-kora",
   },
   {
-    region: "TIBET",
-    title: "Tibet High Plateau",
-    days: "12 days",
-    style: "CULTURE + PLATEAU",
-    text: "Explore high-plateau landscapes and cultural places through a journey that can be adapted around your interests and preferred pace.",
-    href: "/tours/tibet-high-plateau",
+    region: "CENTRAL TIBET",
+    title: "Tibet Culture & Monasteries",
+    days: "9 days",
+    style: "MONASTERIES · CULTURE",
+    price: "From $1,990",
+    text:
+      "Explore monasteries, cultural heritage and sacred places while gaining greater context for Tibet's living religious traditions.",
+    href: "/tours/tibet-culture-monasteries",
   },
 ];
 
 const preparation = [
-  "Understand the altitude and physical demands of your route.",
-  "Confirm current permits and entry requirements before travel.",
-  "Allow appropriate acclimatization time.",
-  "Ask before photographing people or religious activity.",
-  "Follow local guidance inside monasteries and sacred places.",
-  "Keep the itinerary flexible when weather or conditions change.",
+  "Understand the altitude and physical demands of your intended Tibet route.",
+  "Allow appropriate time for adjustment and realistic pacing.",
+  "Confirm current travel documentation, permits and route requirements.",
+  "Ask before photographing people, ceremonies or religious activity where appropriate.",
+  "Follow local guidance inside monasteries, temples and sacred places.",
+  "Keep the itinerary flexible when weather, roads, access or local conditions change.",
+];
+
+const pilgrimageApproach = [
+  {
+    number: "01",
+    title: "Understand the place",
+    text:
+      "Learn why a monastery, pilgrimage route or sacred landscape matters before treating it as another stop on an itinerary.",
+  },
+  {
+    number: "02",
+    title: "Observe without disrupting",
+    text:
+      "Religious practice and pilgrimage continue independently of tourism. Give worshippers and pilgrims appropriate space.",
+  },
+  {
+    number: "03",
+    title: "Follow local guidance",
+    text:
+      "Access, photography and appropriate behavior can vary by location. When uncertain, ask your guide rather than assuming.",
+  },
 ];
 
 export default function SpiritualJourneysPage() {
@@ -68,14 +99,20 @@ export default function SpiritualJourneysPage() {
         paddingBottom: 90,
       }}
     >
+      {/* HERO */}
+
       <section
         className="card"
         style={{
           padding: "clamp(28px, 5vw, 56px)",
           marginBottom: 38,
+          background:
+            "radial-gradient(circle at 85% 15%, rgba(109,224,194,.12), transparent 30%), linear-gradient(145deg, rgba(18,48,55,.96), rgba(8,28,35,.98))",
         }}
       >
-        <span className="pill">SPIRITUAL JOURNEYS</span>
+        <span className="pill">
+          TIBET SPIRITUAL JOURNEYS · 2026
+        </span>
 
         <h1
           style={{
@@ -88,7 +125,7 @@ export default function SpiritualJourneysPage() {
         >
           Travel with purpose.
           <br />
-          Walk with respect.
+          Experience sacred Tibet.
         </h1>
 
         <p
@@ -99,25 +136,38 @@ export default function SpiritualJourneysPage() {
             lineHeight: 1.75,
           }}
         >
-          Pilgrimage and contemplative journeys through
-          Himalayan landscapes, monasteries and sacred
-          places — approached with cultural respect,
-          thoughtful pacing and careful preparation.
+          Explore monasteries, pilgrimage landscapes and
+          Mount Kailash through Tibet journeys approached
+          with cultural respect, thoughtful pacing and
+          careful high-altitude preparation.
         </p>
 
-        <div className="actions" style={{ marginTop: 28 }}>
-          <Link className="btn" href="/custom-journey">
-            Build a spiritual journey
+        <div
+          className="actions"
+          style={{ marginTop: 28 }}
+        >
+          <Link
+            className="btn"
+            href="/tours/kailash-kora"
+          >
+            Explore Mount Kailash
           </Link>
 
-          <Link className="btn alt" href="/ai-trip-planner">
-            Plan with AI
+          <Link
+            className="btn alt"
+            href="/custom-journey"
+          >
+            Build a spiritual journey
           </Link>
         </div>
       </section>
 
+      {/* PRINCIPLES */}
+
       <section>
-        <span className="pill">TRAVEL WITH RESPECT</span>
+        <span className="pill">
+          TRAVEL WITH RESPECT
+        </span>
 
         <h2
           style={{
@@ -136,10 +186,11 @@ export default function SpiritualJourneysPage() {
             lineHeight: 1.7,
           }}
         >
-          Himalayan spiritual travel crosses different
-          communities, religions and traditions. The
-          journey should respect the people for whom
-          these places have meaning beyond tourism.
+          Tibet&apos;s monasteries, pilgrimage routes and
+          sacred landscapes have meaning beyond tourism.
+          A spiritual journey should respect the people,
+          traditions and religious practices connected to
+          the places being visited.
         </p>
 
         <div
@@ -192,8 +243,12 @@ export default function SpiritualJourneysPage() {
         </div>
       </section>
 
+      {/* FEATURED JOURNEYS */}
+
       <section style={{ marginTop: 40 }}>
-        <span className="pill">FEATURED JOURNEYS</span>
+        <span className="pill">
+          FEATURED TIBET JOURNEYS
+        </span>
 
         <h2
           style={{
@@ -202,7 +257,7 @@ export default function SpiritualJourneysPage() {
             fontSize: "clamp(28px, 4vw, 40px)",
           }}
         >
-          Journeys shaped by place and tradition
+          Journeys shaped by sacred places and tradition
         </h2>
 
         <p
@@ -212,9 +267,10 @@ export default function SpiritualJourneysPage() {
             lineHeight: 1.7,
           }}
         >
-          Start with an existing Himalayan journey,
-          then adapt the itinerary around your
-          interests, available time and preferred pace.
+          Explore Mount Kailash and western Tibet or
+          choose a cultural journey focused on
+          monasteries and the living traditions of
+          Central Tibet.
         </p>
 
         <div
@@ -234,7 +290,7 @@ export default function SpiritualJourneysPage() {
                 padding: 26,
                 display: "flex",
                 flexDirection: "column",
-                minHeight: 340,
+                minHeight: 360,
               }}
             >
               <span
@@ -265,6 +321,7 @@ export default function SpiritualJourneysPage() {
               >
                 <SmallTag text={journey.days} />
                 <SmallTag text={journey.style} />
+                <SmallTag text={journey.price} />
               </div>
 
               <p
@@ -292,17 +349,116 @@ export default function SpiritualJourneysPage() {
         </div>
       </section>
 
+      {/* PILGRIMAGE APPROACH */}
+
+      <section
+        className="card"
+        style={{
+          marginTop: 38,
+          padding: "clamp(24px, 4vw, 40px)",
+        }}
+      >
+        <span className="pill">
+          THOUGHTFUL PILGRIMAGE
+        </span>
+
+        <h2
+          style={{
+            marginTop: 14,
+            marginBottom: 8,
+            fontSize: "clamp(28px, 4vw, 40px)",
+          }}
+        >
+          Be present without becoming the center
+        </h2>
+
+        <p
+          className="muted"
+          style={{
+            maxWidth: 820,
+            lineHeight: 1.7,
+          }}
+        >
+          Visiting a sacred place carries a different
+          responsibility from ordinary sightseeing.
+          Observation, patience and respect should remain
+          part of the experience.
+        </p>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(240px, 1fr))",
+            gap: 16,
+            marginTop: 24,
+          }}
+        >
+          {pilgrimageApproach.map((item) => (
+            <div
+              key={item.number}
+              style={{
+                padding: 22,
+                borderRadius: 18,
+                border:
+                  "1px solid rgba(255,255,255,0.10)",
+                background:
+                  "rgba(255,255,255,0.03)",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 13,
+                  fontWeight: 800,
+                  letterSpacing: "0.12em",
+                  opacity: 0.6,
+                }}
+              >
+                APPROACH {item.number}
+              </span>
+
+              <h3
+                style={{
+                  marginTop: 14,
+                  marginBottom: 10,
+                  fontSize: 21,
+                }}
+              >
+                {item.title}
+              </h3>
+
+              <p
+                className="muted"
+                style={{
+                  lineHeight: 1.7,
+                  marginBottom: 0,
+                }}
+              >
+                {item.text}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* PREPARATION + CONDITIONS */}
+
       <section
         style={{
           display: "grid",
           gridTemplateColumns:
             "repeat(auto-fit, minmax(300px, 1fr))",
           gap: 18,
-          marginTop: 38,
+          marginTop: 24,
         }}
       >
-        <div className="card" style={{ padding: 28 }}>
-          <span className="pill">BEFORE YOU GO</span>
+        <div
+          className="card"
+          style={{ padding: 28 }}
+        >
+          <span className="pill">
+            BEFORE YOU GO
+          </span>
 
           <h2
             style={{
@@ -317,10 +473,11 @@ export default function SpiritualJourneysPage() {
             className="muted"
             style={{ lineHeight: 1.7 }}
           >
-            Spiritual journeys can combine cultural
-            sensitivity, high altitude and changing
-            travel requirements. Preparation is part of
-            traveling responsibly.
+            Tibet spiritual journeys can combine
+            cultural sensitivity, significant altitude,
+            long travel distances and changing travel
+            requirements. Preparation is part of
+            responsible travel.
           </p>
 
           <div
@@ -339,7 +496,9 @@ export default function SpiritualJourneysPage() {
                   alignItems: "flex-start",
                 }}
               >
-                <strong aria-hidden="true">✓</strong>
+                <strong aria-hidden="true">
+                  ✓
+                </strong>
 
                 <span
                   className="muted"
@@ -356,12 +515,17 @@ export default function SpiritualJourneysPage() {
             href="/himalayan-guide"
             style={{ marginTop: 24 }}
           >
-            Read Himalayan Guide
+            Read Tibet Travel Guide
           </Link>
         </div>
 
-        <div className="card" style={{ padding: 28 }}>
-          <span className="pill">CURRENT CONDITIONS</span>
+        <div
+          className="card"
+          style={{ padding: 28 }}
+        >
+          <span className="pill">
+            TIBET CONDITIONS
+          </span>
 
           <h2
             style={{
@@ -369,25 +533,88 @@ export default function SpiritualJourneysPage() {
               fontSize: 28,
             }}
           >
-            The mountains set the pace
+            The plateau sets the pace
           </h2>
 
           <p
             className="muted"
             style={{ lineHeight: 1.75 }}
           >
-            Weather, altitude and local conditions can
-            affect Himalayan routes. Use current
-            forecasts as part of planning and follow
-            official information and qualified local
-            guidance before and during the journey.
+            Weather, altitude, road conditions and local
+            circumstances can affect Tibet journeys.
+            Current forecasts are one planning input, but
+            they do not guarantee route or operating
+            conditions.
           </p>
 
-          <Link className="btn" href="/weather-conditions">
-            Check live conditions
+          <Link
+            className="btn"
+            href="/weather-conditions"
+          >
+            Check Tibet conditions
           </Link>
         </div>
       </section>
+
+      {/* KAILASH */}
+
+      <section
+        className="card"
+        style={{
+          marginTop: 24,
+          padding: "clamp(26px, 4vw, 40px)",
+        }}
+      >
+        <span className="pill">
+          MOUNT KAILASH
+        </span>
+
+        <h2
+          style={{
+            marginTop: 14,
+            marginBottom: 12,
+            fontSize: "clamp(28px, 4vw, 40px)",
+          }}
+        >
+          Approach a sacred landscape thoughtfully.
+        </h2>
+
+        <p
+          className="muted"
+          style={{
+            maxWidth: 900,
+            lineHeight: 1.75,
+          }}
+        >
+          A Mount Kailash journey combines remote
+          high-altitude travel with a landscape of deep
+          religious and cultural significance. Visitors
+          should approach the experience with appropriate
+          preparation, patience and respect for pilgrims
+          and local practices.
+        </p>
+
+        <div
+          className="actions"
+          style={{ marginTop: 22 }}
+        >
+          <Link
+            className="btn"
+            href="/tours/kailash-kora"
+          >
+            Mount Kailash Kora
+          </Link>
+
+          <Link
+            className="btn alt"
+            href="/tours/kailash-mansarovar-journey"
+          >
+            Kailash &amp; Mansarovar
+          </Link>
+        </div>
+      </section>
+
+      {/* RESPONSIBLE PILGRIMAGE */}
 
       <section
         className="card"
@@ -396,7 +623,9 @@ export default function SpiritualJourneysPage() {
           padding: "clamp(24px, 4vw, 40px)",
         }}
       >
-        <span className="pill">RESPONSIBLE PILGRIMAGE</span>
+        <span className="pill">
+          RESPONSIBLE PILGRIMAGE
+        </span>
 
         <h2
           style={{
@@ -416,10 +645,9 @@ export default function SpiritualJourneysPage() {
         >
           Photography may be restricted in monasteries,
           temples, ceremonies and other sacred spaces.
-          Ask when uncertain, respect requests from
-          residents and religious communities, and
-          avoid interrupting worship or ceremonies for
-          a photograph.
+          Ask when uncertain, respect requests not to
+          photograph and avoid interrupting worship,
+          pilgrimage or ceremonies for an image.
         </p>
 
         <Link
@@ -427,9 +655,61 @@ export default function SpiritualJourneysPage() {
           href="/responsible-travel"
           style={{ marginTop: 18 }}
         >
-          Read Responsible Travel
+          Responsible Tibet travel
         </Link>
       </section>
+
+      {/* CURRENT INFORMATION */}
+
+      <section
+        className="card"
+        style={{
+          marginTop: 24,
+          padding: "clamp(24px, 4vw, 40px)",
+        }}
+      >
+        <span className="pill">
+          CURRENT INFORMATION
+        </span>
+
+        <h2
+          style={{
+            marginTop: 14,
+            fontSize: "clamp(28px, 4vw, 40px)",
+          }}
+        >
+          Confirm the journey before departure.
+        </h2>
+
+        <p
+          className="muted"
+          style={{
+            maxWidth: 900,
+            lineHeight: 1.75,
+          }}
+        >
+          Travel documentation, permits, route access,
+          local requirements, transportation, weather
+          and operating conditions can change. Confirm
+          current information for your nationality,
+          travel dates and intended Tibet route before
+          final arrangements are made.
+        </p>
+
+        <div
+          className="actions"
+          style={{ marginTop: 22 }}
+        >
+          <Link
+            className="btn alt"
+            href="/ai-research"
+          >
+            Research current information
+          </Link>
+        </div>
+      </section>
+
+      {/* FINAL CTA */}
 
       <section
         className="card"
@@ -437,9 +717,13 @@ export default function SpiritualJourneysPage() {
           marginTop: 24,
           padding: "clamp(28px, 5vw, 46px)",
           textAlign: "center",
+          background:
+            "linear-gradient(135deg, rgba(19,58,61,.9), rgba(16,35,42,.96))",
         }}
       >
-        <span className="pill">YOUR JOURNEY</span>
+        <span className="pill">
+          YOUR TIBET JOURNEY
+        </span>
 
         <h2
           style={{
@@ -459,11 +743,11 @@ export default function SpiritualJourneysPage() {
             lineHeight: 1.7,
           }}
         >
-          Tell us the places, traditions or pilgrimage
-          experiences that interest you, along with
-          your dates and preferred pace, and use them
-          as the starting point for a private Himalayan
-          journey.
+          Tell us whether your interests center on Mount
+          Kailash, monasteries, cultural heritage,
+          pilgrimage or a quieter contemplative journey,
+          then use those priorities as the starting point
+          for your Tibet itinerary.
         </p>
 
         <div
@@ -473,12 +757,18 @@ export default function SpiritualJourneysPage() {
             marginTop: 26,
           }}
         >
-          <Link className="btn" href="/custom-journey">
+          <Link
+            className="btn"
+            href="/custom-journey"
+          >
             Build my spiritual journey
           </Link>
 
-          <Link className="btn alt" href="/contact-book">
-            Request a trip
+          <Link
+            className="btn alt"
+            href="/contact-book"
+          >
+            Request a Tibet trip
           </Link>
         </div>
       </section>
@@ -486,14 +776,20 @@ export default function SpiritualJourneysPage() {
   );
 }
 
-function SmallTag({ text }: { text: string }) {
+function SmallTag({
+  text,
+}: {
+  text: string;
+}) {
   return (
     <span
       style={{
         padding: "7px 10px",
         borderRadius: 999,
-        border: "1px solid rgba(255,255,255,0.10)",
-        background: "rgba(255,255,255,0.04)",
+        border:
+          "1px solid rgba(255,255,255,0.10)",
+        background:
+          "rgba(255,255,255,0.04)",
         fontSize: 13,
       }}
     >
