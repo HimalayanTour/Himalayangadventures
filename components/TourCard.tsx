@@ -3,32 +3,23 @@ import Link from "next/link";
 import type { Tour } from "@/lib/tours";
 
 const images: Record<string, string> = {
-  // Lhasa
   "lhasa-classic": "/lhasa.jpg",
 
-  // Everest
   "lhasa-everest-base-camp": "/tibet-everest.jpg",
 
-  // Central Tibet
-  "lhasa-shigatse-gyantse": "/5.png",
+  "lhasa-shigatse-gyantse": "/Shigatse.jpg",
 
-  // High Plateau
-  "tibet-high-plateau": "/8.jpg",
+  "tibet-high-plateau": "/tibethighplateau.jpg",
 
-  // Mount Kailash & Mansarovar
   "kailash-mansarovar-journey": "/mount-kailash.jpg",
 
-  // Mount Kailash Kora
   "kailash-kora": "/mount-kailash.jpg",
 
-  // Namtso
   "namtso-lake": "/namtso.jpg",
 
-  // Photography
-  "tibet-photography": "/9.jpg",
+  "tibet-photography": "/photographyjourney.jpg",
 
-  // Culture & Monasteries
-  "tibet-culture-monasteries": "/6.png",
+  "tibet-culture-monasteries": "/tibetculture.jpg",
 };
 
 export default function TourCard({
@@ -63,7 +54,9 @@ export default function TourCard({
         </div>
       )}
 
-      <span className="pill">TIBET</span>
+      <span className="pill">
+        TIBET
+      </span>
 
       <h3>{tour.name}</h3>
 
