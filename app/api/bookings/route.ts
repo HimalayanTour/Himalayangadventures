@@ -73,7 +73,40 @@ function formatTourName(
   slug: string | null
 ) {
   if (!slug) {
-    return "Custom Himalayan Journey";
+    return "Custom Tibet Journey";
+  }
+
+  const tourNames: Record<string, string> = {
+    "lhasa-classic":
+      "Lhasa Classic Journey",
+
+    "lhasa-everest-base-camp":
+      "Lhasa to Everest Base Camp",
+
+    "lhasa-shigatse-gyantse":
+      "Lhasa, Gyantse & Shigatse",
+
+    "tibet-high-plateau":
+      "Tibet High Plateau",
+
+    "kailash-mansarovar-journey":
+      "Kailash & Mansarovar Journey",
+
+    "kailash-kora":
+      "Mount Kailash Kora",
+
+    "namtso-lake":
+      "Lhasa & Namtso Lake",
+
+    "tibet-photography":
+      "Tibet Photography Journey",
+
+    "tibet-culture-monasteries":
+      "Tibet Culture & Monasteries",
+  };
+
+  if (tourNames[slug]) {
+    return tourNames[slug];
   }
 
   return slug
@@ -235,11 +268,10 @@ async function sendAdminNotification({
     Until you own and verify a domain,
     Resend's test sender is used.
 
-    Later:
-    RESEND_FROM_EMAIL can be something like:
-
-    Himalayan26 <bookings@yourdomain.com>
+    Later, after you have your domain,
+    RESEND_FROM_EMAIL can be added.
   */
+
   const from =
     verifiedFrom ||
     "Himalayan26 <onboarding@resend.dev>";
@@ -292,14 +324,14 @@ async function sendAdminNotification({
     escapeHtml(adminBookingUrl);
 
   const subject =
-    `New booking request: ${tourName}`;
+    `New Tibet trip request: ${tourName}`;
 
-  const text = `NEW HIMALAYAN BOOKING REQUEST
+  const text = `NEW TIBET BOOKING REQUEST
 
 Customer: ${customerName}
 Customer email: ${customerEmail}
 
-Tour: ${tourName}
+Tibet journey: ${tourName}
 Preferred dates: ${dates || "Not specified"}
 Travelers: ${travelers}
 
@@ -366,7 +398,7 @@ Himalayan26
           line-height:1.2;
         "
       >
-        New booking request
+        New Tibet trip request
       </h1>
 
       <p
@@ -377,7 +409,7 @@ Himalayan26
         "
       >
         A traveler has submitted a new
-        Himalayan journey request.
+        Tibet journey request.
       </p>
     </div>
 
@@ -407,41 +439,81 @@ Himalayan26
         "
       >
         <tr>
-          <td style="padding:9px 0;color:#728187;">
+          <td
+            style="
+              padding:9px 0;
+              color:#728187;
+            "
+          >
             Name
           </td>
 
-          <td style="padding:9px 0;font-weight:700;">
+          <td
+            style="
+              padding:9px 0;
+              font-weight:700;
+            "
+          >
             ${safeName}
           </td>
         </tr>
 
         <tr>
-          <td style="padding:9px 0;color:#728187;">
+          <td
+            style="
+              padding:9px 0;
+              color:#728187;
+            "
+          >
             Email
           </td>
 
-          <td style="padding:9px 0;font-weight:700;">
+          <td
+            style="
+              padding:9px 0;
+              font-weight:700;
+            "
+          >
             ${safeEmail}
           </td>
         </tr>
 
         <tr>
-          <td style="padding:9px 0;color:#728187;">
+          <td
+            style="
+              padding:9px 0;
+              color:#728187;
+            "
+          >
             Phone / WhatsApp
           </td>
 
-          <td style="padding:9px 0;font-weight:700;">
+          <td
+            style="
+              padding:9px 0;
+              font-weight:700;
+            "
+          >
             ${safePhone}
           </td>
         </tr>
 
         <tr>
-          <td style="padding:9px 0;color:#728187;">
+          <td
+            style="
+              padding:9px 0;
+              color:#728187;
+            "
+          >
             Country
           </td>
 
-          <td style="padding:9px 0;font-weight:700;">
+          <td
+            style="
+              padding:9px 0;
+              font-weight:700;
+            "
+          >
             ${safeCountry}
           </td>
         </tr>
@@ -463,7 +535,7 @@ Himalayan26
           font-size:20px;
         "
       >
-        Journey details
+        Tibet journey details
       </h2>
 
       <table
@@ -474,51 +546,101 @@ Himalayan26
         "
       >
         <tr>
-          <td style="padding:9px 0;color:#728187;">
-            Tour
+          <td
+            style="
+              padding:9px 0;
+              color:#728187;
+            "
+          >
+            Journey
           </td>
 
-          <td style="padding:9px 0;font-weight:700;">
+          <td
+            style="
+              padding:9px 0;
+              font-weight:700;
+            "
+          >
             ${safeTour}
           </td>
         </tr>
 
         <tr>
-          <td style="padding:9px 0;color:#728187;">
+          <td
+            style="
+              padding:9px 0;
+              color:#728187;
+            "
+          >
             Preferred dates
           </td>
 
-          <td style="padding:9px 0;font-weight:700;">
+          <td
+            style="
+              padding:9px 0;
+              font-weight:700;
+            "
+          >
             ${safeDates}
           </td>
         </tr>
 
         <tr>
-          <td style="padding:9px 0;color:#728187;">
+          <td
+            style="
+              padding:9px 0;
+              color:#728187;
+            "
+          >
             Travelers
           </td>
 
-          <td style="padding:9px 0;font-weight:700;">
+          <td
+            style="
+              padding:9px 0;
+              font-weight:700;
+            "
+          >
             ${travelers}
           </td>
         </tr>
 
         <tr>
-          <td style="padding:9px 0;color:#728187;">
+          <td
+            style="
+              padding:9px 0;
+              color:#728187;
+            "
+          >
             Trip style
           </td>
 
-          <td style="padding:9px 0;font-weight:700;">
+          <td
+            style="
+              padding:9px 0;
+              font-weight:700;
+            "
+          >
             ${safeTripStyle}
           </td>
         </tr>
 
         <tr>
-          <td style="padding:9px 0;color:#728187;">
+          <td
+            style="
+              padding:9px 0;
+              color:#728187;
+            "
+          >
             Accommodation
           </td>
 
-          <td style="padding:9px 0;font-weight:700;">
+          <td
+            style="
+              padding:9px 0;
+              font-weight:700;
+            "
+          >
             ${safeAccommodation}
           </td>
         </tr>
@@ -540,7 +662,7 @@ Himalayan26
           font-size:20px;
         "
       >
-        Customer message
+        Traveler message
       </h2>
 
       <div
@@ -614,12 +736,11 @@ Himalayan26
     html,
 
     /*
-      This is important:
-
-      When you press Reply in Gmail,
-      it will reply to the traveler,
-      not onboarding@resend.dev.
+      When you press Reply in your
+      email inbox, it replies directly
+      to the traveler.
     */
+
     replyTo: customerEmail,
   });
 }
@@ -644,11 +765,11 @@ async function sendCustomerConfirmation({
   bookingId: string;
 }) {
   /*
-    We intentionally do NOT send this
-    until a custom domain has been
-    verified.
+    Customer email stays disabled
+    until you have a verified sending
+    domain.
 
-    Once RESEND_FROM_EMAIL exists,
+    When RESEND_FROM_EMAIL exists,
     customer confirmations switch on
     automatically.
   */
@@ -694,21 +815,21 @@ async function sendCustomerConfirmation({
     escapeHtml(bookingId);
 
   const subject =
-    "We received your Himalayan journey request";
+    "We received your Tibet journey request";
 
   const text = `Hello ${customerName},
 
 Thank you for contacting Himalayan26.
 
-We received your booking request.
+We received your Tibet journey request.
 
-Tour: ${tourName}
+Journey: ${tourName}
 Preferred dates: ${dates || "Not specified"}
 Travelers: ${travelers}
 Trip style: ${tripStyle || "Not specified"}
 Accommodation: ${accommodation || "Not specified"}
 
-Our Himalayan travel team will review your request and contact you with the next steps.
+Our Tibet travel team will review your request and contact you with the next steps.
 
 Booking reference:
 ${bookingId}
@@ -772,7 +893,7 @@ Himalayan26
           line-height:1.7;
         "
       >
-        We received your Himalayan
+        We received your Tibet
         journey request.
       </p>
     </div>
@@ -787,11 +908,11 @@ Himalayan26
       "
     >
       <h2 style="margin-top:0;">
-        Your request
+        Your Tibet request
       </h2>
 
       <p>
-        <strong>Tour:</strong>
+        <strong>Journey:</strong>
         ${safeTour}
       </p>
 
@@ -830,10 +951,23 @@ Himalayan26
       </h2>
 
       <p style="line-height:1.7;">
-        Our Himalayan travel team will
+        Our Tibet travel team will
         review your request and contact
-        you with itinerary options,
-        availability and the next steps.
+        you about the proposed journey,
+        availability and next steps.
+      </p>
+
+      <p
+        style="
+          line-height:1.7;
+          color:#60747b;
+          margin-bottom:0;
+        "
+      >
+        Final itinerary, services,
+        current travel requirements,
+        availability and pricing should
+        be confirmed before booking.
       </p>
     </div>
 
@@ -1006,7 +1140,7 @@ export async function POST(
     const db = getDb();
 
     /*
-      Save first.
+      Save the booking first.
 
       Email failure must never lose
       a booking.
@@ -1065,7 +1199,7 @@ export async function POST(
       `${origin}/admin/bookings/${data.id}`;
 
     /*
-      Email you the booking.
+      Email the admin notification.
     */
 
     const adminEmailResult =
@@ -1116,7 +1250,7 @@ export async function POST(
         },
 
         message:
-          "Booking request received. Our team will contact you.",
+          "Tibet trip request received. Our Tibet travel team will contact you.",
       },
       {
         status: 201,
