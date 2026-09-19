@@ -1,22 +1,15 @@
 import type { MetadataRoute } from "next";
+import { tours } from "@/lib/tours";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://himalayangadventures.vercel.app";
+  const baseUrl =
+    "https://himalayangadventures.vercel.app";
 
   const routes = [
     "",
     "/explore",
-    "/tours",
-
-    "/nepal",
-    "/bhutan",
     "/tibet",
-    "/india-himalaya",
-
-    "/everest",
-    "/annapurna",
-    "/langtang",
-    "/manaslu",
+    "/tours",
 
     "/adventure",
     "/culture-heritage",
@@ -41,30 +34,37 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
     "/about",
     "/contact-book",
-
-    "/tours/everest-base-camp",
-    "/tours/annapurna-classic",
-    "/tours/langtang-valley",
-    "/tours/manaslu-circuit",
-    "/tours/upper-mustang",
-    "/tours/bhutan-mountain-culture",
-    "/tours/tibet-high-plateau",
-    "/tours/ladakh-high-altitude",
-    "/tours/kailash-mansarovar-journey",
   ];
 
-  return routes.map((route) => ({
-    url: `${baseUrl}${route}`,
-    changeFrequency: route === "" ? "weekly" : "monthly",
-    priority:
-      route === ""
-        ? 1
-        : route === "/tours" ||
-            route === "/explore" ||
-            route === "/ai-trip-planner"
-          ? 0.9
-          : route.startsWith("/tours/")
-            ? 0.8
+  const staticPages: MetadataRoute.Sitemap =
+    routes.map((route) => ({
+      url: `${baseUrl}${route}`,
+
+      changeFrequency:
+        route === ""
+          ? "weekly"
+          : "monthly",
+
+      priority:
+        route === ""
+          ? 1
+          : route === "/tibet" ||
+              route === "/tours" ||
+              route === "/explore" ||
+              route === "/ai-trip-planner"
+            ? 0.9
             : 0.7,
-  }));
+    }));
+
+  const tourPages: MetadataRoute.Sitemap =
+    tours.map((tour) => ({
+      url: `${baseUrl}/tours/${tour.slug}`,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    }));
+
+  return [
+    ...staticPages,
+    ...tourPages,
+  ];
 }
