@@ -3,31 +3,35 @@ import Link from "next/link";
 const researchAreas = [
   {
     number: "01",
-    title: "Route research",
-    text: "Explore questions about Himalayan routes, journey structure, altitude, pacing and the differences between destinations.",
+    title: "Tibet route research",
+    text:
+      "Explore questions about Tibet routes, journey structure, altitude, pacing and the differences between Lhasa, Central Tibet, Everest, Namtso and western Tibet.",
   },
   {
     number: "02",
-    title: "Travel conditions",
-    text: "Use current research as an additional planning layer for changing conditions, seasonal considerations and practical travel questions.",
+    title: "Current travel conditions",
+    text:
+      "Use live research as an additional planning layer for changing weather, route conditions, travel requirements and practical questions that need current information.",
   },
   {
     number: "03",
-    title: "Destination comparison",
-    text: "Compare regions and journeys when you are deciding between places such as Everest, Annapurna, Manaslu, Bhutan, Tibet or Ladakh.",
+    title: "Journey comparison",
+    text:
+      "Compare Tibet journeys by duration, altitude profile, pace, cultural focus, landscapes and travel style before deciding which direction fits you.",
   },
   {
     number: "04",
     title: "Planning questions",
-    text: "Research the practical questions that appear while shaping an itinerary, from trip length and difficulty to travel style and preparation.",
+    text:
+      "Research practical questions while shaping your Tibet itinerary, from trip length and acclimatization to photography, cultural interests and preparation.",
   },
 ];
 
 const examples = [
-  "Compare Everest Base Camp and Annapurna for a first Himalayan trek.",
-  "What should I consider when planning a high-altitude journey?",
-  "How should acclimatization affect the pace of my itinerary?",
-  "Compare Nepal, Bhutan and Tibet for culture and mountain scenery.",
+  "Compare the Lhasa Classic Journey and Lhasa to Everest Base Camp for a first Tibet trip.",
+  "How should altitude and acclimatization affect the pace of a Tibet itinerary?",
+  "Compare a Tibet journey focused on Everest with one focused on Mount Kailash.",
+  "What current information should I verify before planning travel to Tibet?",
 ];
 
 export default function Page() {
@@ -36,12 +40,13 @@ export default function Page() {
       <section className="section">
         <div className="container">
           {/* HERO */}
+
           <div
             className="card"
             style={{
               padding: "clamp(34px, 5vw, 64px)",
               background:
-                "linear-gradient(135deg, rgba(22,42,49,.96), rgba(13,73,75,.72))",
+                "radial-gradient(circle at 85% 15%, rgba(109,224,194,.12), transparent 30%), linear-gradient(135deg, rgba(22,42,49,.96), rgba(13,73,75,.72))",
             }}
           >
             <div
@@ -51,7 +56,7 @@ export default function Page() {
                 letterSpacing: ".18em",
               }}
             >
-              AI RESEARCH · HIMALAYA
+              AI RESEARCH · TIBET
             </div>
 
             <h1
@@ -62,9 +67,9 @@ export default function Page() {
                 marginBottom: 24,
               }}
             >
-              Research before
+              Research Tibet
               <br />
-              you decide.
+              before you decide.
             </h1>
 
             <p
@@ -75,9 +80,12 @@ export default function Page() {
                 lineHeight: 1.8,
               }}
             >
-              Use AI-assisted travel research to investigate routes, compare
-              Himalayan journeys and explore planning questions before turning
-              your ideas into an itinerary.
+              Use AI-assisted research to explore Tibet
+              routes, compare journeys and investigate
+              planning questions. When live research is
+              available, the planner can also add current
+              web information to questions that may change
+              over time.
             </p>
 
             <div
@@ -89,17 +97,24 @@ export default function Page() {
                 flexWrap: "wrap",
               }}
             >
-              <Link className="btn" href="/ai-trip-planner">
-                Start AI research
+              <Link
+                className="btn"
+                href="/ai-trip-planner"
+              >
+                Start Tibet research
               </Link>
 
-              <Link className="btn alt" href="/compare-trips">
-                Compare journeys
+              <Link
+                className="btn alt"
+                href="/compare-trips"
+              >
+                Compare Tibet journeys
               </Link>
             </div>
           </div>
 
           {/* WHAT YOU CAN RESEARCH */}
+
           <div style={{ marginTop: 54 }}>
             <div
               className="eyebrow"
@@ -108,7 +123,7 @@ export default function Page() {
                 letterSpacing: ".16em",
               }}
             >
-              RESEARCH YOUR JOURNEY
+              RESEARCH YOUR TIBET JOURNEY
             </div>
 
             <h2
@@ -128,9 +143,11 @@ export default function Page() {
                 marginBottom: 28,
               }}
             >
-              Himalayan planning involves more than choosing a destination.
-              Altitude, route design, season, difficulty, access and personal
-              priorities can all change which journey makes sense.
+              Tibet planning involves more than choosing a
+              famous place. Altitude, route design, travel
+              time, current access, weather and your own
+              priorities can all affect the shape of a
+              journey.
             </p>
 
             <div
@@ -157,7 +174,9 @@ export default function Page() {
                     RESEARCH {item.number}
                   </div>
 
-                  <h3 style={{ marginBottom: 12 }}>{item.title}</h3>
+                  <h3 style={{ marginBottom: 12 }}>
+                    {item.title}
+                  </h3>
 
                   <p
                     className="muted"
@@ -174,6 +193,7 @@ export default function Page() {
           </div>
 
           {/* LIVE RESEARCH */}
+
           <div
             className="card"
             style={{
@@ -190,7 +210,7 @@ export default function Page() {
                 letterSpacing: ".16em",
               }}
             >
-              LIVE RESEARCH MODE
+              LIVE TIBET RESEARCH
             </div>
 
             <h2
@@ -199,7 +219,7 @@ export default function Page() {
                 marginBottom: 14,
               }}
             >
-              Add current web research when available.
+              Add current web research when it matters.
             </h2>
 
             <p
@@ -209,11 +229,27 @@ export default function Page() {
                 lineHeight: 1.8,
               }}
             >
-              The AI Trip Planner includes a live-research option that can add
-              current web information to supported planning requests. When live
-              research is unavailable, the planner can still create a planning
-              response and clearly indicate that current web verification was
-              not included.
+              The Tibet AI Trip Planner includes a live
+              research option that can add current web
+              information to supported planning questions.
+              This is especially useful for information
+              that may change, such as travel requirements,
+              route access, weather and transportation
+              conditions.
+            </p>
+
+            <p
+              className="muted"
+              style={{
+                maxWidth: 850,
+                lineHeight: 1.8,
+                marginBottom: 0,
+              }}
+            >
+              When live research is unavailable, the
+              planner can still help organize your Tibet
+              journey and will indicate that current web
+              verification was not included.
             </p>
 
             <div
@@ -225,17 +261,118 @@ export default function Page() {
                 flexWrap: "wrap",
               }}
             >
-              <Link className="btn" href="/ai-trip-planner">
-                Open AI Trip Planner
+              <Link
+                className="btn"
+                href="/ai-trip-planner"
+              >
+                Open Tibet AI Planner
               </Link>
 
-              <Link className="btn alt" href="/weather-conditions">
-                Check conditions
+              <Link
+                className="btn alt"
+                href="/weather-conditions"
+              >
+                Check Tibet conditions
               </Link>
             </div>
           </div>
 
+          {/* RESEARCH VS PLANNING */}
+
+          <div style={{ marginTop: 54 }}>
+            <div
+              className="eyebrow"
+              style={{
+                marginBottom: 14,
+                letterSpacing: ".16em",
+              }}
+            >
+              TWO PLANNING LAYERS
+            </div>
+
+            <h2
+              style={{
+                fontSize: "clamp(32px, 4vw, 46px)",
+                marginBottom: 26,
+              }}
+            >
+              Use AI planning and live research differently.
+            </h2>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns:
+                  "repeat(auto-fit, minmax(280px, 1fr))",
+                gap: 16,
+              }}
+            >
+              <div
+                className="card"
+                style={{ padding: 26 }}
+              >
+                <div
+                  className="eyebrow"
+                  style={{
+                    marginBottom: 12,
+                  }}
+                >
+                  AI PLANNING
+                </div>
+
+                <h3>
+                  Shape the journey.
+                </h3>
+
+                <p
+                  className="muted"
+                  style={{
+                    lineHeight: 1.75,
+                    marginBottom: 0,
+                  }}
+                >
+                  Use the planner to think through duration,
+                  pacing, interests, altitude, journey
+                  style and which of our Tibet routes may
+                  fit your priorities.
+                </p>
+              </div>
+
+              <div
+                className="card"
+                style={{ padding: 26 }}
+              >
+                <div
+                  className="eyebrow"
+                  style={{
+                    marginBottom: 12,
+                  }}
+                >
+                  LIVE RESEARCH
+                </div>
+
+                <h3>
+                  Check what may have changed.
+                </h3>
+
+                <p
+                  className="muted"
+                  style={{
+                    lineHeight: 1.75,
+                    marginBottom: 0,
+                  }}
+                >
+                  Turn on live research when your question
+                  depends on current information. Important
+                  results should still be checked against
+                  appropriate official or primary sources.
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* EXAMPLE QUESTIONS */}
+
           <div style={{ marginTop: 54 }}>
             <div
               className="eyebrow"
@@ -253,7 +390,7 @@ export default function Page() {
                 marginBottom: 28,
               }}
             >
-              Start with a real travel question.
+              Start with a real Tibet travel question.
             </h2>
 
             <div
@@ -277,7 +414,8 @@ export default function Page() {
                       letterSpacing: ".14em",
                     }}
                   >
-                    EXAMPLE {String(index + 1).padStart(2, "0")}
+                    EXAMPLE{" "}
+                    {String(index + 1).padStart(2, "0")}
                   </div>
 
                   <p
@@ -293,40 +431,61 @@ export default function Page() {
               ))}
             </div>
 
-            <div className="actions" style={{ marginTop: 24 }}>
-              <Link className="btn" href="/ai-trip-planner">
-                Ask my own question
+            <div
+              className="actions"
+              style={{ marginTop: 24 }}
+            >
+              <Link
+                className="btn"
+                href="/ai-trip-planner"
+              >
+                Ask my Tibet question
               </Link>
             </div>
           </div>
 
-          {/* IMPORTANT NOTE */}
+          {/* CURRENT INFORMATION */}
+
           <div
             className="card"
             style={{
               marginTop: 54,
-              padding: 28,
+              padding: "clamp(26px, 4vw, 38px)",
             }}
           >
-            <div className="eyebrow" style={{ marginBottom: 12 }}>
+            <div
+              className="eyebrow"
+              style={{
+                marginBottom: 12,
+              }}
+            >
               RESEARCH RESPONSIBLY
             </div>
 
-            <h2 style={{ marginBottom: 14 }}>
-              AI research is a planning tool, not the final authority.
+            <h2
+              style={{
+                marginBottom: 14,
+              }}
+            >
+              AI research is a planning tool, not the final
+              authority.
             </h2>
 
             <p
               className="muted"
               style={{
-                maxWidth: 880,
+                maxWidth: 900,
                 lineHeight: 1.8,
               }}
             >
-              Entry rules, permits, closures, weather, transportation and
-              mountain conditions can change. Important travel decisions should
-              be confirmed with current official sources and appropriate local
-              guidance before booking or departure.
+              Travel documentation, permits, route access,
+              local requirements, transportation, weather
+              and operating conditions can change.
+              Important travel decisions should be
+              confirmed using current authoritative
+              information and appropriate local
+              professional guidance before booking or
+              departure.
             </p>
 
             <div
@@ -338,17 +497,31 @@ export default function Page() {
                 flexWrap: "wrap",
               }}
             >
-              <Link className="btn alt" href="/weather-conditions">
-                Safety &amp; conditions
+              <Link
+                className="btn alt"
+                href="/weather-conditions"
+              >
+                Tibet conditions
               </Link>
 
-              <Link className="btn alt" href="/himalayan-guide">
-                Himalayan guide
+              <Link
+                className="btn alt"
+                href="/himalayan-guide"
+              >
+                Tibet travel guide
+              </Link>
+
+              <Link
+                className="btn alt"
+                href="/responsible-travel"
+              >
+                Responsible travel
               </Link>
             </div>
           </div>
 
           {/* FINAL CTA */}
+
           <div
             className="card"
             style={{
@@ -358,8 +531,13 @@ export default function Page() {
                 "linear-gradient(135deg, rgba(19,58,61,.9), rgba(16,35,42,.96))",
             }}
           >
-            <div className="eyebrow" style={{ marginBottom: 14 }}>
-              FROM RESEARCH TO JOURNEY
+            <div
+              className="eyebrow"
+              style={{
+                marginBottom: 14,
+              }}
+            >
+              FROM RESEARCH TO TIBET
             </div>
 
             <h2
@@ -368,19 +546,20 @@ export default function Page() {
                 marginBottom: 14,
               }}
             >
-              Turn what you learn into a better plan.
+              Turn what you learn into a clearer journey.
             </h2>
 
             <p
               className="muted"
               style={{
-                maxWidth: 780,
+                maxWidth: 800,
                 lineHeight: 1.8,
               }}
             >
-              Research your options, compare existing journeys and then build a
-              private itinerary around your dates, interests and preferred
-              travel style.
+              Research current questions, compare our
+              Tibet journeys and then build a private
+              itinerary around your dates, interests,
+              preferred pace and travel style.
             </p>
 
             <div
@@ -392,16 +571,25 @@ export default function Page() {
                 flexWrap: "wrap",
               }}
             >
-              <Link className="btn" href="/ai-trip-planner">
-                Start researching
+              <Link
+                className="btn"
+                href="/ai-trip-planner"
+              >
+                Start Tibet research
               </Link>
 
-              <Link className="btn alt" href="/compare-trips">
-                Compare trips
+              <Link
+                className="btn alt"
+                href="/compare-trips"
+              >
+                Compare Tibet journeys
               </Link>
 
-              <Link className="btn alt" href="/custom-journey">
-                Build a custom journey
+              <Link
+                className="btn alt"
+                href="/custom-journey"
+              >
+                Build a private journey
               </Link>
             </div>
           </div>
