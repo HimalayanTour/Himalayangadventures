@@ -15,8 +15,8 @@ const tourNames: Record<string, string> = {
     "Lhasa Classic Journey",
   "lhasa-everest-base-camp":
     "Lhasa to Everest Base Camp",
-  "lhasa-shigatse-gyantse":
-    "Lhasa, Gyantse & Shigatse",
+  "lhoka-southern-tibet":
+    "Lhoka (Southern Tibet)",
   "tibet-high-plateau":
     "Tibet High Plateau",
   "kailash-mansarovar-journey":
