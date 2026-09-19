@@ -22,7 +22,6 @@ export default function BookingForm({
   const [sent, setSent] =
     useState(false);
 
-  // Custom Journey values
   const [destination, setDestination] =
     useState("");
 
@@ -41,15 +40,10 @@ export default function BookingForm({
   const [message, setMessage] =
     useState("");
 
-  // --------------------------------
-  // READ CUSTOM JOURNEY URL VALUES
-  // --------------------------------
-
   useEffect(() => {
-    const params =
-      new URLSearchParams(
-        window.location.search
-      );
+    const params = new URLSearchParams(
+      window.location.search
+    );
 
     const urlDestination =
       params.get("destination") || "";
@@ -170,11 +164,6 @@ export default function BookingForm({
         formData.get("days") || ""
       ).trim();
 
-    // --------------------------------
-    // ADD CUSTOM JOURNEY INFORMATION
-    // TO THE SAVED BOOKING MESSAGE
-    // --------------------------------
-
     const journeyDetails: string[] =
       [];
 
@@ -272,365 +261,750 @@ export default function BookingForm({
     }
   }
 
+  const fieldStyle = {
+    width: "100%",
+  };
+
+  const selectStyle = {
+    width: "100%",
+    padding: "14px",
+    borderRadius: "12px",
+  };
+
   return (
     <form
-      className="card"
       onSubmit={handleSubmit}
+      className="card"
+      style={{
+        padding:
+          "clamp(22px, 4vw, 38px)",
+        background:
+          "linear-gradient(145deg, rgba(16,45,53,.96), rgba(7,25,32,.98))",
+        border:
+          "1px solid rgba(255,255,255,.10)",
+      }}
     >
-      <span className="pill">
-        BOOKING REQUEST
-      </span>
+      {/* HEADER */}
 
-      <h3
+      <div
         style={{
-          marginTop: 14,
+          display: "flex",
+          alignItems: "flex-start",
+          justifyContent:
+            "space-between",
+          gap: 20,
+          flexWrap: "wrap",
+          marginBottom: 30,
         }}
       >
-        Start your Himalayan journey
-      </h3>
-
-      <p
-        className="muted"
-        style={{
-          marginBottom: 22,
-          lineHeight: 1.6,
-        }}
-      >
-        Tell us about your travel
-        plans and our Himalayan
-        travel team will help create
-        the right journey for you.
-      </p>
-
-      {/* CUSTOM JOURNEY DETAILS */}
-
-      {destination && (
-        <div className="field">
-          <label htmlFor="booking-destination">
-            Destination / region
-          </label>
-
-          <input
-            id="booking-destination"
-            name="destination"
-            type="text"
-            value={destination}
-            onChange={(event) =>
-              setDestination(
-                event.target.value
-              )
-            }
-            disabled={sent}
-            placeholder="Nepal, Bhutan, Tibet..."
-          />
-        </div>
-      )}
-
-      {days && (
-        <div className="field">
-          <label htmlFor="booking-days">
-            Preferred trip length
-          </label>
-
-          <input
-            id="booking-days"
-            name="days"
-            type="number"
-            min="1"
-            max="60"
-            value={days}
-            onChange={(event) =>
-              setDays(
-                event.target.value
-              )
-            }
-            disabled={sent}
-          />
-        </div>
-      )}
-
-      <div className="field">
-        <label htmlFor="booking-name">
-          Full name *
-        </label>
-
-        <input
-          id="booking-name"
-          name="name"
-          type="text"
-          required
-          disabled={sent}
-          autoComplete="name"
-          placeholder="Your full name"
-        />
-      </div>
-
-      <div className="field">
-        <label htmlFor="booking-email">
-          Email address *
-        </label>
-
-        <input
-          id="booking-email"
-          name="email"
-          type="email"
-          required
-          disabled={sent}
-          autoComplete="email"
-          placeholder="you@example.com"
-        />
-      </div>
-
-      <div className="field">
-        <label htmlFor="booking-phone">
-          Phone / WhatsApp
-        </label>
-
-        <input
-          id="booking-phone"
-          name="phone"
-          type="tel"
-          disabled={sent}
-          autoComplete="tel"
-          placeholder="+1 555 123 4567"
-        />
-      </div>
-
-      <div className="field">
-        <label htmlFor="booking-country">
-          Country
-        </label>
-
-        <input
-          id="booking-country"
-          name="country"
-          type="text"
-          disabled={sent}
-          autoComplete="country-name"
-          placeholder="Japan, USA, Australia..."
-        />
-      </div>
-
-      <div className="field">
-        <label htmlFor="booking-dates">
-          Preferred travel dates
-        </label>
-
-        <input
-          id="booking-dates"
-          name="dates"
-          type="text"
-          disabled={sent}
-          placeholder="Example: 5–18 October 2026"
-        />
-      </div>
-
-      <div className="field">
-        <label htmlFor="booking-travelers">
-          Number of travelers
-        </label>
-
-        <input
-          id="booking-travelers"
-          name="travelers"
-          type="number"
-          min="1"
-          max="50"
-          value={travelers}
-          onChange={(event) =>
-            setTravelers(
-              event.target.value
-            )
-          }
-          disabled={sent}
-        />
-      </div>
-
-      <div className="field">
-        <label htmlFor="booking-trip-style">
-          Trip style
-        </label>
-
-        <select
-          id="booking-trip-style"
-          name="tripStyle"
-          value={tripStyle}
-          onChange={(event) =>
-            setTripStyle(
-              event.target.value
-            )
-          }
-          disabled={sent}
-          style={{
-            width: "100%",
-            padding: "14px",
-            borderRadius: "12px",
-          }}
-        >
-          <option value="">
-            Select trip style
-          </option>
-
-          <option value="Adventure">
-            Adventure
-          </option>
-
-          <option value="Culture">
-            Culture
-          </option>
-
-          <option value="Spiritual">
-            Spiritual
-          </option>
-
-          <option value="Photography">
-            Photography
-          </option>
-
-          <option value="Luxury">
-            Luxury
-          </option>
-
-          <option value="Family">
-            Family
-          </option>
-
-          <option value="Wellness">
-            Wellness
-          </option>
-
-          <option value="Private tour">
-            Private tour
-          </option>
-
-          <option value="Small group">
-            Small group
-          </option>
-
-          <option value="Adventure trekking">
-            Adventure trekking
-          </option>
-
-          <option value="Culture and heritage">
-            Culture & heritage
-          </option>
-        </select>
-      </div>
-
-      <div className="field">
-        <label htmlFor="booking-accommodation">
-          Accommodation preference
-        </label>
-
-        <select
-          id="booking-accommodation"
-          name="accommodation"
-          value={accommodation}
-          onChange={(event) =>
-            setAccommodation(
-              event.target.value
-            )
-          }
-          disabled={sent}
-          style={{
-            width: "100%",
-            padding: "14px",
-            borderRadius: "12px",
-          }}
-        >
-          <option value="">
-            Select accommodation
-          </option>
-
-          <option value="Standard">
-            Standard
-          </option>
-
-          <option value="Comfort">
-            Comfort
-          </option>
-
-          <option value="Comfortable">
-            Comfortable
-          </option>
-
-          <option value="Premium">
-            Premium
-          </option>
-
-          <option value="Luxury">
-            Luxury
-          </option>
-
-          <option value="Best available in remote areas">
-            Best available in remote
-            areas
-          </option>
-
-          <option value="Not sure">
-            Not sure yet
-          </option>
-        </select>
-      </div>
-
-      <div className="field">
-        <label htmlFor="booking-message">
-          Tell us about your trip
-        </label>
-
-        <textarea
-          id="booking-message"
-          name="message"
-          rows={6}
-          value={message}
-          onChange={(event) =>
-            setMessage(
-              event.target.value
-            )
-          }
-          disabled={sent}
-          placeholder="Tell us about your interests, fitness level, preferred pace, special requirements or anything else we should know."
-        />
-      </div>
-
-      <button
-        className="btn"
-        type="submit"
-        disabled={sending || sent}
-        style={{
-          width: "100%",
-          marginTop: 10,
-        }}
-      >
-        {sending
-          ? "Sending..."
-          : sent
-            ? "Booking sent ✓"
-            : "Send booking request"}
-      </button>
-
-      {statusMessage && (
         <div
-          className="notice"
+          style={{
+            maxWidth: 680,
+          }}
+        >
+          <span className="pill">
+            BOOKING REQUEST
+          </span>
+
+          <h2
+            style={{
+              marginTop: 15,
+              marginBottom: 10,
+              fontSize:
+                "clamp(30px, 5vw, 46px)",
+              lineHeight: 1.08,
+            }}
+          >
+            Start your Himalayan
+            journey
+          </h2>
+
+          <p
+            className="muted"
+            style={{
+              margin: 0,
+              lineHeight: 1.7,
+              maxWidth: 650,
+            }}
+          >
+            Share a few details about
+            your plans. This is a
+            booking request, not a
+            payment or final
+            reservation.
+          </p>
+        </div>
+
+        <div
+          style={{
+            padding:
+              "10px 14px",
+            borderRadius: 999,
+            border:
+              "1px solid rgba(109,224,194,.24)",
+            background:
+              "rgba(109,224,194,.08)",
+            color: "#7ce6cd",
+            fontSize: 12,
+            fontWeight: 800,
+            whiteSpace: "nowrap",
+          }}
+        >
+          NO PAYMENT REQUIRED
+        </div>
+      </div>
+
+      {/* SELECTED TOUR */}
+
+      {tourSlug && (
+        <div
+          style={{
+            marginBottom: 28,
+            padding: 18,
+            borderRadius: 16,
+            border:
+              "1px solid rgba(109,224,194,.18)",
+            background:
+              "rgba(109,224,194,.055)",
+          }}
+        >
+          <div
+            style={{
+              color: "#76e2c8",
+              fontSize: 11,
+              fontWeight: 900,
+              letterSpacing:
+                ".13em",
+              marginBottom: 6,
+            }}
+          >
+            SELECTED JOURNEY
+          </div>
+
+          <strong
+            style={{
+              fontSize: 17,
+              textTransform:
+                "capitalize",
+            }}
+          >
+            {tourSlug.replace(
+              /-/g,
+              " "
+            )}
+          </strong>
+        </div>
+      )}
+
+      {/* YOUR DETAILS */}
+
+      <section>
+        <div
+          style={{
+            display: "flex",
+            gap: 12,
+            alignItems: "center",
+            marginBottom: 18,
+          }}
+        >
+          <span
+            style={{
+              width: 30,
+              height: 30,
+              borderRadius: "50%",
+              display: "grid",
+              placeItems: "center",
+              background:
+                "rgba(109,224,194,.11)",
+              color: "#78e5ca",
+              fontSize: 12,
+              fontWeight: 900,
+            }}
+          >
+            01
+          </span>
+
+          <div>
+            <strong
+              style={{
+                display: "block",
+                fontSize: 19,
+              }}
+            >
+              Your details
+            </strong>
+
+            <span
+              className="muted"
+              style={{
+                fontSize: 13,
+              }}
+            >
+              How our travel team can
+              reach you
+            </span>
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(230px, 1fr))",
+            gap: 16,
+          }}
+        >
+          <div className="field">
+            <label htmlFor="booking-name">
+              Full name *
+            </label>
+
+            <input
+              id="booking-name"
+              name="name"
+              type="text"
+              required
+              disabled={sent}
+              autoComplete="name"
+              placeholder="Your full name"
+              style={fieldStyle}
+            />
+          </div>
+
+          <div className="field">
+            <label htmlFor="booking-email">
+              Email address *
+            </label>
+
+            <input
+              id="booking-email"
+              name="email"
+              type="email"
+              required
+              disabled={sent}
+              autoComplete="email"
+              placeholder="you@example.com"
+              style={fieldStyle}
+            />
+          </div>
+
+          <div className="field">
+            <label htmlFor="booking-phone">
+              Phone / WhatsApp
+            </label>
+
+            <input
+              id="booking-phone"
+              name="phone"
+              type="tel"
+              disabled={sent}
+              autoComplete="tel"
+              placeholder="+1 555 123 4567"
+              style={fieldStyle}
+            />
+          </div>
+
+          <div className="field">
+            <label htmlFor="booking-country">
+              Country
+            </label>
+
+            <input
+              id="booking-country"
+              name="country"
+              type="text"
+              disabled={sent}
+              autoComplete="country-name"
+              placeholder="Japan, USA, Australia..."
+              style={fieldStyle}
+            />
+          </div>
+        </div>
+      </section>
+
+      <div
+        style={{
+          height: 1,
+          background:
+            "rgba(255,255,255,.08)",
+          margin: "32px 0",
+        }}
+      />
+
+      {/* JOURNEY DETAILS */}
+
+      <section>
+        <div
+          style={{
+            display: "flex",
+            gap: 12,
+            alignItems: "center",
+            marginBottom: 18,
+          }}
+        >
+          <span
+            style={{
+              width: 30,
+              height: 30,
+              borderRadius: "50%",
+              display: "grid",
+              placeItems: "center",
+              background:
+                "rgba(109,224,194,.11)",
+              color: "#78e5ca",
+              fontSize: 12,
+              fontWeight: 900,
+            }}
+          >
+            02
+          </span>
+
+          <div>
+            <strong
+              style={{
+                display: "block",
+                fontSize: 19,
+              }}
+            >
+              Your journey
+            </strong>
+
+            <span
+              className="muted"
+              style={{
+                fontSize: 13,
+              }}
+            >
+              When, where and how long
+              you want to travel
+            </span>
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(220px, 1fr))",
+            gap: 16,
+          }}
+        >
+          {destination && (
+            <div className="field">
+              <label htmlFor="booking-destination">
+                Destination / region
+              </label>
+
+              <input
+                id="booking-destination"
+                name="destination"
+                type="text"
+                value={destination}
+                onChange={(event) =>
+                  setDestination(
+                    event.target.value
+                  )
+                }
+                disabled={sent}
+                placeholder="Nepal, Bhutan, Tibet..."
+              />
+            </div>
+          )}
+
+          {days && (
+            <div className="field">
+              <label htmlFor="booking-days">
+                Preferred trip length
+              </label>
+
+              <input
+                id="booking-days"
+                name="days"
+                type="number"
+                min="1"
+                max="60"
+                value={days}
+                onChange={(event) =>
+                  setDays(
+                    event.target.value
+                  )
+                }
+                disabled={sent}
+              />
+            </div>
+          )}
+
+          <div className="field">
+            <label htmlFor="booking-dates">
+              Preferred travel dates
+            </label>
+
+            <input
+              id="booking-dates"
+              name="dates"
+              type="text"
+              disabled={sent}
+              placeholder="Example: 5–18 October 2026"
+            />
+          </div>
+
+          <div className="field">
+            <label htmlFor="booking-travelers">
+              Number of travelers
+            </label>
+
+            <input
+              id="booking-travelers"
+              name="travelers"
+              type="number"
+              min="1"
+              max="50"
+              value={travelers}
+              onChange={(event) =>
+                setTravelers(
+                  event.target.value
+                )
+              }
+              disabled={sent}
+            />
+          </div>
+        </div>
+      </section>
+
+      <div
+        style={{
+          height: 1,
+          background:
+            "rgba(255,255,255,.08)",
+          margin: "32px 0",
+        }}
+      />
+
+      {/* TRAVEL PREFERENCES */}
+
+      <section>
+        <div
+          style={{
+            display: "flex",
+            gap: 12,
+            alignItems: "center",
+            marginBottom: 18,
+          }}
+        >
+          <span
+            style={{
+              width: 30,
+              height: 30,
+              borderRadius: "50%",
+              display: "grid",
+              placeItems: "center",
+              background:
+                "rgba(109,224,194,.11)",
+              color: "#78e5ca",
+              fontSize: 12,
+              fontWeight: 900,
+            }}
+          >
+            03
+          </span>
+
+          <div>
+            <strong
+              style={{
+                display: "block",
+                fontSize: 19,
+              }}
+            >
+              Travel preferences
+            </strong>
+
+            <span
+              className="muted"
+              style={{
+                fontSize: 13,
+              }}
+            >
+              Help us shape the right
+              experience
+            </span>
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(230px, 1fr))",
+            gap: 16,
+          }}
+        >
+          <div className="field">
+            <label htmlFor="booking-trip-style">
+              Trip style
+            </label>
+
+            <select
+              id="booking-trip-style"
+              name="tripStyle"
+              value={tripStyle}
+              onChange={(event) =>
+                setTripStyle(
+                  event.target.value
+                )
+              }
+              disabled={sent}
+              style={selectStyle}
+            >
+              <option value="">
+                Select trip style
+              </option>
+
+              <option value="Adventure">
+                Adventure
+              </option>
+
+              <option value="Culture">
+                Culture
+              </option>
+
+              <option value="Spiritual">
+                Spiritual
+              </option>
+
+              <option value="Photography">
+                Photography
+              </option>
+
+              <option value="Luxury">
+                Luxury
+              </option>
+
+              <option value="Family">
+                Family
+              </option>
+
+              <option value="Wellness">
+                Wellness
+              </option>
+
+              <option value="Private tour">
+                Private tour
+              </option>
+
+              <option value="Small group">
+                Small group
+              </option>
+
+              <option value="Adventure trekking">
+                Adventure trekking
+              </option>
+
+              <option value="Culture and heritage">
+                Culture & heritage
+              </option>
+            </select>
+          </div>
+
+          <div className="field">
+            <label htmlFor="booking-accommodation">
+              Accommodation preference
+            </label>
+
+            <select
+              id="booking-accommodation"
+              name="accommodation"
+              value={accommodation}
+              onChange={(event) =>
+                setAccommodation(
+                  event.target.value
+                )
+              }
+              disabled={sent}
+              style={selectStyle}
+            >
+              <option value="">
+                Select accommodation
+              </option>
+
+              <option value="Standard">
+                Standard
+              </option>
+
+              <option value="Comfort">
+                Comfort
+              </option>
+
+              <option value="Comfortable">
+                Comfortable
+              </option>
+
+              <option value="Premium">
+                Premium
+              </option>
+
+              <option value="Luxury">
+                Luxury
+              </option>
+
+              <option value="Best available in remote areas">
+                Best available in remote areas
+              </option>
+
+              <option value="Not sure">
+                Not sure yet
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div
+          className="field"
           style={{
             marginTop: 16,
           }}
         >
-          {statusMessage}
+          <label htmlFor="booking-message">
+            Tell us about your trip
+          </label>
+
+          <textarea
+            id="booking-message"
+            name="message"
+            rows={7}
+            value={message}
+            onChange={(event) =>
+              setMessage(
+                event.target.value
+              )
+            }
+            disabled={sent}
+            placeholder="Tell us about your interests, fitness level, preferred pace, special requirements or anything else we should know."
+            style={{
+              minHeight: 170,
+            }}
+          />
+        </div>
+      </section>
+
+      {/* SUBMIT */}
+
+      {!sent && (
+        <div
+          style={{
+            marginTop: 28,
+            padding: 20,
+            borderRadius: 16,
+            background:
+              "rgba(255,255,255,.025)",
+            border:
+              "1px solid rgba(255,255,255,.08)",
+          }}
+        >
+          <button
+            className="btn"
+            type="submit"
+            disabled={sending}
+            style={{
+              width: "100%",
+              minHeight: 54,
+              fontSize: 16,
+            }}
+          >
+            {sending
+              ? "Sending your request..."
+              : "Send booking request"}
+          </button>
+
+          <p
+            className="muted"
+            style={{
+              margin:
+                "12px 0 0",
+              textAlign: "center",
+              fontSize: 13,
+              lineHeight: 1.6,
+            }}
+          >
+            No payment is required.
+            Submitting this form does
+            not create a confirmed
+            reservation.
+          </p>
         </div>
       )}
 
-      <p
-        className="muted"
-        style={{
-          marginTop: 14,
-          fontSize: 13,
-          lineHeight: 1.5,
-        }}
-      >
-        No payment is required when
-        submitting this booking request.
-      </p>
+      {/* SUCCESS */}
+
+      {sent && (
+        <div
+          style={{
+            marginTop: 28,
+            padding:
+              "clamp(22px, 4vw, 34px)",
+            borderRadius: 18,
+            border:
+              "1px solid rgba(109,224,194,.3)",
+            background:
+              "linear-gradient(135deg, rgba(109,224,194,.12), rgba(109,224,194,.035))",
+            textAlign: "center",
+          }}
+        >
+          <div
+            style={{
+              width: 48,
+              height: 48,
+              display: "grid",
+              placeItems: "center",
+              margin:
+                "0 auto 14px",
+              borderRadius: "50%",
+              background:
+                "rgba(109,224,194,.15)",
+              color: "#78e5ca",
+              fontSize: 24,
+              fontWeight: 900,
+            }}
+          >
+            ✓
+          </div>
+
+          <h3
+            style={{
+              margin:
+                "0 0 8px",
+              fontSize: 25,
+            }}
+          >
+            Request received
+          </h3>
+
+          <p
+            className="muted"
+            style={{
+              maxWidth: 620,
+              margin:
+                "0 auto",
+              lineHeight: 1.7,
+            }}
+          >
+            {statusMessage ||
+              "Thank you. Your booking request has been received and our Himalayan travel team will contact you soon."}
+          </p>
+        </div>
+      )}
+
+      {!sent &&
+        statusMessage && (
+          <div
+            className="notice"
+            style={{
+              marginTop: 18,
+              lineHeight: 1.6,
+            }}
+          >
+            {statusMessage}
+          </div>
+        )}
     </form>
   );
 }
