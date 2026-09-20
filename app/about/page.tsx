@@ -36,11 +36,11 @@ const experiences = [
     href: "/tours/lhasa-classic",
   },
   {
-    eyebrow: "CENTRAL TIBET",
-    name: "Gyantse & Shigatse",
+    eyebrow: "LHOKA · SOUTHERN TIBET",
+    name: "Lhoka (Southern Tibet)",
     text:
-      "Travel across Central Tibet through historic towns, monasteries and broad plateau landscapes.",
-    href: "/tours/lhasa-shigatse-gyantse",
+      "Travel south of Lhasa into Lhoka through broad valleys, monasteries, historic places and important cultural landscapes.",
+    href: "/tours/lhoka-southern-tibet",
   },
   {
     eyebrow: "HIMALAYAN LANDSCAPES",
