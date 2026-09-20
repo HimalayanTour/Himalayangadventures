@@ -9,11 +9,11 @@ const regions = [
     href: "/tours/lhasa-classic",
   },
   {
-    name: "Central Tibet",
-    tag: "GYANTSE & SHIGATSE",
+    name: "Lhoka (Southern Tibet)",
+    tag: "VALLEYS · HERITAGE",
     description:
-      "Travel through Central Tibet across broad plateau landscapes, historic towns and important cultural sites.",
-    href: "/tours/lhasa-shigatse-gyantse",
+      "Travel south of Lhasa into Lhoka for broad valleys, monasteries, historic places and the cultural landscapes of southern Tibet.",
+    href: "/tours/lhoka-southern-tibet",
   },
   {
     name: "Everest",
@@ -131,7 +131,7 @@ export default function Page() {
             }}
           >
             Explore Tibet by landscape, cultural focus and
-            journey style. From Lhasa and Central Tibet to
+            journey style. From Lhasa and Lhoka in southern Tibet to
             Everest, Namtso and Mount Kailash, find the
             experience that best matches your time,
             interests and preferred pace.
@@ -358,7 +358,7 @@ export default function Page() {
             }}
           >
             A shorter journey might focus on Lhasa and
-            Central Tibet. With more time, you can explore
+            Lhoka in southern Tibet. With more time, you can explore
             farther toward Everest, Namtso, the high
             plateau or western Tibet. The right route
             depends on your available days, interests,
