@@ -315,10 +315,10 @@ function renderAnswer(text: string) {
 
 const examplePrompts = [
   {
-    label: "CLASSIC TIBET",
-    title: "Lhasa & Central Tibet",
+    label: "LHOKA · SOUTHERN TIBET",
+    title: "Lhoka (Southern Tibet)",
     prompt:
-      "Plan a 7-day Tibet journey for two travelers starting in Lhasa. We want cultural experiences, monasteries, beautiful landscapes, comfortable accommodation and realistic altitude acclimatization.",
+      "Plan a 7-day journey through Lhasa and Lhoka in southern Tibet for two travelers. We want cultural experiences, monasteries, historic places, broad valleys, beautiful landscapes, comfortable accommodation and realistic altitude acclimatization.",
   },
   {
     label: "EVEREST",
