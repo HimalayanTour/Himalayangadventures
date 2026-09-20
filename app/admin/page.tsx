@@ -1,6 +1,5 @@
 import { cookies } from "next/headers";
-import { redirect, notFound } from "next/navigation";
-import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { createHash } from "crypto";
 import { createClient } from "@supabase/supabase-js";
 
@@ -14,9 +13,7 @@ type Booking = {
   email: string;
   dates: string | null;
   travelers: number | null;
-  message: string | null;
   status: string | null;
-  admin_notes: string | null;
   created_at: string;
   phone: string | null;
   country: string | null;
@@ -24,61 +21,42 @@ type Booking = {
   accommodation: string | null;
 };
 
-type EmailTemplate =
-  | "received"
-  | "followup"
-  | "confirmed";
-
-type ParsedMessage = {
-  phone: string;
-  country: string;
-  tripStyle: string;
-  accommodation: string;
-  customerMessage: string;
-};
+const PAGE_SIZE = 10;
 
 const allowedStatuses = [
+  "all",
   "new",
   "contacted",
   "confirmed",
   "cancelled",
 ];
 
-function makeAdminToken(
-  password: string
-) {
+function makeAdminToken(password: string) {
   return createHash("sha256")
     .update(password)
     .digest("hex");
 }
 
 async function isAdminLoggedIn() {
-  const password =
-    process.env.ADMIN_PASSWORD;
+  const password = process.env.ADMIN_PASSWORD;
 
   if (!password) {
     return false;
   }
 
-  const cookieStore =
-    await cookies();
-
+  const cookieStore = await cookies();
   const session =
-    cookieStore.get(
-      "admin_session"
-    )?.value;
+    cookieStore.get("admin_session")?.value;
 
   return (
     !!session &&
-    session ===
-      makeAdminToken(password)
+    session === makeAdminToken(password)
   );
 }
 
 function getDb() {
   const url =
     process.env.NEXT_PUBLIC_SUPABASE_URL;
-
   const serviceKey =
     process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -88,16 +66,12 @@ function getDb() {
     );
   }
 
-  return createClient(
-    url,
-    serviceKey,
-    {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-      },
-    }
-  );
+  return createClient(url, serviceKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  });
 }
 
 function formatTourName(
@@ -108,15 +82,24 @@ function formatTourName(
   }
 
   const tourNames: Record<string, string> = {
-    "lhasa-classic": "Lhasa Classic Journey",
-    "lhasa-everest-base-camp": "Lhasa to Everest Base Camp",
-    "lhoka-southern-tibet": "Lhoka (Southern Tibet)",
-    "tibet-high-plateau": "Tibet High Plateau",
-    "kailash-mansarovar-journey": "Kailash & Mansarovar Journey",
-    "kailash-kora": "Mount Kailash Kora",
-    "namtso-lake": "Lhasa & Namtso Lake",
-    "tibet-photography": "Tibet Photography Journey",
-    "tibet-culture-monasteries": "Tibet Culture & Monasteries",
+    "lhasa-classic":
+      "Lhasa Classic Journey",
+    "lhasa-everest-base-camp":
+      "Lhasa to Everest Base Camp",
+    "lhoka-southern-tibet":
+      "Lhoka (Southern Tibet)",
+    "tibet-high-plateau":
+      "Tibet High Plateau",
+    "kailash-mansarovar-journey":
+      "Kailash & Mansarovar Journey",
+    "kailash-kora":
+      "Mount Kailash Kora",
+    "namtso-lake":
+      "Lhasa & Namtso Lake",
+    "tibet-photography":
+      "Tibet Photography Journey",
+    "tibet-culture-monasteries":
+      "Tibet Culture & Monasteries",
   };
 
   return (
@@ -132,737 +115,225 @@ function formatTourName(
   );
 }
 
-function parseBookingMessage(
-  message: string | null
-): ParsedMessage {
-  const text =
-    message?.trim() || "";
-
-  if (!text) {
-    return {
-      phone: "Not provided",
-      country: "Not provided",
-      tripStyle: "Not specified",
-      accommodation:
-        "Not specified",
-      customerMessage:
-        "No additional message.",
-    };
-  }
-
-  const hasStructuredData =
-    text.includes(
-      "Phone / WhatsApp:"
-    ) ||
-    text.includes("Country:") ||
-    text.includes("Trip style:") ||
-    text.includes(
-      "Accommodation:"
-    );
-
-  if (!hasStructuredData) {
-    return {
-      phone: "Not provided",
-      country: "Not provided",
-      tripStyle: "Not specified",
-      accommodation:
-        "Not specified",
-      customerMessage: text,
-    };
-  }
-
-  const lines =
-    text.split("\n");
-
-  let phone =
-    "Not provided";
-
-  let country =
-    "Not provided";
-
-  let tripStyle =
-    "Not specified";
-
-  let accommodation =
-    "Not specified";
-
-  let readingCustomerMessage =
-    false;
-
-  const customerMessageLines:
-    string[] = [];
-
-  for (const line of lines) {
-    const trimmed =
-      line.trim();
-
-    if (
-      trimmed.startsWith(
-        "Phone / WhatsApp:"
-      )
-    ) {
-      phone =
-        trimmed
-          .replace(
-            "Phone / WhatsApp:",
-            ""
-          )
-          .trim() ||
-        "Not provided";
-
-      continue;
-    }
-
-    if (
-      trimmed.startsWith(
-        "Country:"
-      )
-    ) {
-      country =
-        trimmed
-          .replace(
-            "Country:",
-            ""
-          )
-          .trim() ||
-        "Not provided";
-
-      continue;
-    }
-
-    if (
-      trimmed.startsWith(
-        "Trip style:"
-      )
-    ) {
-      tripStyle =
-        trimmed
-          .replace(
-            "Trip style:",
-            ""
-          )
-          .trim() ||
-        "Not specified";
-
-      continue;
-    }
-
-    if (
-      trimmed.startsWith(
-        "Accommodation:"
-      )
-    ) {
-      accommodation =
-        trimmed
-          .replace(
-            "Accommodation:",
-            ""
-          )
-          .trim() ||
-        "Not specified";
-
-      continue;
-    }
-
-    if (
-      trimmed ===
-      "Customer message:"
-    ) {
-      readingCustomerMessage =
-        true;
-
-      continue;
-    }
-
-    if (
-      readingCustomerMessage
-    ) {
-      customerMessageLines.push(
-        line
-      );
-    }
-  }
-
-  return {
-    phone,
-    country,
-    tripStyle,
-    accommodation,
-    customerMessage:
-      customerMessageLines
-        .join("\n")
-        .trim() ||
-      "No additional message.",
-  };
+function formatDate(value: string) {
+  return new Date(value).toLocaleString();
 }
 
-function escapeHtml(
-  value: string
-) {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-function makeEmailLink(
-  email: string,
-  subject: string,
-  body: string
-) {
-  return `mailto:${encodeURIComponent(
-    email
-  )}?subject=${encodeURIComponent(
-    subject
-  )}&body=${encodeURIComponent(
-    body
-  )}`;
-}
-
-function buildTemplate({
-  template,
-  booking,
-  tourName,
-  tripStyle,
-  accommodation,
+function getPageHref({
+  page,
+  status,
+  q,
 }: {
-  template: EmailTemplate;
-  booking: Booking;
-  tourName: string;
-  tripStyle: string;
-  accommodation: string;
+  page: number;
+  status: string;
+  q: string;
 }) {
-  if (
-    template === "received"
-  ) {
-    return {
-      subject:
-        "We received your Tibet journey request",
+  const params = new URLSearchParams();
 
-      text: `Hello ${booking.name},
-
-Thank you for contacting Himalayan26.
-
-We have received your booking request for ${tourName}.
-
-Preferred dates: ${booking.dates || "Not specified"}
-Travelers: ${booking.travelers ?? "Not specified"}
-Trip style: ${tripStyle}
-Accommodation: ${accommodation}
-
-Our team is reviewing your request and will contact you with the next steps.
-
-Best regards,
-Himalayan26`,
-    };
+  if (q) {
+    params.set("q", q);
   }
 
-  if (
-    template === "followup"
-  ) {
-    return {
-      subject:
-        "More information needed for your Tibet journey",
-
-      text: `Hello ${booking.name},
-
-Thank you for your interest in ${tourName}.
-
-To help us prepare the right journey for you, could you please send us any missing information about your trip?
-
-• Preferred travel dates
-• Number of travelers
-• Fitness or trekking experience
-• Special interests or requirements
-• Preferred accommodation level
-
-Once we receive these details, we can prepare the next steps for your Tibet journey.
-
-Best regards,
-Himalayan26`,
-    };
+  if (status && status !== "all") {
+    params.set("status", status);
   }
 
-  return {
-    subject:
-      "Your Tibet journey is confirmed",
+  if (page > 1) {
+    params.set("page", String(page));
+  }
 
-    text: `Hello ${booking.name},
+  const query = params.toString();
 
-We are pleased to confirm your Tibet journey.
-
-Tour: ${tourName}
-Preferred dates: ${booking.dates || "To be confirmed"}
-Travelers: ${booking.travelers ?? "Not specified"}
-Trip style: ${tripStyle}
-Accommodation: ${accommodation}
-
-We will contact you with the detailed itinerary, preparation information and payment next steps.
-
-Thank you for choosing Himalayan26.
-
-Best regards,
-Himalayan26`,
-  };
+  return query
+    ? `/admin?${query}`
+    : "/admin";
 }
 
-function makeHtmlEmail({
-  title,
-  text,
-}: {
-  title: string;
-  text: string;
-}) {
-  const paragraphs =
-    text
-      .split("\n")
-      .map((line) =>
-        escapeHtml(line)
-      )
-      .join("<br />");
-
-  return `
-<!doctype html>
-<html>
-<body
-  style="
-    margin:0;
-    padding:0;
-    background:#f3f6f7;
-    font-family:Arial,Helvetica,sans-serif;
-    color:#10242b;
-  "
->
-  <div
-    style="
-      max-width:650px;
-      margin:0 auto;
-      padding:32px 18px;
-    "
-  >
-    <div
-      style="
-        background:#071a21;
-        border-radius:20px;
-        padding:30px;
-        color:#ffffff;
-      "
-    >
-      <div
-        style="
-          color:#67e1c2;
-          font-size:13px;
-          font-weight:700;
-          letter-spacing:2px;
-        "
-      >
-        HIMALAYAN26
-      </div>
-
-      <h1
-        style="
-          margin:12px 0 0;
-          font-size:28px;
-          line-height:1.25;
-        "
-      >
-        ${escapeHtml(title)}
-      </h1>
-    </div>
-
-    <div
-      style="
-        margin-top:18px;
-        background:#ffffff;
-        border:1px solid #e4ebed;
-        border-radius:20px;
-        padding:28px;
-        font-size:15px;
-        line-height:1.75;
-      "
-    >
-      ${paragraphs}
-    </div>
-
-    <div
-      style="
-        margin-top:24px;
-        text-align:center;
-        color:#839197;
-        font-size:12px;
-      "
-    >
-      Himalayan26
-    </div>
-  </div>
-</body>
-</html>
-`;
-}
-
-async function updateBookingStatus(
+async function loginAdmin(
   formData: FormData
 ) {
   "use server";
 
-  const loggedIn =
-    await isAdminLoggedIn();
-
-  if (!loggedIn) {
-    redirect("/admin");
-  }
-
-  const id = String(
-    formData.get("id") || ""
+  const enteredPassword = String(
+    formData.get("password") || ""
   );
 
-  const status = String(
-    formData.get("status") || ""
-  );
+  const adminPassword =
+    process.env.ADMIN_PASSWORD;
 
   if (
-    !id ||
-    !allowedStatuses.includes(
-      status
-    )
+    !adminPassword ||
+    enteredPassword !== adminPassword
   ) {
-    return;
+    redirect("/admin?loginError=1");
   }
 
-  const db = getDb();
+  const cookieStore = await cookies();
 
-  const { error } =
-    await db
-      .from("bookings")
-      .update({
-        status,
-      })
-      .eq("id", id);
-
-  if (error) {
-    throw new Error(
-      `Could not update booking status: ${error.message}`
-    );
-  }
-
-  revalidatePath("/admin");
-
-  revalidatePath(
-    `/admin/bookings/${id}`
+  cookieStore.set(
+    "admin_session",
+    makeAdminToken(adminPassword),
+    {
+      httpOnly: true,
+      secure:
+        process.env.NODE_ENV ===
+        "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7,
+    }
   );
 
-  redirect(
-    `/admin/bookings/${id}?statusSaved=1`
-  );
+  redirect("/admin");
 }
 
-async function saveAdminNotes(
-  formData: FormData
-) {
+async function logoutAdmin() {
   "use server";
 
-  const loggedIn =
-    await isAdminLoggedIn();
+  const cookieStore = await cookies();
 
-  if (!loggedIn) {
-    redirect("/admin");
-  }
-
-  const id = String(
-    formData.get("id") || ""
+  cookieStore.set(
+    "admin_session",
+    "",
+    {
+      httpOnly: true,
+      secure:
+        process.env.NODE_ENV ===
+        "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 0,
+    }
   );
 
-  const notes = String(
-    formData.get(
-      "admin_notes"
-    ) || ""
-  ).trim();
-
-  if (!id) {
-    return;
-  }
-
-  const db = getDb();
-
-  const { error } =
-    await db
-      .from("bookings")
-      .update({
-        admin_notes:
-          notes || null,
-      })
-      .eq("id", id);
-
-  if (error) {
-    throw new Error(
-      `Could not save admin notes: ${error.message}`
-    );
-  }
-
-  revalidatePath("/admin");
-
-  revalidatePath(
-    `/admin/bookings/${id}`
-  );
-
-  redirect(
-    `/admin/bookings/${id}?saved=1`
-  );
+  redirect("/admin");
 }
 
-async function sendCustomerEmail(
-  formData: FormData
-) {
-  "use server";
-
-  const loggedIn =
-    await isAdminLoggedIn();
-
-  if (!loggedIn) {
-    redirect("/admin");
-  }
-
-  const id = String(
-    formData.get("id") || ""
-  );
-
-  const template =
-    String(
-      formData.get(
-        "template"
-      ) || ""
-    ) as EmailTemplate;
-
-  if (
-    !id ||
-    ![
-      "received",
-      "followup",
-      "confirmed",
-    ].includes(template)
-  ) {
-    return;
-  }
-
-  /*
-    IMPORTANT:
-
-    Direct customer email is only
-    enabled after a real sending
-    domain is verified.
-
-    This prevents the dashboard from
-    claiming an email was sent when
-    Resend test mode cannot send to
-    arbitrary customers.
-  */
-
-  const fromEmail =
-    process.env.RESEND_FROM_EMAIL?.trim();
-
-  if (!fromEmail) {
-    redirect(
-      `/admin/bookings/${id}?emailError=noDomain`
-    );
-  }
-
-  const resendApiKey =
-    process.env.RESEND_API_KEY;
-
-  if (!resendApiKey) {
-    redirect(
-      `/admin/bookings/${id}?emailError=noKey`
-    );
-  }
-
-  const db = getDb();
-
-  const {
-    data,
-    error,
-  } = await db
-    .from("bookings")
-    .select(
-      `
-        id,
-        tour_slug,
-        name,
-        email,
-        dates,
-        travelers,
-        message,
-        status,
-        admin_notes,
-        created_at,
-        phone,
-        country,
-        trip_style,
-        accommodation
-      `
-    )
-    .eq("id", id)
-    .maybeSingle();
-
-  if (
-    error ||
-    !data
-  ) {
-    redirect(
-      `/admin/bookings/${id}?emailError=booking`
-    );
-  }
-
-  const booking =
-    data as Booking;
-
-  const legacy =
-    parseBookingMessage(
-      booking.message
-    );
-
-  const tripStyle =
-    booking.trip_style?.trim() ||
-    legacy.tripStyle;
-
-  const accommodation =
-    booking.accommodation?.trim() ||
-    legacy.accommodation;
-
-  const tourName =
-    formatTourName(
-      booking.tour_slug
-    );
-
-  const emailTemplate =
-    buildTemplate({
-      template,
-      booking,
-      tourName,
-      tripStyle,
-      accommodation,
-    });
-
-  const html =
-    makeHtmlEmail({
-      title:
-        emailTemplate.subject,
-      text:
-        emailTemplate.text,
-    });
-
-  const response =
-    await fetch(
-      "https://api.resend.com/emails",
-      {
-        method: "POST",
-
-        headers: {
-          Authorization:
-            `Bearer ${resendApiKey}`,
-
-          "Content-Type":
-            "application/json",
-        },
-
-        body: JSON.stringify({
-          from: fromEmail,
-
-          to: [
-            booking.email,
-          ],
-
-          subject:
-            emailTemplate.subject,
-
-          text:
-            emailTemplate.text,
-
-          html,
-        }),
-      }
-    );
-
-  if (!response.ok) {
-    const result =
-      await response.text();
-
-    console.error(
-      "Direct customer email failed:",
-      result
-    );
-
-    redirect(
-      `/admin/bookings/${id}?emailError=resend`
-    );
-  }
-
-  /*
-    Automatically move the booking
-    status forward after a successful
-    customer email.
-  */
-
-  const nextStatus =
-    template === "confirmed"
-      ? "confirmed"
-      : "contacted";
-
-  await db
-    .from("bookings")
-    .update({
-      status: nextStatus,
-    })
-    .eq("id", id);
-
-  revalidatePath("/admin");
-
-  revalidatePath(
-    `/admin/bookings/${id}`
-  );
-
-  redirect(
-    `/admin/bookings/${id}?emailSent=${template}`
-  );
-}
-
-export default async function BookingPage({
-  params,
+export default async function AdminPage({
   searchParams,
 }: {
-  params: Promise<{
-    id: string;
-  }>;
-
   searchParams?: Promise<{
-    saved?: string;
-    statusSaved?: string;
-    emailSent?: string;
-    emailError?: string;
+    q?: string;
+    status?: string;
+    page?: string;
+    loginError?: string;
   }>;
 }) {
+  const query = searchParams
+    ? await searchParams
+    : {};
+
   const loggedIn =
     await isAdminLoggedIn();
 
   if (!loggedIn) {
-    redirect("/admin");
+    return (
+      <main
+        className="container"
+        style={{
+          paddingTop: 70,
+          paddingBottom: 100,
+          maxWidth: 720,
+        }}
+      >
+        <section className="card">
+          <span className="pill">
+            HIMALAYAN26 ADMIN
+          </span>
+
+          <h1
+            style={{
+              marginTop: 18,
+              marginBottom: 12,
+            }}
+          >
+            Admin sign in
+          </h1>
+
+          <p
+            className="muted"
+            style={{
+              lineHeight: 1.7,
+              marginBottom: 28,
+            }}
+          >
+            Sign in to manage Tibet journey
+            requests, customer details and
+            booking status.
+          </p>
+
+          {query.loginError === "1" && (
+            <div
+              className="notice"
+              style={{
+                marginBottom: 20,
+              }}
+            >
+              The admin password was not
+              correct. Please try again.
+            </div>
+          )}
+
+          <form action={loginAdmin}>
+            <div className="field">
+              <label htmlFor="password">
+                Admin password
+              </label>
+
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                autoComplete="current-password"
+                placeholder="Enter admin password"
+              />
+            </div>
+
+            <button
+              className="btn"
+              type="submit"
+              style={{
+                marginTop: 16,
+              }}
+            >
+              Sign in
+            </button>
+          </form>
+        </section>
+      </main>
+    );
   }
-
-  const { id } =
-    await params;
-
-  const query =
-    searchParams
-      ? await searchParams
-      : {};
 
   const db = getDb();
 
-  const {
-    data,
-    error,
-  } = await db
+  const q = String(
+    query.q || ""
+  ).trim();
+
+  const requestedStatus = String(
+    query.status || "all"
+  ).toLowerCase();
+
+  const status =
+    allowedStatuses.includes(
+      requestedStatus
+    )
+      ? requestedStatus
+      : "all";
+
+  const parsedPage = Number.parseInt(
+    String(query.page || "1"),
+    10
+  );
+
+  const page =
+    Number.isFinite(parsedPage) &&
+    parsedPage > 0
+      ? parsedPage
+      : 1;
+
+  let bookingsQuery = db
     .from("bookings")
     .select(
       `
@@ -872,132 +343,118 @@ export default async function BookingPage({
         email,
         dates,
         travelers,
-        message,
         status,
-        admin_notes,
         created_at,
         phone,
         country,
         trip_style,
         accommodation
-      `
+      `,
+      {
+        count: "exact",
+      }
     )
-    .eq("id", id)
-    .maybeSingle();
+    .order("created_at", {
+      ascending: false,
+    });
+
+  if (status !== "all") {
+    bookingsQuery =
+      bookingsQuery.eq(
+        "status",
+        status
+      );
+  }
+
+  if (q) {
+    const safeQ = q
+      .replaceAll(",", " ")
+      .replaceAll("%", "")
+      .trim();
+
+    if (safeQ) {
+      bookingsQuery =
+        bookingsQuery.or(
+          `name.ilike.%${safeQ}%,email.ilike.%${safeQ}%,tour_slug.ilike.%${safeQ}%,country.ilike.%${safeQ}%`
+        );
+    }
+  }
+
+  const from =
+    (page - 1) * PAGE_SIZE;
+  const to =
+    from + PAGE_SIZE - 1;
+
+  const {
+    data,
+    error,
+    count,
+  } = await bookingsQuery.range(
+    from,
+    to
+  );
 
   if (error) {
     throw new Error(
-      `Could not load booking: ${error.message}`
+      `Could not load bookings: ${error.message}`
     );
   }
 
-  if (!data) {
-    notFound();
+  const bookings =
+    (data || []) as Booking[];
+
+  const totalBookings =
+    count || 0;
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(
+      totalBookings / PAGE_SIZE
+    )
+  );
+
+  if (
+    page > totalPages &&
+    totalBookings > 0
+  ) {
+    redirect(
+      getPageHref({
+        page: totalPages,
+        status,
+        q,
+      })
+    );
   }
 
-  const booking =
-    data as Booking;
+  const { count: newCount } =
+    await db
+      .from("bookings")
+      .select("id", {
+        count: "exact",
+        head: true,
+      })
+      .eq("status", "new");
 
-  const legacy =
-    parseBookingMessage(
-      booking.message
-    );
+  const { count: confirmedCount } =
+    await db
+      .from("bookings")
+      .select("id", {
+        count: "exact",
+        head: true,
+      })
+      .eq("status", "confirmed");
 
-  const phone =
-    booking.phone?.trim() ||
-    legacy.phone;
+  const { count: allCount } =
+    await db
+      .from("bookings")
+      .select("id", {
+        count: "exact",
+        head: true,
+      });
 
-  const country =
-    booking.country?.trim() ||
-    legacy.country;
-
-  const tripStyle =
-    booking.trip_style?.trim() ||
-    legacy.tripStyle;
-
-  const accommodation =
-    booking.accommodation?.trim() ||
-    legacy.accommodation;
-
-  const customerMessage =
-    legacy.customerMessage;
-
-  const currentStatus =
-    booking.status || "new";
-
-  const tourName =
-    formatTourName(
-      booking.tour_slug
-    );
-
-  const receivedDate =
-    new Date(
-      booking.created_at
-    ).toLocaleString();
-
-  const received =
-    buildTemplate({
-      template: "received",
-      booking,
-      tourName,
-      tripStyle,
-      accommodation,
-    });
-
-  const followup =
-    buildTemplate({
-      template: "followup",
-      booking,
-      tourName,
-      tripStyle,
-      accommodation,
-    });
-
-  const confirmed =
-    buildTemplate({
-      template: "confirmed",
-      booking,
-      tourName,
-      tripStyle,
-      accommodation,
-    });
-
-  const receivedLink =
-    makeEmailLink(
-      booking.email,
-      received.subject,
-      received.text
-    );
-
-  const followupLink =
-    makeEmailLink(
-      booking.email,
-      followup.subject,
-      followup.text
-    );
-
-  const confirmedLink =
-    makeEmailLink(
-      booking.email,
-      confirmed.subject,
-      confirmed.text
-    );
-
-  const customLink =
-    makeEmailLink(
-      booking.email,
-      "Your Tibet journey request",
-      ""
-    );
-
-  const directEmailReady =
-    Boolean(
-      process.env.RESEND_FROM_EMAIL
-    );
-
-  const infoBoxStyle = {
-    padding: "16px",
-    borderRadius: "14px",
+  const cardStyle = {
+    padding: "18px",
+    borderRadius: "16px",
     border:
       "1px solid rgba(255,255,255,0.12)",
     background:
@@ -1009,608 +466,424 @@ export default async function BookingPage({
       className="container"
       style={{
         paddingTop: 42,
-        paddingBottom: 80,
+        paddingBottom: 90,
       }}
     >
-      <div
-        style={{
-          marginBottom: 24,
-        }}
-      >
-        <a
-          href="/admin"
-          className="btn"
-        >
-          ← Back to dashboard
-        </a>
-      </div>
-
-      {query.statusSaved ===
-        "1" && (
-        <div
-          className="notice"
-          style={{
-            marginBottom: 20,
-          }}
-        >
-          Booking status updated
-          successfully.
-        </div>
-      )}
-
-      {query.saved === "1" && (
-        <div
-          className="notice"
-          style={{
-            marginBottom: 20,
-          }}
-        >
-          Private admin notes saved.
-        </div>
-      )}
-
-      {query.emailSent && (
-        <div
-          className="notice"
-          style={{
-            marginBottom: 20,
-          }}
-        >
-          Customer email sent
-          successfully through
-          Resend. ✓
-        </div>
-      )}
-
-      {query.emailError ===
-        "noDomain" && (
-        <div
-          className="notice"
-          style={{
-            marginBottom: 20,
-          }}
-        >
-          Direct sending is not
-          enabled yet because no
-          verified Resend domain is
-          connected. Use the
-          <strong> Open email </strong>
-          button for now.
-        </div>
-      )}
-
-      {query.emailError ===
-        "noKey" && (
-        <div
-          className="notice"
-          style={{
-            marginBottom: 20,
-          }}
-        >
-          RESEND_API_KEY is missing
-          from the server.
-        </div>
-      )}
-
-      {query.emailError ===
-        "resend" && (
-        <div
-          className="notice"
-          style={{
-            marginBottom: 20,
-          }}
-        >
-          Resend could not deliver
-          the customer email. No
-          booking information was
-          lost.
-        </div>
-      )}
-
-      {/* CUSTOMER */}
-
       <section
-        className="card"
         style={{
-          marginBottom: 24,
+          display: "flex",
+          justifyContent:
+            "space-between",
+          alignItems: "flex-start",
+          gap: 18,
+          flexWrap: "wrap",
+          marginBottom: 30,
         }}
       >
-        <span className="pill">
-          {currentStatus}
-        </span>
+        <div>
+          <span className="pill">
+            HIMALAYAN26 ADMIN
+          </span>
 
-        <h1
-          style={{
-            marginTop: 16,
-            marginBottom: 26,
-          }}
-        >
-          Customer information
-        </h1>
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns:
-              "repeat(auto-fit, minmax(220px, 1fr))",
-            gap: 14,
-          }}
-        >
-          {[
-            [
-              "Customer",
-              booking.name,
-            ],
-
-            [
-              "Email",
-              booking.email,
-            ],
-
-            [
-              "Phone / WhatsApp",
-              phone,
-            ],
-
-            [
-              "Country",
-              country,
-            ],
-
-            [
-              "Tour",
-              tourName,
-            ],
-
-            [
-              "Preferred dates",
-              booking.dates ||
-                "Not specified",
-            ],
-
-            [
-              "Travelers",
-              booking.travelers ??
-                "Not specified",
-            ],
-
-            [
-              "Trip style",
-              tripStyle,
-            ],
-
-            [
-              "Accommodation",
-              accommodation,
-            ],
-
-            [
-              "Received",
-              receivedDate,
-            ],
-          ].map(
-            ([label, value]) => (
-              <div
-                key={String(label)}
-                style={infoBoxStyle}
-              >
-                <div className="muted">
-                  {label}
-                </div>
-
-                <strong>
-                  {value}
-                </strong>
-              </div>
-            )
-          )}
-        </div>
-
-        <div
-          style={{
-            marginTop: 22,
-          }}
-        >
-          <strong>
-            Customer message
-          </strong>
-
-          <div
+          <h1
             style={{
-              ...infoBoxStyle,
-              whiteSpace:
-                "pre-wrap",
-              lineHeight: 1.6,
-              marginTop: 9,
+              marginTop: 16,
+              marginBottom: 10,
             }}
           >
-            {customerMessage}
-          </div>
+            Tibet booking dashboard
+          </h1>
+
+          <p
+            className="muted"
+            style={{
+              maxWidth: 700,
+              lineHeight: 1.7,
+              margin: 0,
+            }}
+          >
+            Review customer requests,
+            manage booking status and
+            open each Tibet journey
+            request for full details.
+          </p>
         </div>
-      </section>
 
-      {/* STATUS */}
-
-      <section
-        className="card"
-        style={{
-          marginBottom: 24,
-        }}
-      >
-        <span className="pill">
-          BOOKING STATUS
-        </span>
-
-        <h2>
-          Manage status
-        </h2>
-
-        <p className="muted">
-          Current status:{" "}
-          <strong>
-            {currentStatus}
-          </strong>
-        </p>
-
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 10,
-          }}
-        >
-          {allowedStatuses.map(
-            (status) => (
-              <form
-                key={status}
-                action={
-                  updateBookingStatus
-                }
-              >
-                <input
-                  type="hidden"
-                  name="id"
-                  value={booking.id}
-                />
-
-                <input
-                  type="hidden"
-                  name="status"
-                  value={status}
-                />
-
-                <button
-                  className="btn"
-                  type="submit"
-                  disabled={
-                    currentStatus ===
-                    status
-                  }
-                >
-                  {status}
-                </button>
-              </form>
-            )
-          )}
-        </div>
-      </section>
-
-      {/* NOTES */}
-
-      <section
-        className="card"
-        style={{
-          marginBottom: 24,
-        }}
-      >
-        <span className="pill">
-          PRIVATE
-        </span>
-
-        <h2>
-          Private admin notes
-        </h2>
-
-        <p className="muted">
-          These notes are for your
-          team only and are never
-          shown to customers.
-        </p>
-
-        <form
-          action={saveAdminNotes}
-        >
-          <input
-            type="hidden"
-            name="id"
-            value={booking.id}
-          />
-
-          <div className="field">
-            <label
-              htmlFor="admin_notes"
-            >
-              Notes
-            </label>
-
-            <textarea
-              id="admin_notes"
-              name="admin_notes"
-              rows={7}
-              defaultValue={
-                booking.admin_notes ||
-                ""
-              }
-              placeholder="Add private notes about this booking..."
-            />
-          </div>
-
+        <form action={logoutAdmin}>
           <button
             className="btn"
             type="submit"
           >
-            Save notes
+            Sign out
           </button>
         </form>
       </section>
 
-      {/* EMAIL */}
-
-      <section className="card">
-        <span className="pill">
-          CUSTOMER EMAIL
-        </span>
-
-        <h2>
-          Contact customer
-        </h2>
-
-        {directEmailReady ? (
+      <section
+        style={{
+          display: "grid",
+          gridTemplateColumns:
+            "repeat(auto-fit, minmax(180px, 1fr))",
+          gap: 14,
+          marginBottom: 26,
+        }}
+      >
+        <div style={cardStyle}>
+          <div className="muted">
+            ALL BOOKINGS
+          </div>
           <div
-            className="notice"
             style={{
-              marginBottom: 22,
+              fontSize: 30,
+              fontWeight: 800,
+              marginTop: 8,
             }}
           >
-            Direct customer email is
-            enabled. Emails can be
-            sent securely through
-            Resend.
-          </div>
-        ) : (
-          <div
-            className="notice"
-            style={{
-              marginBottom: 22,
-            }}
-          >
-            <strong>
-              Direct sending is
-              prepared but not active
-              yet.
-            </strong>
-            <br />
-            Until you connect a
-            verified domain, use
-            <strong>
-              {" "}
-              Open email
-            </strong>
-            . When you later add
-            `RESEND_FROM_EMAIL`,
-            direct sending will
-            automatically unlock.
-          </div>
-        )}
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns:
-              "repeat(auto-fit, minmax(220px, 1fr))",
-            gap: 14,
-          }}
-        >
-          {/* RECEIVED */}
-
-          <div style={infoBoxStyle}>
-            <span className="pill">
-              RECEIVED
-            </span>
-
-            <h3>
-              Booking received
-            </h3>
-
-            <p className="muted">
-              Thank the traveler and
-              confirm that the request
-              is being reviewed.
-            </p>
-
-            {directEmailReady && (
-              <form
-                action={
-                  sendCustomerEmail
-                }
-                style={{
-                  marginBottom: 10,
-                }}
-              >
-                <input
-                  type="hidden"
-                  name="id"
-                  value={booking.id}
-                />
-
-                <input
-                  type="hidden"
-                  name="template"
-                  value="received"
-                />
-
-                <button
-                  className="btn"
-                  type="submit"
-                >
-                  Send with Resend
-                </button>
-              </form>
-            )}
-
-            <a
-              className="btn"
-              href={receivedLink}
-            >
-              Open email
-            </a>
-          </div>
-
-          {/* FOLLOWUP */}
-
-          <div style={infoBoxStyle}>
-            <span className="pill">
-              FOLLOW UP
-            </span>
-
-            <h3>
-              Need more information
-            </h3>
-
-            <p className="muted">
-              Ask the customer for
-              missing travel details.
-            </p>
-
-            {directEmailReady && (
-              <form
-                action={
-                  sendCustomerEmail
-                }
-                style={{
-                  marginBottom: 10,
-                }}
-              >
-                <input
-                  type="hidden"
-                  name="id"
-                  value={booking.id}
-                />
-
-                <input
-                  type="hidden"
-                  name="template"
-                  value="followup"
-                />
-
-                <button
-                  className="btn"
-                  type="submit"
-                >
-                  Send with Resend
-                </button>
-              </form>
-            )}
-
-            <a
-              className="btn"
-              href={followupLink}
-            >
-              Open email
-            </a>
-          </div>
-
-          {/* CONFIRMED */}
-
-          <div style={infoBoxStyle}>
-            <span className="pill">
-              CONFIRMED
-            </span>
-
-            <h3>
-              Booking confirmed
-            </h3>
-
-            <p className="muted">
-              Confirm the journey and
-              explain the next steps.
-            </p>
-
-            {directEmailReady && (
-              <form
-                action={
-                  sendCustomerEmail
-                }
-                style={{
-                  marginBottom: 10,
-                }}
-              >
-                <input
-                  type="hidden"
-                  name="id"
-                  value={booking.id}
-                />
-
-                <input
-                  type="hidden"
-                  name="template"
-                  value="confirmed"
-                />
-
-                <button
-                  className="btn"
-                  type="submit"
-                >
-                  Send with Resend
-                </button>
-              </form>
-            )}
-
-            <a
-              className="btn"
-              href={confirmedLink}
-            >
-              Open email
-            </a>
-          </div>
-
-          {/* CUSTOM */}
-
-          <div style={infoBoxStyle}>
-            <span className="pill">
-              CUSTOM
-            </span>
-
-            <h3>
-              Write custom email
-            </h3>
-
-            <p className="muted">
-              Write a completely
-              custom message to this
-              traveler.
-            </p>
-
-            <a
-              className="btn"
-              href={customLink}
-            >
-              Write email
-            </a>
+            {allCount || 0}
           </div>
         </div>
 
-        <div
-          className="notice"
+        <div style={cardStyle}>
+          <div className="muted">
+            NEW REQUESTS
+          </div>
+          <div
+            style={{
+              fontSize: 30,
+              fontWeight: 800,
+              marginTop: 8,
+            }}
+          >
+            {newCount || 0}
+          </div>
+        </div>
+
+        <div style={cardStyle}>
+          <div className="muted">
+            CONFIRMED
+          </div>
+          <div
+            style={{
+              fontSize: 30,
+              fontWeight: 800,
+              marginTop: 8,
+            }}
+          >
+            {confirmedCount || 0}
+          </div>
+        </div>
+      </section>
+
+      <section
+        className="card"
+        style={{
+          marginBottom: 24,
+        }}
+      >
+        <span className="pill">
+          FILTER BOOKINGS
+        </span>
+
+        <form
+          method="get"
+          action="/admin"
           style={{
             marginTop: 20,
           }}
         >
-          Customer:{" "}
-          <strong>
-            {booking.email}
-          </strong>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns:
+                "minmax(220px, 2fr) minmax(170px, 1fr)",
+              gap: 14,
+            }}
+          >
+            <div className="field">
+              <label htmlFor="q">
+                Search
+              </label>
+
+              <input
+                id="q"
+                name="q"
+                type="search"
+                defaultValue={q}
+                placeholder="Customer, email, tour or country"
+              />
+            </div>
+
+            <div className="field">
+              <label htmlFor="status">
+                Status
+              </label>
+
+              <select
+                id="status"
+                name="status"
+                defaultValue={status}
+              >
+                <option value="all">
+                  All statuses
+                </option>
+                <option value="new">
+                  New
+                </option>
+                <option value="contacted">
+                  Contacted
+                </option>
+                <option value="confirmed">
+                  Confirmed
+                </option>
+                <option value="cancelled">
+                  Cancelled
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              gap: 10,
+              flexWrap: "wrap",
+              marginTop: 16,
+            }}
+          >
+            <button
+              className="btn"
+              type="submit"
+            >
+              Apply filters
+            </button>
+
+            <a
+              className="btn"
+              href="/admin"
+            >
+              Clear filters
+            </a>
+
+            <a
+              className="btn"
+              href="/api/admin/bookings/export"
+            >
+              Export CSV
+            </a>
+          </div>
+        </form>
+      </section>
+
+      <section className="card">
+        <div
+          style={{
+            display: "flex",
+            justifyContent:
+              "space-between",
+            alignItems: "center",
+            gap: 14,
+            flexWrap: "wrap",
+            marginBottom: 20,
+          }}
+        >
+          <div>
+            <span className="pill">
+              BOOKING REQUESTS
+            </span>
+
+            <h2
+              style={{
+                marginTop: 14,
+                marginBottom: 0,
+              }}
+            >
+              Customer requests
+            </h2>
+          </div>
+
+          <div className="muted">
+            {totalBookings} result
+            {totalBookings === 1
+              ? ""
+              : "s"}
+          </div>
         </div>
+
+        {bookings.length === 0 ? (
+          <div
+            className="notice"
+            style={{
+              padding: 22,
+            }}
+          >
+            No bookings match these
+            filters.
+          </div>
+        ) : (
+          <div
+            style={{
+              display: "grid",
+              gap: 14,
+            }}
+          >
+            {bookings.map(
+              (booking) => {
+                const currentStatus =
+                  booking.status ||
+                  "new";
+
+                return (
+                  <article
+                    key={booking.id}
+                    style={cardStyle}
+                  >
+                    <div
+                      style={{
+                        display:
+                          "flex",
+                        justifyContent:
+                          "space-between",
+                        alignItems:
+                          "flex-start",
+                        gap: 14,
+                        flexWrap:
+                          "wrap",
+                      }}
+                    >
+                      <div
+                        style={{
+                          minWidth: 0,
+                          flex: "1 1 520px",
+                        }}
+                      >
+                        <div
+                          style={{
+                            display:
+                              "flex",
+                            gap: 8,
+                            flexWrap:
+                              "wrap",
+                            alignItems:
+                              "center",
+                            marginBottom:
+                              12,
+                          }}
+                        >
+                          <span className="pill">
+                            {currentStatus}
+                          </span>
+
+                          <span className="muted">
+                            {formatDate(
+                              booking.created_at
+                            )}
+                          </span>
+                        </div>
+
+                        <h3
+                          style={{
+                            margin:
+                              "0 0 8px",
+                          }}
+                        >
+                          {booking.name}
+                        </h3>
+
+                        <div
+                          className="muted"
+                          style={{
+                            lineHeight:
+                              1.7,
+                            overflowWrap:
+                              "anywhere",
+                          }}
+                        >
+                          {booking.email}
+                          <br />
+                          {formatTourName(
+                            booking.tour_slug
+                          )}
+                          <br />
+                          Preferred dates:{" "}
+                          {booking.dates ||
+                            "Not specified"}
+                          {" · "}
+                          Travelers:{" "}
+                          {booking.travelers ??
+                            "Not specified"}
+                        </div>
+                      </div>
+
+                      <a
+                        className="btn"
+                        href={`/admin/bookings/${booking.id}`}
+                      >
+                        View booking
+                      </a>
+                    </div>
+                  </article>
+                );
+              }
+            )}
+          </div>
+        )}
+
+        {totalPages > 1 && (
+          <div
+            style={{
+              display: "flex",
+              justifyContent:
+                "space-between",
+              alignItems: "center",
+              gap: 12,
+              flexWrap: "wrap",
+              marginTop: 24,
+            }}
+          >
+            <div className="muted">
+              Page {page} of{" "}
+              {totalPages} · 10
+              bookings per page
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                gap: 10,
+                flexWrap: "wrap",
+              }}
+            >
+              {page > 1 && (
+                <a
+                  className="btn"
+                  href={getPageHref({
+                    page:
+                      page - 1,
+                    status,
+                    q,
+                  })}
+                >
+                  ← Previous
+                </a>
+              )}
+
+              {page <
+                totalPages && (
+                <a
+                  className="btn"
+                  href={getPageHref({
+                    page:
+                      page + 1,
+                    status,
+                    q,
+                  })}
+                >
+                  Next →
+                </a>
+              )}
+            </div>
+          </div>
+        )}
       </section>
     </main>
   );
