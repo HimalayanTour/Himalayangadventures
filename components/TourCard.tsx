@@ -3,16 +3,31 @@ import Link from "next/link";
 import type { Tour } from "@/lib/tours";
 
 const tourImages: Record<string, string> = {
-  "lhasa-classic": "/8.jpg",
+  "lhasa-classic": "/lhasa.jpg",
+
   "lhasa-everest-base-camp":
-    "/ChatGPT Image Sep 7, 2026, 01_05_24 AM.png",
-  "lhoka-southern-tibet": "/5.png",
-  "tibet-high-plateau": "/8.jpg",
-  "kailash-mansarovar-journey": "/10.jpg",
-  "kailash-kora": "/10.jpg",
-  "namtso-lake": "/3.png",
-  "tibet-photography": "/9.jpg",
-  "tibet-culture-monasteries": "/6.png",
+    "/tibet-everest.jpg",
+
+  "lhoka-southern-tibet":
+    "/5.png",
+
+  "tibet-high-plateau":
+    "/tibethighplateau.jpg",
+
+  "kailash-mansarovar-journey":
+    "/mount-kailash.jpg",
+
+  "kailash-kora":
+    "/mount-kailash.jpg",
+
+  "namtso-lake":
+    "/namtso.jpg",
+
+  "tibet-photography":
+    "/photographyjourney.jpg",
+
+  "tibet-culture-monasteries":
+    "/tibetculture.jpg",
 };
 
 export default function TourCard({
@@ -21,7 +36,7 @@ export default function TourCard({
   tour: Tour;
 }) {
   const image =
-    tourImages[tour.slug] || "/8.jpg";
+    tourImages[tour.slug] || "/lhasa.jpg";
 
   return (
     <article className="card">
@@ -46,7 +61,9 @@ export default function TourCard({
         />
       </div>
 
-      <span className="pill">TIBET</span>
+      <span className="pill">
+        TIBET
+      </span>
 
       <h3
         style={{
@@ -70,7 +87,9 @@ export default function TourCard({
           marginTop: 20,
         }}
       >
-        <strong>From {tour.price}</strong>
+        <strong>
+          From {tour.price}
+        </strong>
 
         <Link
           href={`/tours/${tour.slug}`}
