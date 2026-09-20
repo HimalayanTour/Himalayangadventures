@@ -38,13 +38,13 @@ const journeyIdeas = [
     href: "/tours/lhasa-classic",
   },
   {
-    region: "CENTRAL TIBET",
-    title: "Lhasa, Gyantse & Shigatse",
+    region: "LHOKA · SOUTHERN TIBET",
+    title: "Lhoka (Southern Tibet)",
     days: "7 days",
     price: "From $1,590",
     text:
-      "Travel through Central Tibet with a balance of cultural places, plateau landscapes and a more measured journey rhythm.",
-    href: "/tours/lhasa-shigatse-gyantse",
+      "Travel south of Lhasa into Lhoka with a balance of cultural heritage, broad valleys, historic places and a more measured journey rhythm.",
+    href: "/tours/lhoka-southern-tibet",
   },
   {
     region: "HIGH PLATEAU",
