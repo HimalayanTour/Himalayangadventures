@@ -193,7 +193,7 @@ export default function Map() {
           zIndex: 500,
           left: "16px",
           bottom: "16px",
-          maxWidth: "250px",
+          maxWidth: "280px",
           padding: "10px 13px",
           borderRadius: "12px",
           background: "rgba(7,19,26,.84)",
@@ -211,8 +211,8 @@ export default function Map() {
             color: "rgba(238,246,247,.72)",
           }}
         >
-          {tours.length} Tibet journeys · Lhasa · Everest · Namtso · Mount
-          Kailash · High Plateau
+          {tours.length} Tibet journeys · Lhasa · Lhoka · Everest · Namtso ·
+          Mount Kailash · High Plateau
         </div>
       </div>
     </div>
