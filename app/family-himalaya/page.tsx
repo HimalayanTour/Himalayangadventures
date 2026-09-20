@@ -37,12 +37,12 @@ const journeyIdeas = [
     href: "/tours/lhasa-classic",
   },
   {
-    region: "CENTRAL TIBET",
-    title: "Lhasa, Gyantse & Shigatse",
+    region: "LHOKA · SOUTHERN TIBET",
+    title: "Lhoka (Southern Tibet)",
     tag: "7 DAYS",
     text:
-      "A Central Tibet journey combining historic places and plateau landscapes. The pace and daily plan should be considered against the needs of the family traveling.",
-    href: "/tours/lhasa-shigatse-gyantse",
+      "A southern Tibet journey through Lhoka combining historic places, cultural heritage and broad valley landscapes. The pace and daily plan should be considered against the needs of the family traveling.",
+    href: "/tours/lhoka-southern-tibet",
   },
   {
     region: "PRIVATE TIBET",
