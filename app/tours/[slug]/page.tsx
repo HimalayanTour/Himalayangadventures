@@ -8,31 +8,31 @@ const baseUrl =
   "https://himalayangadventures.vercel.app";
 
 const images: Record<string, string> = {
-  "lhasa-classic": "/8.jpg",
+  "lhasa-classic": "/lhasa.jpg",
 
   "lhasa-everest-base-camp":
-    "/ChatGPT Image Sep 7, 2026, 01_05_24 AM.png",
+    "/tibet-everest.jpg",
 
   "lhoka-southern-tibet":
     "/5.png",
 
   "tibet-high-plateau":
-    "/8.jpg",
+    "/tibethighplateau.jpg",
 
   "kailash-mansarovar-journey":
-    "/10.jpg",
+    "/mount-kailash.jpg",
 
   "kailash-kora":
-    "/10.jpg",
+    "/mount-kailash.jpg",
 
   "namtso-lake":
-    "/3.png",
+    "/namtso.jpg",
 
   "tibet-photography":
-    "/9.jpg",
+    "/photographyjourney.jpg",
 
   "tibet-culture-monasteries":
-    "/6.png",
+    "/tibetculture.jpg",
 };
 
 const highlights: Record<string, string[]> = {
