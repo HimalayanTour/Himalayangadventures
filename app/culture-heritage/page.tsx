@@ -11,13 +11,13 @@ const culturalJourneys = [
     href: "/tours/lhasa-classic",
   },
   {
-    region: "CENTRAL TIBET",
-    title: "Lhasa, Gyantse & Shigatse",
+    region: "LHOKA · SOUTHERN TIBET",
+    title: "Lhoka (Southern Tibet)",
     days: "7 days",
     price: "From $1,590",
     text:
-      "Travel beyond Lhasa through Central Tibet, connecting historic towns, cultural landscapes and important religious places.",
-    href: "/tours/lhasa-shigatse-gyantse",
+      "Travel south of Lhasa into Lhoka, connecting broad valleys, monasteries, historic places and the cultural heritage of southern Tibet.",
+    href: "/tours/lhoka-southern-tibet",
   },
   {
     region: "TIBET",
