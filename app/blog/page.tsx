@@ -387,4 +387,4 @@ export default function JournalPage() {
       </section>
     </main>
   );
-}#
+}
