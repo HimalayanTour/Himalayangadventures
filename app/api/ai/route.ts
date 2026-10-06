@@ -14,10 +14,23 @@ type ResearchSource = {
   url: string;
 };
 
-function cleanText(value: unknown, maxLength = 2000) {
-  if (typeof value !== "string") return "";
+type OpenAIResult = {
+  response: Response | null;
+  result: any;
+  timedOut: boolean;
+};
 
-  return value.trim().slice(0, maxLength);
+function cleanText(
+  value: unknown,
+  maxLength = 2000
+) {
+  if (typeof value !== "string") {
+    return "";
+  }
+
+  return value
+    .trim()
+    .slice(0, maxLength);
 }
 
 function extractAnswer(result: any) {
@@ -52,11 +65,16 @@ function extractAnswer(result: any) {
   return answer.trim();
 }
 
-function extractSources(result: any): ResearchSource[] {
+function extractSources(
+  result: any
+): ResearchSource[] {
   const sources: ResearchSource[] = [];
   const seen = new Set<string>();
 
-  function addSource(url: unknown, title: unknown) {
+  function addSource(
+    url: unknown,
+    title: unknown
+  ) {
     if (
       typeof url !== "string" ||
       !url.startsWith("http") ||
@@ -70,7 +88,8 @@ function extractSources(result: any): ResearchSource[] {
     sources.push({
       url,
       title:
-        typeof title === "string" && title.trim()
+        typeof title === "string" &&
+        title.trim()
           ? title.trim()
           : url,
     });
@@ -83,10 +102,15 @@ function extractSources(result: any): ResearchSource[] {
   for (const item of result.output) {
     if (
       item?.type === "web_search_call" &&
-      Array.isArray(item?.action?.sources)
+      Array.isArray(
+        item?.action?.sources
+      )
     ) {
       for (const source of item.action.sources) {
-        addSource(source?.url, source?.title);
+        addSource(
+          source?.url,
+          source?.title
+        );
       }
     }
 
@@ -95,12 +119,22 @@ function extractSources(result: any): ResearchSource[] {
     }
 
     for (const content of item.content) {
-      if (!Array.isArray(content?.annotations)) {
+      if (
+        !Array.isArray(
+          content?.annotations
+        )
+      ) {
         continue;
       }
 
-      for (const annotation of content.annotations) {
-        if (annotation?.type === "url_citation") {
+      for (
+        const annotation
+        of content.annotations
+      ) {
+        if (
+          annotation?.type ===
+          "url_citation"
+        ) {
           addSource(
             annotation?.url,
             annotation?.title
@@ -115,36 +149,82 @@ function extractSources(result: any): ResearchSource[] {
 
 async function callOpenAI(
   apiKey: string,
-  body: Record<string, unknown>
-) {
-  const response = await fetch(
-    "https://api.openai.com/v1/responses",
-    {
-      method: "POST",
+  body: Record<string, unknown>,
+  timeoutMs?: number
+): Promise<OpenAIResult> {
+  const controller =
+    new AbortController();
 
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
+  let timeout:
+    | ReturnType<typeof setTimeout>
+    | undefined;
 
-      body: JSON.stringify(body),
-
-      cache: "no-store",
-    }
-  );
-
-  let result: any = {};
-
-  try {
-    result = await response.json();
-  } catch {
-    result = {};
+  if (timeoutMs) {
+    timeout = setTimeout(() => {
+      controller.abort();
+    }, timeoutMs);
   }
 
-  return {
-    response,
-    result,
-  };
+  try {
+    const response = await fetch(
+      "https://api.openai.com/v1/responses",
+      {
+        method: "POST",
+
+        headers: {
+          Authorization:
+            `Bearer ${apiKey}`,
+
+          "Content-Type":
+            "application/json",
+        },
+
+        body: JSON.stringify(body),
+
+        cache: "no-store",
+
+        signal: controller.signal,
+      }
+    );
+
+    let result: any = {};
+
+    try {
+      result =
+        await response.json();
+    } catch {
+      result = {};
+    }
+
+    return {
+      response,
+      result,
+      timedOut: false,
+    };
+  } catch (error: any) {
+    if (
+      error?.name === "AbortError"
+    ) {
+      return {
+        response: null,
+
+        result: {
+          error: {
+            message:
+              "Live research timed out.",
+          },
+        },
+
+        timedOut: true,
+      };
+    }
+
+    throw error;
+  } finally {
+    if (timeout) {
+      clearTimeout(timeout);
+    }
+  }
 }
 
 const tibetTours = `
@@ -403,45 +483,59 @@ async function createNormalPlan(
   apiKey: string,
   message: string
 ) {
-  return callOpenAI(apiKey, {
-    model: "gpt-6-luna",
+  return callOpenAI(
+    apiKey,
+    {
+      model: "gpt-6-luna",
 
-    instructions: plannerInstructions,
+      instructions:
+        plannerInstructions,
 
-    input: message,
+      input: message,
 
-    max_output_tokens: 1600,
-  });
+      max_output_tokens: 1600,
+    }
+  );
 }
 
 async function createResearchPlan(
   apiKey: string,
   message: string
 ) {
-  return callOpenAI(apiKey, {
-    model: "gpt-6-luna",
+  return callOpenAI(
+    apiKey,
+    {
+      model: "gpt-6-luna",
 
-    instructions: researchInstructions,
+      instructions:
+        researchInstructions,
 
-    input: message,
+      input: message,
 
-    tools: [
-      {
-        type: "web_search",
-        search_context_size: "low",
-      },
-    ],
+      tools: [
+        {
+          type: "web_search",
+          search_context_size:
+            "low",
+        },
+      ],
 
-    tool_choice: "auto",
+      tool_choice: "auto",
 
-    max_tool_calls: 1,
+      max_tool_calls: 1,
 
-    include: [
-      "web_search_call.action.sources",
-    ],
+      include: [
+        "web_search_call.action.sources",
+      ],
 
-    max_output_tokens: 1700,
-  });
+      max_output_tokens: 1700,
+    },
+
+    // Do not let a slow or rate-limited
+    // live-research attempt hold the
+    // whole planner for too long.
+    12000
+  );
 }
 
 async function createFallbackPlan(
@@ -468,7 +562,9 @@ Clearly tell the traveler that current requirements and important conditions mus
   );
 }
 
-export async function POST(request: Request) {
+export async function POST(
+  request: Request
+) {
   try {
     const apiKey =
       process.env.OPENAI_API_KEY;
@@ -525,9 +621,7 @@ export async function POST(request: Request) {
     }
 
     /*
-     * -----------------------------------------
-     * NORMAL AI PLANNER
-     * -----------------------------------------
+     * NORMAL AI
      */
 
     if (!liveResearch) {
@@ -537,10 +631,13 @@ export async function POST(request: Request) {
           message
         );
 
-      if (!ai.response.ok) {
+      if (
+        !ai.response ||
+        !ai.response.ok
+      ) {
         console.error(
           "OpenAI normal planner failed:",
-          ai.response.status,
+          ai.response?.status,
           ai.result
         );
 
@@ -552,6 +649,7 @@ export async function POST(request: Request) {
           },
           {
             status:
+              ai.response?.status &&
               ai.response.status >= 400
                 ? ai.response.status
                 : 500,
@@ -563,11 +661,6 @@ export async function POST(request: Request) {
         extractAnswer(ai.result);
 
       if (!answer) {
-        console.error(
-          "OpenAI returned no planner text:",
-          ai.result
-        );
-
         return NextResponse.json(
           {
             error:
@@ -595,9 +688,7 @@ export async function POST(request: Request) {
     }
 
     /*
-     * -----------------------------------------
-     * LIVE WEB RESEARCH
-     * -----------------------------------------
+     * LIVE RESEARCH
      */
 
     const research =
@@ -606,17 +697,34 @@ export async function POST(request: Request) {
         message
       );
 
-    /*
-     * If live research fails for ANY reason,
-     * use the normal planner as a backup.
-     */
+    const researchFailed =
+      research.timedOut ||
+      !research.response ||
+      !research.response.ok;
 
-    if (!research.response.ok) {
-      console.warn(
-        "Live research unavailable. Trying normal planner fallback:",
-        research.response.status,
-        research.result
-      );
+    if (researchFailed) {
+      const status =
+        research.response?.status;
+
+      if (research.timedOut) {
+        console.warn(
+          "Live research timed out. Using normal planner fallback."
+        );
+      } else if (status === 429) {
+        console.warn(
+          "Live research rate limited. Using normal planner fallback."
+        );
+      } else {
+        console.warn(
+          "Live research unavailable. Using normal planner fallback:",
+          status,
+          research.result
+        );
+      }
+
+      /*
+       * Immediately switch to normal AI.
+       */
 
       const fallback =
         await createFallbackPlan(
@@ -624,21 +732,27 @@ export async function POST(request: Request) {
           message
         );
 
-      if (!fallback.response.ok) {
+      if (
+        !fallback.response ||
+        !fallback.response.ok
+      ) {
         console.error(
           "Normal fallback planner failed:",
-          fallback.response.status,
+          fallback.response?.status,
           fallback.result
         );
 
         return NextResponse.json(
           {
             error:
-              fallback.result?.error?.message ||
+              fallback.result
+                ?.error
+                ?.message ||
               "The AI Trip Planner could not respond.",
           },
           {
             status:
+              fallback.response?.status &&
               fallback.response.status >= 400
                 ? fallback.response.status
                 : 503,
@@ -652,11 +766,6 @@ export async function POST(request: Request) {
         );
 
       if (!fallbackAnswer) {
-        console.error(
-          "Fallback returned no text:",
-          fallback.result
-        );
-
         return NextResponse.json(
           {
             error:
@@ -678,16 +787,18 @@ export async function POST(request: Request) {
         researchUnavailable: true,
 
         researchMessage:
-          "Live web research is temporarily unavailable. This Tibet plan was created without live verification. Please confirm current travel documentation, permits, route access and important travel conditions before booking.",
+          status === 429
+            ? "Live web research is temporarily rate limited. This Tibet plan was created without live verification. Please confirm current travel documentation, permits, route access and important travel conditions before booking."
+            : research.timedOut
+              ? "Live web research took too long to respond. This Tibet plan was created without live verification. Please confirm current travel documentation, permits, route access and important travel conditions before booking."
+              : "Live web research is temporarily unavailable. This Tibet plan was created without live verification. Please confirm current travel documentation, permits, route access and important travel conditions before booking.",
 
         sources: [],
       });
     }
 
     /*
-     * -----------------------------------------
      * LIVE RESEARCH SUCCESS
-     * -----------------------------------------
      */
 
     const answer =
@@ -702,7 +813,7 @@ export async function POST(request: Request) {
 
     if (!answer) {
       console.warn(
-        "Research succeeded but returned no final text. Trying normal planner."
+        "Live research returned no usable final text. Using fallback."
       );
 
       const fallback =
@@ -711,7 +822,10 @@ export async function POST(request: Request) {
           message
         );
 
-      if (!fallback.response.ok) {
+      if (
+        !fallback.response ||
+        !fallback.response.ok
+      ) {
         return NextResponse.json(
           {
             error:
