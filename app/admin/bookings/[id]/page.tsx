@@ -37,6 +37,286 @@ type ParsedMessage = {
   customerMessage: string;
 };
 
+type JourneySection = {
+  title: string;
+  paragraphs: string[];
+  table?: {
+    headers: string[];
+    rows: string[][];
+  };
+};
+
+type ParsedJourneyMessage = {
+  additionalMessage: string;
+  originalRequest: string;
+  sections: JourneySection[];
+};
+
+function cleanMarkdownInline(value: string) {
+  return value
+    .replace(/\*\*(.*?)\*\*/g, "$1")
+    .replace(/__(.*?)__/g, "$1")
+    .replace(/`(.*?)`/g, "$1")
+    .trim();
+}
+
+function isDividerLine(value: string) {
+  const line = value.trim();
+
+  return (
+    /^={5,}$/.test(line) ||
+    /^-{5,}$/.test(line)
+  );
+}
+
+function isMarkdownTableDivider(value: string) {
+  const cells = value
+    .trim()
+    .replace(/^\|/, "")
+    .replace(/\|$/, "")
+    .split("|")
+    .map((cell) => cell.trim());
+
+  return (
+    cells.length > 0 &&
+    cells.every((cell) =>
+      /^:?-{3,}:?$/.test(cell)
+    )
+  );
+}
+
+function parseTableRow(value: string) {
+  return value
+    .trim()
+    .replace(/^\|/, "")
+    .replace(/\|$/, "")
+    .split("|")
+    .map((cell) =>
+      cleanMarkdownInline(cell.trim())
+    );
+}
+
+function parseJourneyMessage(
+  message: string
+): ParsedJourneyMessage | null {
+  const normalized = message
+    .replace(/\r\n/g, "\n")
+    .trim();
+
+  if (
+    !normalized.includes(
+      "AI-PLANNED TIBET JOURNEY"
+    )
+  ) {
+    return null;
+  }
+
+  const lines = normalized.split("\n");
+
+  const aiTitleIndex =
+    lines.findIndex((line) =>
+      line
+        .trim()
+        .includes(
+          "AI-PLANNED TIBET JOURNEY"
+        )
+    );
+
+  const originalRequestIndex =
+    lines.findIndex((line) =>
+      line
+        .trim()
+        .includes(
+          "TRAVELER'S ORIGINAL AI REQUEST"
+        )
+    );
+
+  const recommendationIndex =
+    lines.findIndex((line) =>
+      line
+        .trim()
+        .includes(
+          "AI JOURNEY RECOMMENDATION"
+        )
+    );
+
+  if (
+    aiTitleIndex < 0 ||
+    originalRequestIndex < 0 ||
+    recommendationIndex < 0
+  ) {
+    return null;
+  }
+
+  const additionalMessage =
+    lines
+      .slice(0, aiTitleIndex)
+      .filter(
+        (line) =>
+          !isDividerLine(line) &&
+          line.trim() !==
+            "TRAVELER'S ADDITIONAL MESSAGE"
+      )
+      .join("\n")
+      .trim();
+
+  const originalRequest =
+    lines
+      .slice(
+        originalRequestIndex + 1,
+        recommendationIndex
+      )
+      .filter(
+        (line) =>
+          !isDividerLine(line)
+      )
+      .join("\n")
+      .trim();
+
+  const recommendationLines =
+    lines.slice(
+      recommendationIndex + 1
+    );
+
+  const sections: JourneySection[] = [];
+
+  let currentSection:
+    | JourneySection
+    | null = null;
+
+  for (
+    let index = 0;
+    index < recommendationLines.length;
+    index += 1
+  ) {
+    const rawLine =
+      recommendationLines[index];
+
+    const line =
+      rawLine.trim();
+
+    if (
+      !line ||
+      isDividerLine(line)
+    ) {
+      continue;
+    }
+
+    if (
+      /^#{1,6}\s+/.test(line)
+    ) {
+      const title =
+        cleanMarkdownInline(
+          line.replace(
+            /^#{1,6}\s+/,
+            ""
+          )
+        );
+
+      currentSection = {
+        title,
+        paragraphs: [],
+      };
+
+      sections.push(
+        currentSection
+      );
+
+      continue;
+    }
+
+    if (
+      line.startsWith("|") &&
+      line.endsWith("|")
+    ) {
+      const tableLines: string[] = [
+        line,
+      ];
+
+      while (
+        index + 1 <
+          recommendationLines.length &&
+        recommendationLines[
+          index + 1
+        ]
+          .trim()
+          .startsWith("|") &&
+        recommendationLines[
+          index + 1
+        ]
+          .trim()
+          .endsWith("|")
+      ) {
+        index += 1;
+
+        tableLines.push(
+          recommendationLines[
+            index
+          ].trim()
+        );
+      }
+
+      if (
+        tableLines.length >= 2 &&
+        isMarkdownTableDivider(
+          tableLines[1]
+        )
+      ) {
+        const headers =
+          parseTableRow(
+            tableLines[0]
+          );
+
+        const rows =
+          tableLines
+            .slice(2)
+            .map(parseTableRow);
+
+        if (!currentSection) {
+          currentSection = {
+            title: "Journey details",
+            paragraphs: [],
+          };
+
+          sections.push(
+            currentSection
+          );
+        }
+
+        currentSection.table = {
+          headers,
+          rows,
+        };
+      }
+
+      continue;
+    }
+
+    if (!currentSection) {
+      currentSection = {
+        title:
+          "Journey recommendation",
+        paragraphs: [],
+      };
+
+      sections.push(
+        currentSection
+      );
+    }
+
+    currentSection.paragraphs.push(
+      cleanMarkdownInline(line)
+    );
+  }
+
+  return {
+    additionalMessage,
+    originalRequest,
+    sections,
+  };
+}
+
+
 const allowedStatuses = [
   "new",
   "contacted",
@@ -922,6 +1202,11 @@ export default async function BookingPage({
   const customerMessage =
     legacy.customerMessage;
 
+  const journeyMessage =
+    parseJourneyMessage(
+      customerMessage
+    );
+
   const currentStatus =
     booking.status || "new";
 
@@ -1215,17 +1500,317 @@ export default async function BookingPage({
             Customer message
           </strong>
 
-          <div
-            style={{
-              ...infoBoxStyle,
-              whiteSpace:
-                "pre-wrap",
-              lineHeight: 1.6,
-              marginTop: 9,
-            }}
-          >
-            {customerMessage}
-          </div>
+          {journeyMessage ? (
+            <div
+              style={{
+                marginTop: 12,
+                border:
+                  "1px solid rgba(103,225,194,0.22)",
+                borderRadius: 22,
+                overflow: "hidden",
+                background:
+                  "linear-gradient(180deg, rgba(12,45,53,0.78), rgba(7,26,33,0.92))",
+              }}
+            >
+              {journeyMessage.additionalMessage && (
+                <div
+                  style={{
+                    padding: "22px 24px",
+                    borderBottom:
+                      "1px solid rgba(255,255,255,0.08)",
+                  }}
+                >
+                  <div
+                    style={{
+                      color: "#67e1c2",
+                      fontSize: 12,
+                      fontWeight: 800,
+                      letterSpacing:
+                        "0.12em",
+                      textTransform:
+                        "uppercase",
+                      marginBottom: 9,
+                    }}
+                  >
+                    Traveler&apos;s additional message
+                  </div>
+
+                  <div
+                    style={{
+                      fontSize: 16,
+                      lineHeight: 1.7,
+                      whiteSpace:
+                        "pre-wrap",
+                    }}
+                  >
+                    {
+                      journeyMessage.additionalMessage
+                    }
+                  </div>
+                </div>
+              )}
+
+              <div
+                style={{
+                  padding: "24px",
+                  background:
+                    "rgba(4,22,28,0.55)",
+                  borderBottom:
+                    "1px solid rgba(255,255,255,0.08)",
+                }}
+              >
+                <div
+                  style={{
+                    color: "#67e1c2",
+                    fontSize: 12,
+                    fontWeight: 800,
+                    letterSpacing:
+                      "0.14em",
+                    textTransform:
+                      "uppercase",
+                  }}
+                >
+                  AI Journey
+                </div>
+
+                <h2
+                  style={{
+                    margin:
+                      "8px 0 0",
+                    fontSize: 28,
+                    lineHeight: 1.2,
+                  }}
+                >
+                  AI-Planned Tibet Journey
+                </h2>
+              </div>
+
+              <div
+                style={{
+                  padding: "24px",
+                  borderBottom:
+                    "1px solid rgba(255,255,255,0.08)",
+                }}
+              >
+                <div
+                  style={{
+                    color: "#67e1c2",
+                    fontSize: 12,
+                    fontWeight: 800,
+                    letterSpacing:
+                      "0.12em",
+                    textTransform:
+                      "uppercase",
+                    marginBottom: 10,
+                  }}
+                >
+                  Traveler&apos;s original AI request
+                </div>
+
+                <div
+                  style={{
+                    lineHeight: 1.75,
+                    fontSize: 16,
+                  }}
+                >
+                  {
+                    journeyMessage.originalRequest
+                  }
+                </div>
+              </div>
+
+              <div
+                style={{
+                  padding: "24px",
+                }}
+              >
+                <div
+                  style={{
+                    color: "#67e1c2",
+                    fontSize: 12,
+                    fontWeight: 800,
+                    letterSpacing:
+                      "0.12em",
+                    textTransform:
+                      "uppercase",
+                    marginBottom: 22,
+                  }}
+                >
+                  AI journey recommendation
+                </div>
+
+                {journeyMessage.sections.map(
+                  (section, sectionIndex) => (
+                    <div
+                      key={`${section.title}-${sectionIndex}`}
+                      style={{
+                        marginBottom:
+                          sectionIndex ===
+                          journeyMessage.sections.length -
+                            1
+                            ? 0
+                            : 30,
+                      }}
+                    >
+                      <h3
+                        style={{
+                          margin:
+                            "0 0 12px",
+                          fontSize: 22,
+                          lineHeight: 1.25,
+                        }}
+                      >
+                        {section.title}
+                      </h3>
+
+                      {section.paragraphs.map(
+                        (
+                          paragraph,
+                          paragraphIndex
+                        ) => (
+                          <p
+                            key={`${sectionIndex}-${paragraphIndex}`}
+                            style={{
+                              margin:
+                                paragraphIndex ===
+                                section.paragraphs.length -
+                                  1
+                                  ? "0"
+                                  : "0 0 12px",
+                              lineHeight: 1.75,
+                              color:
+                                "rgba(255,255,255,0.9)",
+                            }}
+                          >
+                            {paragraph}
+                          </p>
+                        )
+                      )}
+
+                      {section.table && (
+                        <div
+                          style={{
+                            marginTop: 16,
+                            overflowX:
+                              "auto",
+                            border:
+                              "1px solid rgba(255,255,255,0.12)",
+                            borderRadius:
+                              16,
+                          }}
+                        >
+                          <table
+                            style={{
+                              width:
+                                "100%",
+                              borderCollapse:
+                                "collapse",
+                              minWidth:
+                                560,
+                            }}
+                          >
+                            <thead>
+                              <tr
+                                style={{
+                                  background:
+                                    "rgba(103,225,194,0.10)",
+                                }}
+                              >
+                                {section.table.headers.map(
+                                  (
+                                    header,
+                                    headerIndex
+                                  ) => (
+                                    <th
+                                      key={`${header}-${headerIndex}`}
+                                      style={{
+                                        padding:
+                                          "14px 16px",
+                                        textAlign:
+                                          "left",
+                                        fontSize:
+                                          13,
+                                        color:
+                                          "#dffaf3",
+                                        borderBottom:
+                                          "1px solid rgba(255,255,255,0.12)",
+                                      }}
+                                    >
+                                      {
+                                        header
+                                      }
+                                    </th>
+                                  )
+                                )}
+                              </tr>
+                            </thead>
+
+                            <tbody>
+                              {section.table.rows.map(
+                                (
+                                  row,
+                                  rowIndex
+                                ) => (
+                                  <tr
+                                    key={
+                                      rowIndex
+                                    }
+                                  >
+                                    {row.map(
+                                      (
+                                        cell,
+                                        cellIndex
+                                      ) => (
+                                        <td
+                                          key={`${rowIndex}-${cellIndex}`}
+                                          style={{
+                                            padding:
+                                              "14px 16px",
+                                            verticalAlign:
+                                              "top",
+                                            lineHeight:
+                                              1.55,
+                                            borderBottom:
+                                              rowIndex ===
+                                              section.table!
+                                                .rows
+                                                .length -
+                                                1
+                                                ? "none"
+                                                : "1px solid rgba(255,255,255,0.08)",
+                                          }}
+                                        >
+                                          {
+                                            cell
+                                          }
+                                        </td>
+                                      )
+                                    )}
+                                  </tr>
+                                )
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  )
+                )}
+              </div>
+            </div>
+          ) : (
+            <div
+              style={{
+                ...infoBoxStyle,
+                whiteSpace:
+                  "pre-wrap",
+                lineHeight: 1.6,
+                marginTop: 9,
+              }}
+            >
+              {customerMessage}
+            </div>
+          )}
         </div>
       </section>
 
