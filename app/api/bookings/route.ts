@@ -30,33 +30,42 @@ function getDb() {
     );
   }
 
-  return createClient(url, serviceKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-  });
+  return createClient(
+    url,
+    serviceKey,
+    {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+    }
+  );
 }
 
 function cleanText(
   value: unknown,
   maxLength = 2000
 ) {
-  if (typeof value !== "string") {
+  if (
+    typeof value !== "string"
+  ) {
     return "";
   }
 
-  return value.trim().slice(0, maxLength);
+  return value
+    .trim()
+    .slice(0, maxLength);
 }
 
 function cleanOptionalText(
   value: unknown,
   maxLength = 500
 ) {
-  const text = cleanText(
-    value,
-    maxLength
-  );
+  const text =
+    cleanText(
+      value,
+      maxLength
+    );
 
   return text || null;
 }
@@ -76,7 +85,8 @@ function formatTourName(
     return "Custom Tibet Journey";
   }
 
-  const tourNames: Record<string, string> = {
+  const tourNames:
+    Record<string, string> = {
     "lhasa-classic":
       "Lhasa Classic Journey",
 
@@ -105,7 +115,9 @@ function formatTourName(
       "Tibet Culture & Monasteries",
   };
 
-  if (tourNames[slug]) {
+  if (
+    tourNames[slug]
+  ) {
     return tourNames[slug];
   }
 
@@ -113,7 +125,8 @@ function formatTourName(
     .split("-")
     .map(
       (word) =>
-        word.charAt(0).toUpperCase() +
+        word.charAt(0)
+          .toUpperCase() +
         word.slice(1)
     )
     .join(" ");
@@ -123,11 +136,545 @@ function escapeHtml(
   value: string
 ) {
   return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+    .replaceAll(
+      "&",
+      "&amp;"
+    )
+    .replaceAll(
+      "<",
+      "&lt;"
+    )
+    .replaceAll(
+      ">",
+      "&gt;"
+    )
+    .replaceAll(
+      '"',
+      "&quot;"
+    )
+    .replaceAll(
+      "'",
+      "&#039;"
+    );
+}
+
+/*
+ * -----------------------------------------
+ * FORMAT INLINE MARKDOWN
+ * -----------------------------------------
+ *
+ * Converts:
+ * **bold**
+ *
+ * Everything is escaped first,
+ * so customer input cannot inject HTML.
+ */
+
+function formatInlineMarkdown(
+  value: string
+) {
+  const safe =
+    escapeHtml(value);
+
+  return safe.replace(
+    /\*\*(.+?)\*\*/g,
+    "<strong>$1</strong>"
+  );
+}
+
+function isMarkdownTableLine(
+  line: string
+) {
+  const trimmed =
+    line.trim();
+
+  return (
+    trimmed.startsWith("|") &&
+    trimmed.endsWith("|")
+  );
+}
+
+function isMarkdownSeparator(
+  line: string
+) {
+  const cells =
+    line
+      .trim()
+      .slice(1, -1)
+      .split("|")
+      .map(
+        (cell) =>
+          cell.trim()
+      );
+
+  return (
+    cells.length > 0 &&
+    cells.every(
+      (cell) =>
+        /^:?-{3,}:?$/.test(
+          cell
+        )
+    )
+  );
+}
+
+function parseMarkdownRow(
+  line: string
+) {
+  return line
+    .trim()
+    .slice(1, -1)
+    .split("|")
+    .map(
+      (cell) =>
+        cell.trim()
+    );
+}
+
+/*
+ * -----------------------------------------
+ * PROFESSIONAL EMAIL MESSAGE FORMATTER
+ * -----------------------------------------
+ *
+ * This formats the AI itinerary into:
+ *
+ * - headings
+ * - bold text
+ * - clean paragraphs
+ * - proper itinerary tables
+ * - section labels
+ *
+ * Supabase still stores the original
+ * plain text message unchanged.
+ */
+
+function renderBookingMessageHtml(
+  message: string | null
+) {
+  if (!message) {
+    return `
+      <p
+        style="
+          margin:0;
+          color:#60747b;
+          line-height:1.7;
+        "
+      >
+        No additional message.
+      </p>
+    `;
+  }
+
+  const lines =
+    message.replace(
+      /\r\n/g,
+      "\n"
+    ).split("\n");
+
+  const html:
+    string[] = [];
+
+  let index = 0;
+
+  while (
+    index < lines.length
+  ) {
+    const rawLine =
+      lines[index];
+
+    const line =
+      rawLine.trim();
+
+    if (!line) {
+      index += 1;
+      continue;
+    }
+
+    /*
+     * Decorative separator from
+     * AI itinerary handoff.
+     */
+
+    if (
+      /^={5,}$/.test(line)
+    ) {
+      index += 1;
+      continue;
+    }
+
+    /*
+     * Markdown table
+     */
+
+    if (
+      isMarkdownTableLine(
+        line
+      )
+    ) {
+      const tableLines:
+        string[] = [];
+
+      while (
+        index <
+          lines.length &&
+        isMarkdownTableLine(
+          lines[index]
+        )
+      ) {
+        tableLines.push(
+          lines[index]
+        );
+
+        index += 1;
+      }
+
+      const rows =
+        tableLines.filter(
+          (row) =>
+            !isMarkdownSeparator(
+              row
+            )
+        );
+
+      if (
+        rows.length > 0
+      ) {
+        const header =
+          parseMarkdownRow(
+            rows[0]
+          );
+
+        const body =
+          rows
+            .slice(1)
+            .map(
+              parseMarkdownRow
+            );
+
+        html.push(`
+          <div
+            style="
+              overflow-x:auto;
+              margin:16px 0 22px;
+              border:1px solid #dce6e8;
+              border-radius:12px;
+            "
+          >
+            <table
+              role="presentation"
+              style="
+                width:100%;
+                border-collapse:collapse;
+                font-size:14px;
+              "
+            >
+              <thead>
+                <tr
+                  style="
+                    background:#eaf8f4;
+                  "
+                >
+                  ${header
+                    .map(
+                      (cell) => `
+                        <th
+                          style="
+                            text-align:left;
+                            padding:12px 14px;
+                            border-bottom:1px solid #d4e4e6;
+                            color:#17353c;
+                          "
+                        >
+                          ${formatInlineMarkdown(
+                            cell
+                          )}
+                        </th>
+                      `
+                    )
+                    .join("")}
+                </tr>
+              </thead>
+
+              <tbody>
+                ${body
+                  .map(
+                    (row) => `
+                      <tr>
+                        ${row
+                          .map(
+                            (
+                              cell
+                            ) => `
+                              <td
+                                style="
+                                  padding:12px 14px;
+                                  border-bottom:1px solid #e7edef;
+                                  vertical-align:top;
+                                  line-height:1.6;
+                                "
+                              >
+                                ${formatInlineMarkdown(
+                                  cell
+                                )}
+                              </td>
+                            `
+                          )
+                          .join("")}
+                      </tr>
+                    `
+                  )
+                  .join("")}
+              </tbody>
+            </table>
+          </div>
+        `);
+
+        continue;
+      }
+    }
+
+    /*
+     * AI handoff section headings
+     */
+
+    if (
+      line ===
+      "AI-PLANNED TIBET JOURNEY"
+    ) {
+      html.push(`
+        <div
+          style="
+            margin:24px 0 16px;
+            padding:18px;
+            border-radius:14px;
+            background:#071a21;
+            color:#ffffff;
+          "
+        >
+          <div
+            style="
+              font-size:11px;
+              color:#67e1c2;
+              letter-spacing:1.6px;
+              font-weight:800;
+              margin-bottom:6px;
+            "
+          >
+            AI JOURNEY
+          </div>
+
+          <div
+            style="
+              font-size:22px;
+              font-weight:800;
+              line-height:1.3;
+            "
+          >
+            AI-Planned Tibet Journey
+          </div>
+        </div>
+      `);
+
+      index += 1;
+      continue;
+    }
+
+    if (
+      [
+        "TRAVELER'S ORIGINAL AI REQUEST",
+        "AI JOURNEY RECOMMENDATION",
+        "LIVE RESEARCH STATUS",
+        "RESEARCH NOTE",
+        "LIVE RESEARCH SOURCES",
+        "TRAVELER'S ADDITIONAL MESSAGE",
+      ].includes(line)
+    ) {
+      html.push(`
+        <div
+          style="
+            margin:20px 0 8px;
+            color:#287866;
+            font-size:11px;
+            font-weight:800;
+            letter-spacing:1.2px;
+            text-transform:uppercase;
+          "
+        >
+          ${escapeHtml(line)}
+        </div>
+      `);
+
+      index += 1;
+      continue;
+    }
+
+    /*
+     * Markdown headings
+     */
+
+    if (
+      line.startsWith(
+        "### "
+      )
+    ) {
+      html.push(`
+        <h4
+          style="
+            margin:20px 0 8px;
+            font-size:16px;
+            line-height:1.4;
+            color:#17353c;
+          "
+        >
+          ${formatInlineMarkdown(
+            line.slice(4)
+          )}
+        </h4>
+      `);
+
+      index += 1;
+      continue;
+    }
+
+    if (
+      line.startsWith(
+        "## "
+      )
+    ) {
+      html.push(`
+        <h3
+          style="
+            margin:24px 0 10px;
+            font-size:19px;
+            line-height:1.4;
+            color:#10242b;
+          "
+        >
+          ${formatInlineMarkdown(
+            line.slice(3)
+          )}
+        </h3>
+      `);
+
+      index += 1;
+      continue;
+    }
+
+    if (
+      line.startsWith(
+        "# "
+      )
+    ) {
+      html.push(`
+        <h2
+          style="
+            margin:24px 0 10px;
+            font-size:22px;
+            line-height:1.35;
+            color:#10242b;
+          "
+        >
+          ${formatInlineMarkdown(
+            line.slice(2)
+          )}
+        </h2>
+      `);
+
+      index += 1;
+      continue;
+    }
+
+    /*
+     * Bullet list
+     */
+
+    if (
+      line.startsWith(
+        "- "
+      ) ||
+      line.startsWith(
+        "* "
+      )
+    ) {
+      const items:
+        string[] = [];
+
+      while (
+        index <
+          lines.length &&
+        (
+          lines[index]
+            .trim()
+            .startsWith(
+              "- "
+            ) ||
+          lines[index]
+            .trim()
+            .startsWith(
+              "* "
+            )
+        )
+      ) {
+        items.push(
+          lines[index]
+            .trim()
+            .slice(2)
+        );
+
+        index += 1;
+      }
+
+      html.push(`
+        <ul
+          style="
+            margin:10px 0 18px;
+            padding-left:22px;
+            line-height:1.7;
+          "
+        >
+          ${items
+            .map(
+              (item) => `
+                <li
+                  style="
+                    margin-bottom:6px;
+                  "
+                >
+                  ${formatInlineMarkdown(
+                    item
+                  )}
+                </li>
+              `
+            )
+            .join("")}
+        </ul>
+      `);
+
+      continue;
+    }
+
+    /*
+     * Normal paragraph
+     */
+
+    html.push(`
+      <p
+        style="
+          margin:7px 0 13px;
+          line-height:1.7;
+          color:#304b52;
+        "
+      >
+        ${formatInlineMarkdown(
+          line
+        )}
+      </p>
+    `);
+
+    index += 1;
+  }
+
+  return html.join("");
 }
 
 async function sendResendEmail({
@@ -155,7 +702,8 @@ async function sendResendEmail({
 
     return {
       sent: false,
-      reason: "missing_api_key",
+      reason:
+        "missing_api_key",
     };
   }
 
@@ -175,22 +723,30 @@ async function sendResendEmail({
   };
 
   if (replyTo) {
-    payload.reply_to = replyTo;
+    payload.reply_to =
+      replyTo;
   }
 
-  const response = await fetch(
-    "https://api.resend.com/emails",
-    {
-      method: "POST",
-      headers: {
-        Authorization:
-          `Bearer ${resendApiKey}`,
-        "Content-Type":
-          "application/json",
-      },
-      body: JSON.stringify(payload),
-    }
-  );
+  const response =
+    await fetch(
+      "https://api.resend.com/emails",
+      {
+        method: "POST",
+
+        headers: {
+          Authorization:
+            `Bearer ${resendApiKey}`,
+
+          "Content-Type":
+            "application/json",
+        },
+
+        body:
+          JSON.stringify(
+            payload
+          ),
+      }
+    );
 
   const result =
     await response.json();
@@ -203,7 +759,8 @@ async function sendResendEmail({
 
     return {
       sent: false,
-      reason: "resend_error",
+      reason:
+        "resend_error",
       details: result,
     };
   }
@@ -241,68 +798,82 @@ async function sendAdminNotification({
   phone: string | null;
   country: string | null;
   tripStyle: string | null;
-  accommodation: string | null;
+  accommodation:
+    string | null;
   message: string | null;
   bookingId: string;
   adminBookingUrl: string;
 }) {
   const notificationEmail =
-    process.env.BOOKING_NOTIFICATION_EMAIL?.trim();
+    process.env
+      .BOOKING_NOTIFICATION_EMAIL
+      ?.trim();
 
-  if (!notificationEmail) {
+  if (
+    !notificationEmail
+  ) {
     console.warn(
       "BOOKING_NOTIFICATION_EMAIL missing."
     );
 
     return {
       sent: false,
+
       reason:
         "missing_notification_email",
     };
   }
 
   const verifiedFrom =
-    process.env.RESEND_FROM_EMAIL?.trim();
+    process.env.RESEND_FROM_EMAIL
+      ?.trim();
 
   /*
-    Until you own and verify a domain,
-    Resend's test sender is used.
-
-    Later, after you have your domain,
-    RESEND_FROM_EMAIL can be added.
-  */
+   * Until you own and verify a domain,
+   * Resend's test sender is used.
+   */
 
   const from =
     verifiedFrom ||
     "Himalayan26 <onboarding@resend.dev>";
 
   const safeName =
-    escapeHtml(customerName);
+    escapeHtml(
+      customerName
+    );
 
   const safeEmail =
-    escapeHtml(customerEmail);
+    escapeHtml(
+      customerEmail
+    );
 
   const safeTour =
-    escapeHtml(tourName);
+    escapeHtml(
+      tourName
+    );
 
   const safeDates =
     escapeHtml(
-      dates || "Not specified"
+      dates ||
+        "Not specified"
     );
 
   const safePhone =
     escapeHtml(
-      phone || "Not provided"
+      phone ||
+        "Not provided"
     );
 
   const safeCountry =
     escapeHtml(
-      country || "Not provided"
+      country ||
+        "Not provided"
     );
 
   const safeTripStyle =
     escapeHtml(
-      tripStyle || "Not specified"
+      tripStyle ||
+        "Not specified"
     );
 
   const safeAccommodation =
@@ -311,22 +882,26 @@ async function sendAdminNotification({
         "Not specified"
     );
 
-  const safeMessage =
+  const safeBookingId =
     escapeHtml(
-      message ||
-        "No additional message."
+      bookingId
     );
 
-  const safeBookingId =
-    escapeHtml(bookingId);
-
   const safeAdminUrl =
-    escapeHtml(adminBookingUrl);
+    escapeHtml(
+      adminBookingUrl
+    );
+
+  const formattedMessage =
+    renderBookingMessageHtml(
+      message
+    );
 
   const subject =
     `New Tibet trip request: ${tourName}`;
 
-  const text = `NEW TIBET BOOKING REQUEST
+  const text =
+`NEW TIBET BOOKING REQUEST
 
 Customer: ${customerName}
 Customer email: ${customerEmail}
@@ -354,6 +929,7 @@ Himalayan26
 
   const html = `
 <!doctype html>
+
 <html>
 <body
   style="
@@ -366,7 +942,7 @@ Himalayan26
 >
   <div
     style="
-      max-width:680px;
+      max-width:720px;
       margin:0 auto;
       padding:32px 18px;
     "
@@ -408,8 +984,7 @@ Himalayan26
           line-height:1.6;
         "
       >
-        A traveler has submitted a new
-        Tibet journey request.
+        A traveler has submitted a new Tibet journey request.
       </p>
     </div>
 
@@ -432,6 +1007,7 @@ Himalayan26
       </h2>
 
       <table
+        role="presentation"
         style="
           width:100%;
           border-collapse:collapse;
@@ -443,6 +1019,7 @@ Himalayan26
             style="
               padding:9px 0;
               color:#728187;
+              width:42%;
             "
           >
             Name
@@ -539,6 +1116,7 @@ Himalayan26
       </h2>
 
       <table
+        role="presentation"
         style="
           width:100%;
           border-collapse:collapse;
@@ -550,6 +1128,7 @@ Himalayan26
             style="
               padding:9px 0;
               color:#728187;
+              width:42%;
             "
           >
             Journey
@@ -658,22 +1237,34 @@ Himalayan26
     >
       <h2
         style="
-          margin:0 0 14px;
+          margin:0 0 6px;
           font-size:20px;
         "
       >
-        Traveler message
+        Journey request & AI itinerary
       </h2>
+
+      <p
+        style="
+          margin:0 0 18px;
+          color:#728187;
+          font-size:13px;
+          line-height:1.6;
+        "
+      >
+        Customer notes and any AI-planned Tibet itinerary are shown below.
+      </p>
 
       <div
         style="
-          background:#f4f8f9;
-          padding:17px;
-          border-radius:12px;
-          line-height:1.65;
-          white-space:pre-wrap;
+          background:#f7fafb;
+          padding:20px;
+          border-radius:14px;
+          border:1px solid #e5edef;
         "
-      >${safeMessage}</div>
+      >
+        ${formattedMessage}
+      </div>
     </div>
 
     <div
@@ -730,18 +1321,20 @@ Himalayan26
 
   return sendResendEmail({
     from,
-    to: notificationEmail,
+    to:
+      notificationEmail,
     subject,
     text,
     html,
 
     /*
-      When you press Reply in your
-      email inbox, it replies directly
-      to the traveler.
-    */
+     * Pressing Reply in the
+     * notification email replies
+     * directly to the traveler.
+     */
 
-    replyTo: customerEmail,
+    replyTo:
+      customerEmail,
   });
 }
 
@@ -761,21 +1354,20 @@ async function sendCustomerConfirmation({
   dates: string | null;
   travelers: number;
   tripStyle: string | null;
-  accommodation: string | null;
+  accommodation:
+    string | null;
   bookingId: string;
 }) {
   /*
-    Customer email stays disabled
-    until you have a verified sending
-    domain.
-
-    When RESEND_FROM_EMAIL exists,
-    customer confirmations switch on
-    automatically.
-  */
+   * Customer email stays disabled
+   * until you have a verified
+   * sending domain.
+   */
 
   const verifiedFrom =
-    process.env.RESEND_FROM_EMAIL?.trim();
+    process.env
+      .RESEND_FROM_EMAIL
+      ?.trim();
 
   if (!verifiedFrom) {
     console.log(
@@ -784,25 +1376,32 @@ async function sendCustomerConfirmation({
 
     return {
       sent: false,
+
       reason:
         "no_verified_domain",
     };
   }
 
   const safeName =
-    escapeHtml(customerName);
+    escapeHtml(
+      customerName
+    );
 
   const safeTour =
-    escapeHtml(tourName);
+    escapeHtml(
+      tourName
+    );
 
   const safeDates =
     escapeHtml(
-      dates || "Not specified"
+      dates ||
+        "Not specified"
     );
 
   const safeTripStyle =
     escapeHtml(
-      tripStyle || "Not specified"
+      tripStyle ||
+        "Not specified"
     );
 
   const safeAccommodation =
@@ -812,12 +1411,15 @@ async function sendCustomerConfirmation({
     );
 
   const safeBookingId =
-    escapeHtml(bookingId);
+    escapeHtml(
+      bookingId
+    );
 
   const subject =
     "We received your Tibet journey request";
 
-  const text = `Hello ${customerName},
+  const text =
+`Hello ${customerName},
 
 Thank you for contacting Himalayan26.
 
@@ -840,6 +1442,7 @@ Himalayan26
 
   const html = `
 <!doctype html>
+
 <html>
 <body
   style="
@@ -893,8 +1496,7 @@ Himalayan26
           line-height:1.7;
         "
       >
-        We received your Tibet
-        journey request.
+        We received your Tibet journey request.
       </p>
     </div>
 
@@ -907,32 +1509,51 @@ Himalayan26
         border:1px solid #e4ebed;
       "
     >
-      <h2 style="margin-top:0;">
+      <h2
+        style="
+          margin-top:0;
+        "
+      >
         Your Tibet request
       </h2>
 
       <p>
-        <strong>Journey:</strong>
+        <strong>
+          Journey:
+        </strong>
+
         ${safeTour}
       </p>
 
       <p>
-        <strong>Preferred dates:</strong>
+        <strong>
+          Preferred dates:
+        </strong>
+
         ${safeDates}
       </p>
 
       <p>
-        <strong>Travelers:</strong>
+        <strong>
+          Travelers:
+        </strong>
+
         ${travelers}
       </p>
 
       <p>
-        <strong>Trip style:</strong>
+        <strong>
+          Trip style:
+        </strong>
+
         ${safeTripStyle}
       </p>
 
       <p>
-        <strong>Accommodation:</strong>
+        <strong>
+          Accommodation:
+        </strong>
+
         ${safeAccommodation}
       </p>
     </div>
@@ -946,15 +1567,20 @@ Himalayan26
         border:1px solid #e4ebed;
       "
     >
-      <h2 style="margin-top:0;">
+      <h2
+        style="
+          margin-top:0;
+        "
+      >
         What happens next?
       </h2>
 
-      <p style="line-height:1.7;">
-        Our Tibet travel team will
-        review your request and contact
-        you about the proposed journey,
-        availability and next steps.
+      <p
+        style="
+          line-height:1.7;
+        "
+      >
+        Our Tibet travel team will review your request and contact you about the proposed journey, availability and next steps.
       </p>
 
       <p
@@ -964,10 +1590,7 @@ Himalayan26
           margin-bottom:0;
         "
       >
-        Final itinerary, services,
-        current travel requirements,
-        availability and pricing should
-        be confirmed before booking.
+        Final itinerary, services, current travel requirements, availability and pricing should be confirmed before booking.
       </p>
     </div>
 
@@ -1000,8 +1623,12 @@ Himalayan26
 `;
 
   return sendResendEmail({
-    from: verifiedFrom,
-    to: customerEmail,
+    from:
+      verifiedFrom,
+
+    to:
+      customerEmail,
+
     subject,
     text,
     html,
@@ -1012,7 +1639,8 @@ export async function POST(
   request: Request
 ) {
   try {
-    let body: BookingBody;
+    let body:
+      BookingBody;
 
     try {
       body =
@@ -1029,15 +1657,17 @@ export async function POST(
       );
     }
 
-    const name = cleanText(
-      body.name,
-      150
-    );
+    const name =
+      cleanText(
+        body.name,
+        150
+      );
 
-    const email = cleanText(
-      body.email,
-      254
-    ).toLowerCase();
+    const email =
+      cleanText(
+        body.email,
+        254
+      ).toLowerCase();
 
     const tourSlug =
       cleanOptionalText(
@@ -1051,10 +1681,19 @@ export async function POST(
         300
       );
 
+    /*
+     * AI itineraries can be longer
+     * than an ordinary customer note.
+     *
+     * Keep enough space so the full
+     * itinerary reaches Supabase
+     * and the notification email.
+     */
+
     const message =
       cleanOptionalText(
         body.message,
-        5000
+        12000
       );
 
     const phone =
@@ -1095,7 +1734,9 @@ export async function POST(
 
     if (
       !email ||
-      !isValidEmail(email)
+      !isValidEmail(
+        email
+      )
     ) {
       return NextResponse.json(
         {
@@ -1109,7 +1750,9 @@ export async function POST(
     }
 
     let travelers =
-      Number(body.travelers);
+      Number(
+        body.travelers
+      );
 
     if (
       !Number.isFinite(
@@ -1120,7 +1763,9 @@ export async function POST(
     }
 
     travelers =
-      Math.floor(travelers);
+      Math.floor(
+        travelers
+      );
 
     if (
       travelers < 1 ||
@@ -1137,14 +1782,16 @@ export async function POST(
       );
     }
 
-    const db = getDb();
+    const db =
+      getDb();
 
     /*
-      Save the booking first.
-
-      Email failure must never lose
-      a booking.
-    */
+     * Save the booking FIRST.
+     *
+     * Email problems must never
+     * cause a customer's booking
+     * request to be lost.
+     */
 
     const {
       data,
@@ -1152,18 +1799,30 @@ export async function POST(
     } = await db
       .from("bookings")
       .insert({
-        tour_slug: tourSlug,
+        tour_slug:
+          tourSlug,
+
         name,
+
         email,
+
         dates,
+
         travelers,
+
         message,
+
         phone,
+
         country,
+
         trip_style:
           tripStyle,
+
         accommodation,
-        status: "new",
+
+        status:
+          "new",
       })
       .select("id")
       .single();
@@ -1199,47 +1858,73 @@ export async function POST(
       `${origin}/admin/bookings/${data.id}`;
 
     /*
-      Email the admin notification.
-    */
+     * Admin notification
+     */
 
     const adminEmailResult =
       await sendAdminNotification({
-        customerName: name,
-        customerEmail: email,
+        customerName:
+          name,
+
+        customerEmail:
+          email,
+
         tourName,
+
         dates,
+
         travelers,
+
         phone,
+
         country,
+
         tripStyle,
+
         accommodation,
+
         message,
-        bookingId: data.id,
+
+        bookingId:
+          data.id,
+
         adminBookingUrl,
       });
 
     /*
-      Customer confirmation only
-      becomes active after you add
-      RESEND_FROM_EMAIL later.
-    */
+     * Customer confirmation remains
+     * disabled until you later add
+     * a verified RESEND_FROM_EMAIL.
+     */
 
     const customerEmailResult =
       await sendCustomerConfirmation({
-        customerName: name,
-        customerEmail: email,
+        customerName:
+          name,
+
+        customerEmail:
+          email,
+
         tourName,
+
         dates,
+
         travelers,
+
         tripStyle,
+
         accommodation,
-        bookingId: data.id,
+
+        bookingId:
+          data.id,
       });
 
     return NextResponse.json(
       {
         ok: true,
-        id: data.id,
+
+        id:
+          data.id,
 
         email: {
           adminNotification:
