@@ -20,6 +20,99 @@ type OpenAIResult = {
   timedOut: boolean;
 };
 
+type LocalTour = {
+  name: string;
+  slug: string;
+  duration: number;
+  difficulty: string;
+  price: string;
+  focus: string;
+};
+
+const LOCAL_TOURS: LocalTour[] = [
+  {
+    name: "Lhasa Classic Journey",
+    slug: "lhasa-classic",
+    duration: 5,
+    difficulty: "Easy–Moderate",
+    price: "$1,290",
+    focus:
+      "Lhasa, culture, monasteries and acclimatization",
+  },
+  {
+    name: "Lhasa to Everest Base Camp",
+    slug: "lhasa-everest-base-camp",
+    duration: 8,
+    difficulty: "Moderate",
+    price: "$1,890",
+    focus:
+      "Lhasa, Gyantse, Shigatse, Tibetan Plateau and Everest region",
+  },
+  {
+    name: "Lhoka (Southern Tibet)",
+    slug: "lhoka-southern-tibet",
+    duration: 7,
+    difficulty: "Easy–Moderate",
+    price: "$1,590",
+    focus:
+      "southern Tibet, Lhoka, culture, valleys, monasteries and historic places",
+  },
+  {
+    name: "Tibet High Plateau",
+    slug: "tibet-high-plateau",
+    duration: 12,
+    difficulty: "Moderate",
+    price: "$2,190",
+    focus:
+      "high plateau landscapes, culture and remote travel",
+  },
+  {
+    name: "Kailash & Mansarovar Journey",
+    slug: "kailash-mansarovar-journey",
+    duration: 15,
+    difficulty: "Moderate",
+    price: "$2,890",
+    focus:
+      "western Tibet, Mount Kailash, Lake Manasarovar and pilgrimage landscapes",
+  },
+  {
+    name: "Mount Kailash Kora",
+    slug: "kailash-kora",
+    duration: 13,
+    difficulty: "Challenging",
+    price: "$2,690",
+    focus:
+      "Mount Kailash, Kora, altitude and western Tibet",
+  },
+  {
+    name: "Lhasa & Namtso Lake",
+    slug: "namtso-lake",
+    duration: 7,
+    difficulty: "Moderate",
+    price: "$1,690",
+    focus:
+      "Lhasa, Namtso and high-altitude lake landscapes",
+  },
+  {
+    name: "Tibet Photography Journey",
+    slug: "tibet-photography",
+    duration: 10,
+    difficulty: "Moderate",
+    price: "$2,390",
+    focus:
+      "photography, culture, landscapes and slower observational travel",
+  },
+  {
+    name: "Tibet Culture & Monasteries",
+    slug: "tibet-culture-monasteries",
+    duration: 9,
+    difficulty: "Easy–Moderate",
+    price: "$1,990",
+    focus:
+      "Tibetan culture, monasteries, heritage and living traditions",
+  },
+];
+
 function cleanText(
   value: unknown,
   maxLength = 2000
@@ -183,7 +276,8 @@ async function callOpenAI(
 
         cache: "no-store",
 
-        signal: controller.signal,
+        signal:
+          controller.signal,
       }
     );
 
@@ -211,7 +305,7 @@ async function callOpenAI(
         result: {
           error: {
             message:
-              "Live research timed out.",
+              "Request timed out.",
           },
         },
 
@@ -494,7 +588,9 @@ async function createNormalPlan(
       input: message,
 
       max_output_tokens: 1600,
-    }
+    },
+
+    12000
   );
 }
 
@@ -531,60 +627,588 @@ async function createResearchPlan(
       max_output_tokens: 1700,
     },
 
-    // Do not let a slow or rate-limited
-    // live-research attempt hold the
-    // whole planner for too long.
     12000
   );
 }
 
-async function createFallbackPlan(
-  apiKey: string,
+/*
+ * -----------------------------------------
+ * LOCAL EMERGENCY PLANNER
+ * -----------------------------------------
+ *
+ * This does NOT call OpenAI.
+ *
+ * It uses only the official journey
+ * collection already defined in the site.
+ *
+ * Its purpose is to make sure customers
+ * still receive a useful Tibet journey
+ * when OpenAI is temporarily rate limited
+ * or unavailable.
+ */
+
+function extractRequestedDays(
   message: string
 ) {
-  const fallbackMessage = `
-${message}
+  const patterns = [
+    /(\d{1,2})\s*[- ]?day/i,
+    /(\d{1,2})\s*days/i,
+    /for\s+(\d{1,2})\s*days/i,
+  ];
 
-IMPORTANT:
+  for (const pattern of patterns) {
+    const match =
+      message.match(pattern);
 
-Live web research is currently unavailable.
+    if (match) {
+      const value =
+        Number(match[1]);
 
-Create the Tibet journey using normal planning knowledge and the Himalayan Adventures Tibet journey collection.
+      if (
+        Number.isFinite(value) &&
+        value >= 1 &&
+        value <= 60
+      ) {
+        return value;
+      }
+    }
+  }
 
-Do not claim that current travel documentation, permits, regional access, entry requirements, regulations, weather, transportation conditions or restrictions were verified live.
+  return null;
+}
 
-Clearly tell the traveler that current requirements and important conditions must be confirmed before booking.
-`;
+function chooseLocalTour(
+  message: string
+): LocalTour {
+  const text =
+    message.toLowerCase();
 
-  return createNormalPlan(
-    apiKey,
-    fallbackMessage
-  );
+  const requestedDays =
+    extractRequestedDays(
+      message
+    );
+
+  if (
+    text.includes(
+      "mansarovar"
+    ) ||
+    text.includes(
+      "manasarovar"
+    )
+  ) {
+    return LOCAL_TOURS.find(
+      (tour) =>
+        tour.slug ===
+        "kailash-mansarovar-journey"
+    )!;
+  }
+
+  if (
+    text.includes(
+      "kailash"
+    ) &&
+    (
+      text.includes(
+        "kora"
+      ) ||
+      text.includes(
+        "trek"
+      ) ||
+      text.includes(
+        "pilgrimage"
+      )
+    )
+  ) {
+    return LOCAL_TOURS.find(
+      (tour) =>
+        tour.slug ===
+        "kailash-kora"
+    )!;
+  }
+
+  if (
+    text.includes(
+      "kailash"
+    )
+  ) {
+    return LOCAL_TOURS.find(
+      (tour) =>
+        tour.slug ===
+        "kailash-mansarovar-journey"
+    )!;
+  }
+
+  if (
+    text.includes(
+      "everest"
+    ) ||
+    text.includes(
+      "base camp"
+    ) ||
+    text.includes(
+      "ebc"
+    )
+  ) {
+    return LOCAL_TOURS.find(
+      (tour) =>
+        tour.slug ===
+        "lhasa-everest-base-camp"
+    )!;
+  }
+
+  if (
+    text.includes(
+      "namtso"
+    ) ||
+    text.includes(
+      "lake"
+    )
+  ) {
+    return LOCAL_TOURS.find(
+      (tour) =>
+        tour.slug ===
+        "namtso-lake"
+    )!;
+  }
+
+  if (
+    text.includes(
+      "lhoka"
+    ) ||
+    text.includes(
+      "southern tibet"
+    ) ||
+    text.includes(
+      "south tibet"
+    )
+  ) {
+    return LOCAL_TOURS.find(
+      (tour) =>
+        tour.slug ===
+        "lhoka-southern-tibet"
+    )!;
+  }
+
+  if (
+    text.includes(
+      "photo"
+    ) ||
+    text.includes(
+      "photography"
+    ) ||
+    text.includes(
+      "photographer"
+    )
+  ) {
+    return LOCAL_TOURS.find(
+      (tour) =>
+        tour.slug ===
+        "tibet-photography"
+    )!;
+  }
+
+  if (
+    text.includes(
+      "monastery"
+    ) ||
+    text.includes(
+      "monasteries"
+    ) ||
+    text.includes(
+      "heritage"
+    ) ||
+    text.includes(
+      "culture"
+    )
+  ) {
+    if (
+      requestedDays === 7
+    ) {
+      return LOCAL_TOURS.find(
+        (tour) =>
+          tour.slug ===
+          "lhoka-southern-tibet"
+      )!;
+    }
+
+    return LOCAL_TOURS.find(
+      (tour) =>
+        tour.slug ===
+        "tibet-culture-monasteries"
+    )!;
+  }
+
+  if (
+    text.includes(
+      "plateau"
+    ) ||
+    text.includes(
+      "remote"
+    )
+  ) {
+    return LOCAL_TOURS.find(
+      (tour) =>
+        tour.slug ===
+        "tibet-high-plateau"
+    )!;
+  }
+
+  /*
+   * Generic trip:
+   * match the official tour duration
+   * closest to what the traveler asked for.
+   *
+   * A generic 7-day trip therefore matches
+   * Lhoka (Southern Tibet).
+   */
+
+  if (
+    requestedDays
+  ) {
+    const sorted =
+      [...LOCAL_TOURS].sort(
+        (a, b) => {
+          const differenceA =
+            Math.abs(
+              a.duration -
+                requestedDays
+            );
+
+          const differenceB =
+            Math.abs(
+              b.duration -
+                requestedDays
+            );
+
+          if (
+            differenceA !==
+            differenceB
+          ) {
+            return (
+              differenceA -
+              differenceB
+            );
+          }
+
+          /*
+           * For equal matches,
+           * prefer a culturally balanced
+           * easier journey.
+           */
+
+          const preference =
+            [
+              "lhoka-southern-tibet",
+              "lhasa-classic",
+              "namtso-lake",
+              "tibet-culture-monasteries",
+              "lhasa-everest-base-camp",
+              "tibet-photography",
+              "tibet-high-plateau",
+              "kailash-kora",
+              "kailash-mansarovar-journey",
+            ];
+
+          return (
+            preference.indexOf(
+              a.slug
+            ) -
+            preference.indexOf(
+              b.slug
+            )
+          );
+        }
+      );
+
+    return sorted[0];
+  }
+
+  return LOCAL_TOURS.find(
+    (tour) =>
+      tour.slug ===
+      "lhoka-southern-tibet"
+  )!;
+}
+
+function itineraryForTour(
+  tour: LocalTour
+) {
+  switch (tour.slug) {
+    case "lhasa-classic":
+      return [
+        "Arrive in Lhasa. Keep the first day light and allow time to begin adjusting to the altitude.",
+        "Explore central Lhasa at a gentle pace, with cultural visits planned around how you are feeling.",
+        "Continue exploring important Lhasa cultural and monastery sites with an unhurried schedule.",
+        "Allow another flexible day for cultural experiences, local neighborhoods and final sightseeing.",
+        "Depart Lhasa or continue into another Tibet journey after final arrangements are confirmed.",
+      ];
+
+    case "lhasa-everest-base-camp":
+      return [
+        "Arrive in Lhasa and keep the day light for initial altitude adjustment.",
+        "Explore Lhasa at a gentle pace with cultural sightseeing and rest time.",
+        "Continue Lhasa sightseeing and allow another acclimatization day.",
+        "Travel from Lhasa toward Gyantse and Shigatse through central Tibet.",
+        "Continue from Shigatse toward the Everest region, allowing for a long high-altitude travel day.",
+        "Experience the Everest region according to confirmed access, route conditions and local arrangements.",
+        "Begin the return journey toward Shigatse.",
+        "Travel from Shigatse back to Lhasa, allowing for road conditions and breaks.",
+      ];
+
+    case "lhoka-southern-tibet":
+      return [
+        "Arrive in Lhasa and take the day slowly to begin acclimatizing.",
+        "Explore Lhasa at a gentle pace, allowing time for culture and rest.",
+        "Continue exploring important cultural and monastery sites in Lhasa.",
+        "Travel from Lhasa into the Lhoka area, allowing time for the drive and changing landscapes.",
+        "Explore historic places, monasteries and cultural sites in southern Tibet.",
+        "Spend another day experiencing Lhoka's valleys, local landscapes and cultural heritage at a flexible pace.",
+        "Return toward Lhasa or continue according to the final confirmed travel arrangements.",
+      ];
+
+    case "namtso-lake":
+      return [
+        "Arrive in Lhasa and keep the day light for altitude adjustment.",
+        "Explore Lhasa gently with cultural visits and plenty of rest time.",
+        "Continue Lhasa sightseeing and allow another day for acclimatization.",
+        "Travel toward the Namtso region, adjusting the day according to altitude, road and weather conditions.",
+        "Experience the Namtso landscape with a conservative schedule appropriate for the higher elevation.",
+        "Return toward Lhasa and keep the schedule flexible after the high-altitude excursion.",
+        "Final Lhasa time and departure according to confirmed arrangements.",
+      ];
+
+    case "tibet-photography":
+      return [
+        "Arrive in Lhasa and begin adjusting to the altitude.",
+        "Photograph Lhasa cultural areas at a relaxed pace.",
+        "Continue Lhasa photography with monasteries, architecture and street life.",
+        "Travel into the wider plateau landscape with photography stops where practical.",
+        "Focus on cultural landscapes, changing light and rural scenery.",
+        "Continue photography-oriented travel with time for observation rather than rushing.",
+        "Include another landscape and cultural photography day based on the final route.",
+        "Use a flexible day for weather, light and photographic opportunities.",
+        "Return toward Lhasa while continuing to photograph plateau scenery.",
+        "Final photography time in Lhasa and departure according to arrangements.",
+      ];
+
+    case "tibet-culture-monasteries":
+      return [
+        "Arrive in Lhasa and begin acclimatizing.",
+        "Explore central Lhasa and important cultural areas.",
+        "Visit major monastery and heritage sites at an unhurried pace.",
+        "Continue cultural exploration in Lhasa with time for local neighborhoods.",
+        "Travel into another cultural area of Tibet according to the confirmed route.",
+        "Experience monasteries, historic places and local traditions.",
+        "Continue cultural travel with realistic road time and rest breaks.",
+        "Return toward Lhasa with flexible cultural stops where practical.",
+        "Final Lhasa time and departure.",
+      ];
+
+    case "tibet-high-plateau":
+      return [
+        "Arrive in Lhasa and begin acclimatizing.",
+        "Explore Lhasa gently and allow plenty of rest.",
+        "Continue Lhasa cultural sightseeing and acclimatization.",
+        "Begin traveling across the Tibetan Plateau with realistic road time.",
+        "Experience broad plateau landscapes and cultural stops.",
+        "Continue through higher and more remote plateau areas according to access and conditions.",
+        "Allow a slower day for altitude, weather and road conditions.",
+        "Continue the high plateau journey with flexible stops.",
+        "Experience additional remote landscapes and cultural places.",
+        "Begin the gradual return toward central Tibet.",
+        "Continue toward Lhasa with appropriate breaks.",
+        "Final Lhasa time and departure.",
+      ];
+
+    case "kailash-kora":
+      return [
+        "Arrive in Lhasa and begin acclimatizing.",
+        "Explore Lhasa gently and continue altitude adjustment.",
+        "Allow another Lhasa acclimatization day.",
+        "Begin the long journey toward western Tibet.",
+        "Continue west with realistic driving time and rest stops.",
+        "Continue toward the Mount Kailash region according to confirmed route access.",
+        "Use a flexible preparation and acclimatization day before the Kora.",
+        "Begin the Mount Kailash Kora according to local conditions and traveler readiness.",
+        "Continue the Kora with conservative pacing.",
+        "Complete the Kora according to the confirmed operating plan.",
+        "Begin the return journey east.",
+        "Continue toward central Tibet with realistic driving time.",
+        "Return toward Lhasa or depart according to the final confirmed arrangements.",
+      ];
+
+    case "kailash-mansarovar-journey":
+      return [
+        "Arrive in Lhasa and begin acclimatizing.",
+        "Explore Lhasa gently with cultural sightseeing.",
+        "Continue acclimatization in Lhasa.",
+        "Begin traveling west across Tibet.",
+        "Continue west with realistic road time.",
+        "Continue through western Tibet toward the Kailash region.",
+        "Experience Lake Manasarovar according to confirmed access and conditions.",
+        "Prepare for the Mount Kailash area with a flexible acclimatization day.",
+        "Begin the Mount Kailash experience according to the confirmed route.",
+        "Continue the Kailash journey at a conservative pace.",
+        "Complete the planned Kailash section according to local arrangements.",
+        "Begin returning east through western Tibet.",
+        "Continue the return journey toward central Tibet.",
+        "Return toward Lhasa with appropriate rest and breaks.",
+        "Final departure according to confirmed arrangements.",
+      ];
+
+    default:
+      return [
+        "Arrive in Tibet and begin with a light acclimatization day.",
+        "Explore Lhasa gently with cultural sightseeing.",
+        "Continue cultural exploration with realistic pacing.",
+        "Travel into the wider Tibetan Plateau according to the selected route.",
+        "Continue the journey with appropriate rest and flexible travel time.",
+        "Experience additional cultural and landscape highlights.",
+        "Return toward Lhasa or depart according to confirmed arrangements.",
+      ];
+  }
+}
+
+function buildLocalPlan(
+  message: string
+) {
+  const tour =
+    chooseLocalTour(
+      message
+    );
+
+  const requestedDays =
+    extractRequestedDays(
+      message
+    );
+
+  const itinerary =
+    itineraryForTour(
+      tour
+    );
+
+  const itineraryRows =
+    itinerary
+      .map(
+        (plan, index) =>
+          `| ${index + 1} | ${plan} |`
+      )
+      .join("\n");
+
+  const durationNote =
+    requestedDays &&
+    requestedDays !==
+      tour.duration
+      ? `You mentioned approximately ${requestedDays} days. The closest current Himalayan Adventures journey is ${tour.duration} days, so the final route should be adjusted with the travel team before booking.`
+      : `This matches the ${tour.duration}-day planning length of the current journey.`;
+
+  return `
+## Recommended journey
+
+**${tour.name}** is the closest match for your Tibet trip. It is a ${tour.duration}-day ${tour.difficulty} journey focused on ${tour.focus}.
+
+${durationNote}
+
+## Suggested itinerary
+
+| Day | Plan |
+|---|---|
+${itineraryRows}
+
+This is a planning-level itinerary, not a confirmed operating schedule. The final route may change after dates, transportation, access and local arrangements are confirmed.
+
+## Why this route fits
+
+This journey gives you a balanced Tibet experience using one of Himalayan Adventures' current Tibet routes. The itinerary keeps the first days relatively gentle and avoids treating high-altitude travel as a rushed sightseeing schedule.
+
+## Travel requirements
+
+Current travel documentation, permits, regional access, transportation arrangements and other requirements **have not been verified live for this request**.
+
+These details can change and must be confirmed before booking.
+
+## Safety and altitude
+
+Tibet is a high-altitude destination. Keep the first days relatively light, allow time for rest and hydration, and avoid building the itinerary around aggressive daily travel.
+
+Higher areas such as Everest, Namtso, Mount Kailash and remote plateau routes require additional attention to altitude, long drives, weather and local conditions.
+
+No itinerary can guarantee safe acclimatization.
+
+## Planning price
+
+**${tour.name}** is currently listed with a **starting planning price of ${tour.price}**.
+
+This is not a final quotation. Final pricing depends on confirmed dates, route, services, availability and operating arrangements.
+
+## Next step
+
+Send this journey to the Himalayan Adventures Tibet travel team with your preferred dates, number of travelers, accommodation preference and any changes you would like.
+
+The team should confirm the final itinerary, current travel requirements, route access, availability and final price before booking.
+`.trim();
+}
+
+function localResponse(
+  message: string,
+  liveResearchRequested: boolean,
+  reason:
+    | "rate_limit"
+    | "timeout"
+    | "unavailable"
+    | "missing_key"
+    | "empty_result" =
+    "unavailable"
+) {
+  let researchMessage = "";
+
+  if (
+    liveResearchRequested
+  ) {
+    if (
+      reason ===
+      "rate_limit"
+    ) {
+      researchMessage =
+        "Live web research is temporarily busy. Your Tibet journey was created using the Himalayan Adventures journey collection without live verification. Please confirm current travel documentation, permits, route access and important travel conditions before booking.";
+    } else if (
+      reason ===
+      "timeout"
+    ) {
+      researchMessage =
+        "Live web research took too long to respond. Your Tibet journey was created using the Himalayan Adventures journey collection without live verification. Please confirm current travel documentation, permits, route access and important travel conditions before booking.";
+    } else {
+      researchMessage =
+        "Live web research is temporarily unavailable. Your Tibet journey was created using the Himalayan Adventures journey collection without live verification. Please confirm current travel documentation, permits, route access and important travel conditions before booking.";
+    }
+  }
+
+  return NextResponse.json({
+    ok: true,
+
+    answer:
+      buildLocalPlan(
+        message
+      ),
+
+    liveResearch: false,
+
+    researchUnavailable:
+      liveResearchRequested,
+
+    researchMessage,
+
+    sources: [],
+
+    fallback:
+      "local",
+  });
 }
 
 export async function POST(
   request: Request
 ) {
   try {
-    const apiKey =
-      process.env.OPENAI_API_KEY;
-
-    if (!apiKey) {
-      console.error(
-        "OPENAI_API_KEY is missing."
-      );
-
-      return NextResponse.json(
-        {
-          error:
-            "The AI service is not configured.",
-        },
-        {
-          status: 503,
-        }
-      );
-    }
-
     let body: AiRequestBody;
 
     try {
@@ -603,10 +1227,13 @@ export async function POST(
     }
 
     const message =
-      cleanText(body.message);
+      cleanText(
+        body.message
+      );
 
     const liveResearch =
-      body.liveResearch === true;
+      body.liveResearch ===
+      true;
 
     if (!message) {
       return NextResponse.json(
@@ -620,8 +1247,34 @@ export async function POST(
       );
     }
 
+    const apiKey =
+      process.env.OPENAI_API_KEY;
+
     /*
-     * NORMAL AI
+     * -----------------------------------------
+     * NO API KEY
+     * -----------------------------------------
+     *
+     * Do not break the planner.
+     * Use the local Tibet journey engine.
+     */
+
+    if (!apiKey) {
+      console.warn(
+        "OPENAI_API_KEY missing. Using local Tibet planner."
+      );
+
+      return localResponse(
+        message,
+        liveResearch,
+        "missing_key"
+      );
+    }
+
+    /*
+     * -----------------------------------------
+     * NORMAL AI MODE
+     * -----------------------------------------
      */
 
     if (!liveResearch) {
@@ -632,43 +1285,52 @@ export async function POST(
         );
 
       if (
+        ai.timedOut
+      ) {
+        console.warn(
+          "Normal AI timed out. Using local Tibet planner."
+        );
+
+        return localResponse(
+          message,
+          false,
+          "timeout"
+        );
+      }
+
+      if (
         !ai.response ||
         !ai.response.ok
       ) {
-        console.error(
-          "OpenAI normal planner failed:",
-          ai.response?.status,
-          ai.result
+        console.warn(
+          "Normal AI unavailable. Using local Tibet planner.",
+          ai.response?.status
         );
 
-        return NextResponse.json(
-          {
-            error:
-              ai.result?.error?.message ||
-              "The AI Trip Planner could not respond.",
-          },
-          {
-            status:
-              ai.response?.status &&
-              ai.response.status >= 400
-                ? ai.response.status
-                : 500,
-          }
+        return localResponse(
+          message,
+          false,
+          ai.response?.status ===
+            429
+            ? "rate_limit"
+            : "unavailable"
         );
       }
 
       const answer =
-        extractAnswer(ai.result);
+        extractAnswer(
+          ai.result
+        );
 
       if (!answer) {
-        return NextResponse.json(
-          {
-            error:
-              "The AI Trip Planner did not return a journey plan.",
-          },
-          {
-            status: 502,
-          }
+        console.warn(
+          "Normal AI returned no usable answer. Using local Tibet planner."
+        );
+
+        return localResponse(
+          message,
+          false,
+          "empty_result"
         );
       }
 
@@ -679,16 +1341,20 @@ export async function POST(
 
         liveResearch: false,
 
-        researchUnavailable: false,
+        researchUnavailable:
+          false,
 
-        researchMessage: "",
+        researchMessage:
+          "",
 
         sources: [],
       });
     }
 
     /*
-     * LIVE RESEARCH
+     * -----------------------------------------
+     * LIVE RESEARCH MODE
+     * -----------------------------------------
      */
 
     const research =
@@ -697,108 +1363,147 @@ export async function POST(
         message
       );
 
-    const researchFailed =
-      research.timedOut ||
-      !research.response ||
-      !research.response.ok;
+    /*
+     * If live research hits a 429,
+     * do NOT make another OpenAI call.
+     *
+     * The normal model is likely using
+     * the same temporary token budget.
+     *
+     * Immediately use the local Tibet
+     * planner instead.
+     */
 
-    if (researchFailed) {
-      const status =
-        research.response?.status;
+    if (
+      research.response?.status ===
+      429
+    ) {
+      console.warn(
+        "Live research rate limited. Using local Tibet planner immediately."
+      );
 
-      if (research.timedOut) {
-        console.warn(
-          "Live research timed out. Using normal planner fallback."
-        );
-      } else if (status === 429) {
-        console.warn(
-          "Live research rate limited. Using normal planner fallback."
-        );
-      } else {
-        console.warn(
-          "Live research unavailable. Using normal planner fallback:",
-          status,
-          research.result
-        );
-      }
+      return localResponse(
+        message,
+        true,
+        "rate_limit"
+      );
+    }
 
-      /*
-       * Immediately switch to normal AI.
-       */
+    /*
+     * If research timed out,
+     * try normal AI once.
+     */
 
-      const fallback =
-        await createFallbackPlan(
+    if (
+      research.timedOut
+    ) {
+      console.warn(
+        "Live research timed out. Trying normal planner."
+      );
+
+      const normal =
+        await createNormalPlan(
           apiKey,
           message
         );
 
       if (
-        !fallback.response ||
-        !fallback.response.ok
+        normal.response?.ok
       ) {
-        console.error(
-          "Normal fallback planner failed:",
-          fallback.response?.status,
-          fallback.result
-        );
+        const answer =
+          extractAnswer(
+            normal.result
+          );
 
-        return NextResponse.json(
-          {
-            error:
-              fallback.result
-                ?.error
-                ?.message ||
-              "The AI Trip Planner could not respond.",
-          },
-          {
-            status:
-              fallback.response?.status &&
-              fallback.response.status >= 400
-                ? fallback.response.status
-                : 503,
-          }
-        );
+        if (answer) {
+          return NextResponse.json({
+            ok: true,
+
+            answer,
+
+            liveResearch:
+              false,
+
+            researchUnavailable:
+              true,
+
+            researchMessage:
+              "Live web research took too long to respond. This Tibet plan was created without live verification. Please confirm current travel documentation, permits, route access and important travel conditions before booking.",
+
+            sources: [],
+          });
+        }
       }
 
-      const fallbackAnswer =
-        extractAnswer(
-          fallback.result
-        );
-
-      if (!fallbackAnswer) {
-        return NextResponse.json(
-          {
-            error:
-              "The backup Tibet trip planner could not create a response.",
-          },
-          {
-            status: 502,
-          }
-        );
-      }
-
-      return NextResponse.json({
-        ok: true,
-
-        answer: fallbackAnswer,
-
-        liveResearch: false,
-
-        researchUnavailable: true,
-
-        researchMessage:
-          status === 429
-            ? "Live web research is temporarily rate limited. This Tibet plan was created without live verification. Please confirm current travel documentation, permits, route access and important travel conditions before booking."
-            : research.timedOut
-              ? "Live web research took too long to respond. This Tibet plan was created without live verification. Please confirm current travel documentation, permits, route access and important travel conditions before booking."
-              : "Live web research is temporarily unavailable. This Tibet plan was created without live verification. Please confirm current travel documentation, permits, route access and important travel conditions before booking.",
-
-        sources: [],
-      });
+      return localResponse(
+        message,
+        true,
+        "timeout"
+      );
     }
 
     /*
+     * Other live-research errors:
+     * try normal AI once.
+     */
+
+    if (
+      !research.response ||
+      !research.response.ok
+    ) {
+      console.warn(
+        "Live research unavailable. Trying normal planner.",
+        research.response?.status
+      );
+
+      const normal =
+        await createNormalPlan(
+          apiKey,
+          message
+        );
+
+      if (
+        normal.response?.ok
+      ) {
+        const answer =
+          extractAnswer(
+            normal.result
+          );
+
+        if (answer) {
+          return NextResponse.json({
+            ok: true,
+
+            answer,
+
+            liveResearch:
+              false,
+
+            researchUnavailable:
+              true,
+
+            researchMessage:
+              "Live web research is temporarily unavailable. This Tibet plan was created without live verification. Please confirm current travel documentation, permits, route access and important travel conditions before booking.",
+
+            sources: [],
+          });
+        }
+      }
+
+      return localResponse(
+        message,
+        true,
+        normal.response?.status ===
+          429
+          ? "rate_limit"
+          : "unavailable"
+      );
+    }
+
+    /*
+     * -----------------------------------------
      * LIVE RESEARCH SUCCESS
+     * -----------------------------------------
      */
 
     const answer =
@@ -813,61 +1518,51 @@ export async function POST(
 
     if (!answer) {
       console.warn(
-        "Live research returned no usable final text. Using fallback."
+        "Live research returned no usable answer. Trying normal planner."
       );
 
-      const fallback =
-        await createFallbackPlan(
+      const normal =
+        await createNormalPlan(
           apiKey,
           message
         );
 
       if (
-        !fallback.response ||
-        !fallback.response.ok
+        normal.response?.ok
       ) {
-        return NextResponse.json(
-          {
-            error:
-              "The AI Trip Planner could not create a response.",
-          },
-          {
-            status: 502,
-          }
-        );
+        const normalAnswer =
+          extractAnswer(
+            normal.result
+          );
+
+        if (
+          normalAnswer
+        ) {
+          return NextResponse.json({
+            ok: true,
+
+            answer:
+              normalAnswer,
+
+            liveResearch:
+              false,
+
+            researchUnavailable:
+              true,
+
+            researchMessage:
+              "Live research did not produce a usable result. This Tibet plan was created without live verification.",
+
+            sources: [],
+          });
+        }
       }
 
-      const fallbackAnswer =
-        extractAnswer(
-          fallback.result
-        );
-
-      if (!fallbackAnswer) {
-        return NextResponse.json(
-          {
-            error:
-              "The AI Trip Planner could not create a response.",
-          },
-          {
-            status: 502,
-          }
-        );
-      }
-
-      return NextResponse.json({
-        ok: true,
-
-        answer: fallbackAnswer,
-
-        liveResearch: false,
-
-        researchUnavailable: true,
-
-        researchMessage:
-          "Live research did not produce a usable result. This Tibet plan was created without live verification.",
-
-        sources: [],
-      });
+      return localResponse(
+        message,
+        true,
+        "empty_result"
+      );
     }
 
     return NextResponse.json({
@@ -877,26 +1572,48 @@ export async function POST(
 
       liveResearch: true,
 
-      researchUnavailable: false,
+      researchUnavailable:
+        false,
 
       researchMessage: "",
 
       sources,
     });
   } catch (error) {
+    /*
+     * -----------------------------------------
+     * LAST SAFETY NET
+     * -----------------------------------------
+     *
+     * A temporary external service problem
+     * should not show technical API errors
+     * to the traveler.
+     */
+
     console.error(
       "AI route unexpected error:",
       error
     );
 
-    return NextResponse.json(
-      {
-        error:
-          "Something went wrong with the AI Trip Planner.",
-      },
-      {
-        status: 500,
-      }
-    );
+    try {
+      const clonedMessage =
+        "Plan a Tibet journey";
+
+      return localResponse(
+        clonedMessage,
+        false,
+        "unavailable"
+      );
+    } catch {
+      return NextResponse.json(
+        {
+          error:
+            "The Tibet Trip Planner is temporarily unavailable. Please try again.",
+        },
+        {
+          status: 503,
+        }
+      );
+    }
   }
 }
