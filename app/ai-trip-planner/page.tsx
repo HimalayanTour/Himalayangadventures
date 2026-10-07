@@ -558,6 +558,22 @@ function renderAnswer(
   return elements;
 }
 
+const featureActionStyle = {
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: "9px 13px",
+  borderRadius: 999,
+  border: "1px solid rgba(109,224,194,.28)",
+  background: "rgba(109,224,194,.07)",
+  color: "#c9f4e9",
+  fontSize: 13,
+  fontWeight: 700,
+  lineHeight: 1.4,
+  textDecoration: "none",
+  cursor: "pointer",
+} as const;
+
 export default function AiTripPlannerPage() {
   const [
     message,
@@ -922,42 +938,46 @@ export default function AiTripPlannerPage() {
               marginTop: 30,
             }}
           >
-            {[
-              "Personalized Tibet itinerary",
-              "Live research",
-              "Route comparison",
-              "Human follow-up",
-            ].map(
-              (item) => (
-                <span
-                  key={item}
-                  style={{
-                    padding:
-                      "9px 13px",
+            <button
+              type="button"
+              onClick={() =>
+                document.getElementById("planner")?.scrollIntoView({
+                  behavior: "smooth",
+                  block: "start",
+                })
+              }
+              style={featureActionStyle}
+            >
+              Personalized Tibet itinerary ↗
+            </button>
 
-                    borderRadius:
-                      999,
+            <button
+              type="button"
+              disabled={loading}
+              onClick={() => {
+                setLiveResearch(true);
+                document.getElementById("planner")?.scrollIntoView({
+                  behavior: "smooth",
+                  block: "start",
+                });
+              }}
+              style={{
+                ...featureActionStyle,
+                opacity: loading ? 0.6 : 1,
+                cursor: loading ? "not-allowed" : "pointer",
+              }}
+              title="Enable live research and open the AI planner"
+            >
+              Live research ↗
+            </button>
 
-                    border:
-                      "1px solid rgba(255,255,255,.11)",
+            <Link href="/compare-trips" style={featureActionStyle}>
+              Route comparison ↗
+            </Link>
 
-                    background:
-                      "rgba(255,255,255,.04)",
-
-                    color:
-                      "#c5d4d7",
-
-                    fontSize:
-                      13,
-
-                    fontWeight:
-                      700,
-                  }}
-                >
-                  {item}
-                </span>
-              )
-            )}
+            <Link href="/contact-book#booking-request" style={featureActionStyle}>
+              Human follow-up ↗
+            </Link>
           </div>
         </div>
       </section>
