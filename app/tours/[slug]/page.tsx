@@ -1,3 +1,4 @@
+
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -7,34 +8,21 @@ import BookingForm from "@/components/BookingForm";
 const baseUrl =
   "https://himalayangadventures.vercel.app";
 
+// TOUR PHOTOGRAPHS
+// /5.png is a temporary photo for Ganden to Samye Trek.
 const images: Record<string, string> = {
   "lhasa-classic": "/lhasa.jpg",
-
-  "lhasa-everest-base-camp":
-    "/tibet-everest.jpg",
-
-  "lhoka-southern-tibet":
-    "/5.png",
-
-  "tibet-high-plateau":
-    "/tibethighplateau.jpg",
-
-  "kailash-mansarovar-journey":
-    "/mount-kailash.jpg",
-
-  "kailash-kora":
-    "/mount-kailash.jpg",
-
-  "namtso-lake":
-    "/namtso.jpg",
-
-  "tibet-photography":
-    "/photographyjourney.jpg",
-
-  "tibet-culture-monasteries":
-    "/tibetculture.jpg",
+  "lhasa-everest-base-camp": "/tibet-everest.jpg",
+  "lhoka-southern-tibet": "/5.png",
+  "tibet-high-plateau": "/tibethighplateau.jpg",
+  "kailash-mansarovar-journey": "/mount-kailash.jpg",
+  "ganden-samye-trek": "/5.png",
+  "namtso-lake": "/namtso.jpg",
+  "tibet-photography": "/photographyjourney.jpg",
+  "tibet-culture-monasteries": "/tibetculture.jpg",
 };
 
+// HIGHLIGHTS FOR ALL NINE TIBET TOURS
 const highlights: Record<string, string[]> = {
   "lhasa-classic": [
     "Explore the cultural heart of Lhasa",
@@ -71,11 +59,11 @@ const highlights: Record<string, string[]> = {
     "Discover an important pilgrimage landscape",
   ],
 
-  "kailash-kora": [
-    "Journey to sacred Mount Kailash",
-    "Experience the Mount Kailash Kora route",
-    "Travel through the remote landscapes of western Tibet",
-    "Allow careful pacing for altitude and demanding terrain",
+  "ganden-samye-trek": [
+    "Follow a classic trekking route between Ganden and Samye monasteries",
+    "Experience remote alpine valleys and dramatic mountain passes",
+    "Discover high-altitude landscapes away from major roads",
+    "Plan a challenging supported trek with guides, acclimatization and weather awareness",
   ],
 
   "namtso-lake": [
@@ -100,15 +88,15 @@ const highlights: Record<string, string[]> = {
   ],
 };
 
-const routeFocus: Record<
-  string,
-  {
-    opening: string;
-    middle: string;
-    focus: string;
-    ending: string;
-  }
-> = {
+type RouteOutline = {
+  opening: string;
+  middle: string;
+  focus: string;
+  ending: string;
+};
+
+// PLANNING OUTLINES FOR ALL NINE TOURS
+const routeFocus: Record<string, RouteOutline> = {
   "lhasa-classic": {
     opening:
       "Arrive in Lhasa and begin with a gentle schedule designed around altitude adjustment.",
@@ -164,15 +152,15 @@ const routeFocus: Record<
       "Complete the western Tibet journey and return according to the confirmed route and current access arrangements.",
   },
 
-  "kailash-kora": {
+  "ganden-samye-trek": {
     opening:
-      "Begin with acclimatization and preparation before traveling toward western Tibet.",
+      "Arrive in Lhasa, allow time to acclimatize and prepare your trekking equipment. Meet the local team and review the planned route.",
     middle:
-      "Cross the plateau toward Mount Kailash with gradual altitude progression and realistic travel days.",
+      "Travel toward Ganden Monastery and begin the supported trek through alpine valleys and remote mountain landscapes, subject to local access.",
     focus:
-      "Undertake the Kora according to current route conditions, personal ability and local guidance.",
+      "Trek through demanding high-altitude terrain and over mountain passes, with camping and daily distances adjusted to weather, altitude and group fitness.",
     ending:
-      "Recover after the Kora and continue the return journey according to the confirmed itinerary.",
+      "Continue toward Samye Monastery, complete the trekking route where conditions permit, and return to Lhasa according to the confirmed itinerary.",
   },
 
   "namtso-lake": {
@@ -209,12 +197,14 @@ const routeFocus: Record<
   },
 };
 
+// GENERATE PAGES FOR EVERY TOUR
 export function generateStaticParams() {
   return tours.map((tour) => ({
     slug: tour.slug,
   }));
 }
 
+// SEARCH ENGINE METADATA
 export async function generateMetadata({
   params,
 }: {
@@ -234,56 +224,47 @@ export async function generateMetadata({
   }
 
   const description =
-    `Explore ${tour.name}, a ${tour.duration} Tibet journey rated ` +
-    `${tour.difficulty}, with planning prices starting from ${tour.price}. ` +
-    `Discover highlights and request a private Tibet journey.`;
+    `Explore ${tour.name}, a ${tour.duration} Tibet journey ` +
+    `rated ${tour.difficulty}, with planning prices starting ` +
+    `from ${tour.price}. Discover highlights and request a private Tibet journey.`;
 
-  const canonicalUrl =
-    `/tours/${tour.slug}`;
-
-  const image =
-    images[tour.slug];
+  const pageUrl = `${baseUrl}/tours/${tour.slug}`;
+  const image = images[tour.slug];
+  const imageUrl = image
+    ? `${baseUrl}${image}`
+    : undefined;
 
   return {
     title: `${tour.name} | Tibet Tour`,
-
     description,
-
     alternates: {
-      canonical: canonicalUrl,
+      canonical: pageUrl,
     },
-
     openGraph: {
       type: "website",
-      url: canonicalUrl,
-      title:
-        `${tour.name} | Himalayan Adventures`,
+      url: pageUrl,
+      title: `${tour.name} | Himalayan Adventures`,
       description,
-      siteName:
-        "Himalayan Adventures",
-      images: image
+      siteName: "Himalayan Adventures",
+      images: imageUrl
         ? [
             {
-              url: image,
+              url: imageUrl,
               alt: `${tour.name} in Tibet`,
             },
           ]
         : undefined,
     },
-
     twitter: {
-      card:
-        "summary_large_image",
-      title:
-        `${tour.name} | Himalayan Adventures`,
+      card: "summary_large_image",
+      title: `${tour.name} | Himalayan Adventures`,
       description,
-      images: image
-        ? [image]
-        : undefined,
+      images: imageUrl ? [imageUrl] : undefined,
     },
   };
 }
 
+// INDIVIDUAL TOUR PAGE
 export default async function TourPage({
   params,
 }: {
@@ -296,92 +277,62 @@ export default async function TourPage({
     notFound();
   }
 
-  const image =
-    images[tour.slug];
+  const image = images[tour.slug];
+  const tourHighlights = highlights[tour.slug] || [];
+  const itinerary = routeFocus[tour.slug];
 
-  const tourHighlights =
-    highlights[tour.slug] || [];
-
-  const itinerary =
-    routeFocus[tour.slug];
+  const isTrekkingTour =
+    tour.slug === "ganden-samye-trek";
 
   const structuredData = {
-    "@context":
-      "https://schema.org",
-
-    "@type":
-      "TouristTrip",
-
-    name:
-      tour.name,
-
+    "@context": "https://schema.org",
+    "@type": "TouristTrip",
+    name: tour.name,
     description:
-      `${tour.duration} Tibet journey rated ${tour.difficulty}, with planning prices starting from ${tour.price}.`,
-
-    url:
-      `${baseUrl}/tours/${tour.slug}`,
-
-    touristType:
-      "Tibet traveler",
-
+      `${tour.duration} Tibet journey rated ${tour.difficulty}, ` +
+      `with planning prices starting from ${tour.price}.`,
+    url: `${baseUrl}/tours/${tour.slug}`,
+    touristType: "Tibet traveler",
     image: image
-      ? `${baseUrl}${encodeURI(image)}`
+      ? `${baseUrl}${image}`
       : undefined,
   };
 
   return (
     <main>
+      {/* STRUCTURED DATA */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html:
-            JSON.stringify(
-              structuredData
-            ).replace(
-              /</g,
-              "\\u003c"
-            ),
+          __html: JSON.stringify(
+            structuredData
+          ).replace(/</g, "\\u003c"),
         }}
       />
 
       {/* HERO */}
       <section
         style={{
-          minHeight:
-            "540px",
-
-          display:
-            "flex",
-
-          alignItems:
-            "end",
-
-          backgroundImage:
-            image
-              ? `linear-gradient(
-                  180deg,
-                  rgba(3, 17, 24, 0.12) 0%,
-                  rgba(3, 17, 24, 0.38) 48%,
-                  rgba(3, 17, 24, 0.95) 100%
-                ),
-                url("${image}")`
-              : undefined,
-
-          backgroundSize:
-            "cover",
-
-          backgroundPosition:
-            "center",
+          minHeight: 540,
+          display: "flex",
+          alignItems: "end",
+          backgroundImage: image
+            ? `linear-gradient(
+                180deg,
+                rgba(3,17,24,.12) 0%,
+                rgba(3,17,24,.38) 48%,
+                rgba(3,17,24,.95) 100%
+              ), url("${image}")`
+            : "linear-gradient(135deg, #153d43, #071920)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
         }}
       >
         <div
           className="container"
           style={{
-            paddingBottom:
-              "58px",
-
-            paddingTop:
-              "120px",
+            paddingBottom: 58,
+            paddingTop: 120,
           }}
         >
           <span className="pill">
@@ -390,23 +341,12 @@ export default async function TourPage({
 
           <h1
             style={{
-              fontSize:
-                "clamp(44px, 7vw, 82px)",
-
-              maxWidth:
-                "950px",
-
-              marginTop:
-                "16px",
-
-              marginBottom:
-                "20px",
-
-              lineHeight:
-                0.98,
-
-              letterSpacing:
-                "-0.04em",
+              fontSize: "clamp(44px, 7vw, 82px)",
+              maxWidth: 950,
+              marginTop: 16,
+              marginBottom: 20,
+              lineHeight: 0.98,
+              letterSpacing: "-.04em",
             }}
           >
             {tour.name}
@@ -414,17 +354,10 @@ export default async function TourPage({
 
           <div
             style={{
-              display:
-                "flex",
-
-              gap:
-                "12px",
-
-              flexWrap:
-                "wrap",
-
-              alignItems:
-                "center",
+              display: "flex",
+              gap: 12,
+              flexWrap: "wrap",
+              alignItems: "center",
             }}
           >
             <span className="btn">
@@ -437,8 +370,7 @@ export default async function TourPage({
 
             <strong
               style={{
-                fontSize:
-                  "30px",
+                fontSize: 30,
               }}
             >
               From {tour.price}
@@ -447,74 +379,56 @@ export default async function TourPage({
         </div>
       </section>
 
+      {/* MAIN TOUR CONTENT */}
       <section className="section">
         <div className="container">
           <div
             style={{
-              display:
-                "grid",
-
+              display: "grid",
               gridTemplateColumns:
                 "repeat(auto-fit, minmax(300px, 1fr))",
-
-              gap:
-                "28px",
-
-              alignItems:
-                "start",
+              gap: 28,
+              alignItems: "start",
             }}
           >
             <div>
-              {/* OVERVIEW */}
+              {/* ABOUT */}
               <div className="card">
                 <span className="eyebrow">
                   TIBET JOURNEY
                 </span>
 
-                <h2>
-                  About this trip
-                </h2>
+                <h2>About this trip</h2>
 
                 <p
                   className="muted"
                   style={{
-                    lineHeight:
-                      1.8,
+                    lineHeight: 1.8,
                   }}
                 >
-                  This{" "}
-                  {tour.duration.toLowerCase()}{" "}
-                  journey is designed as a
-                  thoughtful way to
-                  experience Tibet,
-                  balancing important
-                  places with altitude
-                  awareness, realistic
-                  travel time and
-                  cultural understanding.
+                  {isTrekkingTour
+                    ? "This challenging high-altitude trekking journey connects the Ganden and Samye monastery areas through remote Tibetan mountain landscapes. It is intended for travelers prepared for sustained walking, variable mountain conditions and simple accommodation while trekking."
+                    : `This ${tour.duration.toLowerCase()} journey is designed as a thoughtful way to experience Tibet, balancing important places with altitude awareness, realistic travel time and cultural understanding.`}
                 </p>
 
                 <p
                   className="muted"
                   style={{
-                    lineHeight:
-                      1.8,
+                    lineHeight: 1.8,
                   }}
                 >
-                  The current planning
-                  level is{" "}
+                  The current planning level is{" "}
                   <strong>
                     {tour.difficulty}
                   </strong>
-                  , with a starting
-                  planning price of{" "}
+                  , with a starting planning
+                  price of{" "}
                   <strong>
                     {tour.price}
                   </strong>
                   . Final route, dates,
                   services and price are
-                  confirmed before
-                  booking.
+                  confirmed before booking.
                 </p>
               </div>
 
@@ -522,8 +436,7 @@ export default async function TourPage({
               <div
                 className="card"
                 style={{
-                  marginTop:
-                    "20px",
+                  marginTop: 20,
                 }}
               >
                 <span className="eyebrow">
@@ -531,23 +444,16 @@ export default async function TourPage({
                 </span>
 
                 <h2>
-                  What you&apos;ll
-                  experience
+                  What you&apos;ll experience
                 </h2>
 
                 <div
                   style={{
-                    display:
-                      "grid",
-
+                    display: "grid",
                     gridTemplateColumns:
                       "repeat(auto-fit, minmax(220px, 1fr))",
-
-                    gap:
-                      "14px",
-
-                    marginTop:
-                      "20px",
+                    gap: 14,
+                    marginTop: 20,
                   }}
                 >
                   {tourHighlights.map(
@@ -555,20 +461,13 @@ export default async function TourPage({
                       <div
                         key={item}
                         style={{
-                          padding:
-                            "18px",
-
-                          borderRadius:
-                            "14px",
-
+                          padding: 18,
+                          borderRadius: 14,
                           border:
                             "1px solid rgba(255,255,255,.09)",
-
                           background:
                             "rgba(255,255,255,.035)",
-
-                          lineHeight:
-                            1.6,
+                          lineHeight: 1.6,
                         }}
                       >
                         {item}
@@ -578,13 +477,12 @@ export default async function TourPage({
                 </div>
               </div>
 
-              {/* ROUTE */}
+              {/* ROUTE OUTLINE */}
               {itinerary && (
                 <div
                   className="card"
                   style={{
-                    marginTop:
-                      "20px",
+                    marginTop: 20,
                   }}
                 >
                   <span className="eyebrow">
@@ -598,32 +496,23 @@ export default async function TourPage({
                   <p
                     className="muted"
                     style={{
-                      lineHeight:
-                        1.7,
-
-                      marginBottom:
-                        24,
+                      lineHeight: 1.7,
+                      marginBottom: 24,
                     }}
                   >
-                    This is a planning
-                    outline rather than
-                    a confirmed
-                    day-by-day
-                    itinerary. The final
-                    route depends on
-                    your dates, current
-                    access requirements
-                    and confirmed travel
-                    arrangements.
+                    This is a planning outline
+                    rather than a confirmed
+                    day-by-day itinerary. The
+                    final route depends on
+                    your dates, current access
+                    requirements and confirmed
+                    travel arrangements.
                   </p>
 
                   <div
                     style={{
-                      display:
-                        "grid",
-
-                      gap:
-                        "18px",
+                      display: "grid",
+                      gap: 18,
                     }}
                   >
                     <div>
@@ -635,51 +524,42 @@ export default async function TourPage({
                       <p
                         className="muted"
                         style={{
-                          lineHeight:
-                            1.7,
+                          lineHeight: 1.7,
                         }}
                       >
-                        {
-                          itinerary.opening
-                        }
+                        {itinerary.opening}
                       </p>
                     </div>
 
                     <div>
                       <strong>
-                        02 · JOURNEY INTO
-                        TIBET
+                        {isTrekkingTour
+                          ? "02 · BEGIN THE TREK"
+                          : "02 · JOURNEY INTO TIBET"}
                       </strong>
 
                       <p
                         className="muted"
                         style={{
-                          lineHeight:
-                            1.7,
+                          lineHeight: 1.7,
                         }}
                       >
-                        {
-                          itinerary.middle
-                        }
+                        {itinerary.middle}
                       </p>
                     </div>
 
                     <div>
                       <strong>
-                        03 · CORE
-                        EXPERIENCE
+                        03 · CORE EXPERIENCE
                       </strong>
 
                       <p
                         className="muted"
                         style={{
-                          lineHeight:
-                            1.7,
+                          lineHeight: 1.7,
                         }}
                       >
-                        {
-                          itinerary.focus
-                        }
+                        {itinerary.focus}
                       </p>
                     </div>
 
@@ -691,25 +571,75 @@ export default async function TourPage({
                       <p
                         className="muted"
                         style={{
-                          lineHeight:
-                            1.7,
+                          lineHeight: 1.7,
                         }}
                       >
-                        {
-                          itinerary.ending
-                        }
+                        {itinerary.ending}
                       </p>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* PLANNING */}
+              {/* HIGH-ALTITUDE TREKKING NOTE */}
+              {isTrekkingTour && (
+                <div
+                  className="card"
+                  style={{
+                    marginTop: 20,
+                    border:
+                      "1px solid rgba(235,192,104,.25)",
+                  }}
+                >
+                  <span className="eyebrow">
+                    IMPORTANT TREKKING INFORMATION
+                  </span>
+
+                  <h2>
+                    Prepare for a demanding trek
+                  </h2>
+
+                  <p
+                    className="muted"
+                    style={{
+                      lineHeight: 1.8,
+                    }}
+                  >
+                    The Ganden to Samye route
+                    involves significant
+                    altitude, mountain passes,
+                    sustained walking and
+                    potentially remote camps.
+                    Appropriate fitness,
+                    acclimatization, equipment
+                    and experienced local
+                    support are important.
+                  </p>
+
+                  <p
+                    className="muted"
+                    style={{
+                      lineHeight: 1.8,
+                    }}
+                  >
+                    Route access, permits,
+                    weather, trekking support
+                    and suitability must all
+                    be confirmed before
+                    accepting a booking.
+                    The displayed duration
+                    and price are planning
+                    estimates, not guaranteed
+                    arrangements.
+                  </p>
+                </div>
+              )}
+
+              {/* BEFORE YOU GO */}
               <div
                 className="card"
                 style={{
-                  marginTop:
-                    "20px",
+                  marginTop: 20,
                 }}
               >
                 <span className="eyebrow">
@@ -723,42 +653,35 @@ export default async function TourPage({
                 <p
                   className="muted"
                   style={{
-                    lineHeight:
-                      1.8,
+                    lineHeight: 1.8,
                   }}
                 >
-                  Tibet is a
-                  high-altitude
-                  destination.
-                  Acclimatization,
-                  weather, road
-                  conditions, travel
-                  documentation,
-                  permits and route
-                  access can affect the
-                  final itinerary.
+                  Tibet is a high-altitude
+                  destination. Acclimatization,
+                  weather, road conditions,
+                  travel documentation,
+                  permits and route access
+                  can affect the final
+                  itinerary.
                 </p>
 
                 <p
                   className="muted"
                   style={{
-                    lineHeight:
-                      1.8,
+                    lineHeight: 1.8,
                   }}
                 >
-                  Current requirements
-                  should be confirmed
-                  for your nationality,
-                  dates and intended
-                  route before booking
-                  or departure.
+                  Current requirements should
+                  be confirmed for your
+                  nationality, dates and
+                  intended route before
+                  booking or departure.
                 </p>
 
                 <div
                   className="actions"
                   style={{
-                    marginTop:
-                      20,
+                    marginTop: 20,
                   }}
                 >
                   <Link
@@ -777,12 +700,11 @@ export default async function TourPage({
                 </div>
               </div>
 
-              {/* LOCATION */}
+              {/* MAP REFERENCE */}
               <div
                 className="card"
                 style={{
-                  marginTop:
-                    "20px",
+                  marginTop: 20,
                 }}
               >
                 <span className="eyebrow">
@@ -794,10 +716,8 @@ export default async function TourPage({
                 </h2>
 
                 <p className="muted">
-                  Approximate
-                  geographic
-                  reference:{" "}
-                  {tour.lat},{" "}
+                  Approximate geographic
+                  reference: {tour.lat},{" "}
                   {tour.lng}
                 </p>
 
@@ -812,16 +732,13 @@ export default async function TourPage({
               </div>
             </div>
 
-            {/* BOOKING */}
+            {/* BOOKING FORM */}
             <aside>
               <div
                 className="card"
                 style={{
-                  position:
-                    "sticky",
-
-                  top:
-                    "100px",
+                  position: "sticky",
+                  top: 100,
                 }}
               >
                 <span className="eyebrow">
@@ -830,8 +747,7 @@ export default async function TourPage({
 
                 <h2
                   style={{
-                    marginBottom:
-                      8,
+                    marginBottom: 8,
                   }}
                 >
                   From {tour.price}
@@ -843,35 +759,25 @@ export default async function TourPage({
                 </p>
 
                 <BookingForm
-                  tourSlug={
-                    tour.slug
-                  }
+                  tourSlug={tour.slug}
                 />
 
                 <p
                   className="muted"
                   style={{
-                    marginTop:
-                      "16px",
-
-                    fontSize:
-                      "13px",
-
-                    lineHeight:
-                      1.6,
+                    marginTop: 16,
+                    fontSize: 13,
+                    lineHeight: 1.6,
                   }}
                 >
-                  Sending a request does
-                  not confirm a
-                  reservation or
-                  require payment.
-                  Final dates,
-                  itinerary, travel
-                  requirements,
-                  services,
-                  availability and
-                  price are confirmed
-                  before booking.
+                  Sending a request does not
+                  confirm a reservation or
+                  require payment. Final
+                  dates, itinerary, travel
+                  requirements, services,
+                  availability and price
+                  are confirmed before
+                  booking.
                 </p>
               </div>
             </aside>
