@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -77,16 +78,16 @@ const tours: Tour[] = [
       "Mount Kailash, Lake Manasarovar and a longer reflective journey",
   },
   {
-    name: "Mount Kailash Kora",
-    slug: "kailash-kora",
-    region: "Western Tibet",
-    duration: 13,
-    price: 2690,
+    name: "Ganden to Samye Trek",
+    slug: "ganden-samye-trek",
+    region: "Central Tibet · Ganden · Samye",
+    duration: 9,
+    price: 2190,
     difficulty: "Challenging",
     altitude: "Very high altitude",
-    style: "High-altitude pilgrimage",
+    style: "High-altitude trekking & adventure",
     bestFor:
-      "Travelers specifically interested in the Mount Kailash Kora",
+      "Experienced trekkers interested in Tibetan mountain landscapes, remote valleys, monasteries and a challenging multi-day trek",
   },
   {
     name: "Lhasa & Namtso Lake",
@@ -231,6 +232,7 @@ export default function CompareTripsPage() {
       }}
     >
       {/* HERO */}
+
       <section
         className="card"
         style={{
@@ -248,8 +250,7 @@ export default function CompareTripsPage() {
           style={{
             marginTop: 16,
             marginBottom: 0,
-            fontSize:
-              "clamp(40px, 7vw, 76px)",
+            fontSize: "clamp(40px, 7vw, 76px)",
             lineHeight: 1,
             maxWidth: 950,
           }}
@@ -274,17 +275,14 @@ export default function CompareTripsPage() {
         </p>
       </section>
 
-      {/* SELECT */}
+      {/* SELECT TWO TOURS */}
+
       <section className="card">
         <span className="pill">
           SELECT TWO JOURNEYS
         </span>
 
-        <h2
-          style={{
-            marginTop: 14,
-          }}
-        >
+        <h2 style={{ marginTop: 14 }}>
           What would you like to compare?
         </h2>
 
@@ -379,9 +377,7 @@ export default function CompareTripsPage() {
         {sameTour && (
           <div
             className="notice"
-            style={{
-              marginTop: 18,
-            }}
+            style={{ marginTop: 18 }}
           >
             Select two different Tibet journeys to see a
             side-by-side comparison.
@@ -391,7 +387,8 @@ export default function CompareTripsPage() {
 
       {!sameTour && (
         <>
-          {/* TABLE */}
+          {/* COMPARISON TABLE */}
+
           <section
             className="card"
             style={{
@@ -403,11 +400,7 @@ export default function CompareTripsPage() {
               SIDE-BY-SIDE
             </span>
 
-            <h2
-              style={{
-                marginTop: 14,
-              }}
-            >
+            <h2 style={{ marginTop: 14 }}>
               {firstTour.name} vs{" "}
               {secondTour.name}
             </h2>
@@ -502,21 +495,16 @@ export default function CompareTripsPage() {
           </section>
 
           {/* QUICK FACTS */}
+
           <section
             className="card"
-            style={{
-              marginTop: 24,
-            }}
+            style={{ marginTop: 24 }}
           >
             <span className="pill">
               QUICK DIFFERENCES
             </span>
 
-            <h2
-              style={{
-                marginTop: 14,
-              }}
-            >
+            <h2 style={{ marginTop: 14 }}>
               The main differences at a glance
             </h2>
 
@@ -642,6 +630,7 @@ export default function CompareTripsPage() {
           </section>
 
           {/* NEXT STEP */}
+
           <section
             className="card"
             style={{
@@ -655,11 +644,7 @@ export default function CompareTripsPage() {
               NEXT STEP
             </span>
 
-            <h2
-              style={{
-                marginTop: 14,
-              }}
-            >
+            <h2 style={{ marginTop: 14 }}>
               Explore both Tibet journeys in detail
             </h2>
 
@@ -670,9 +655,10 @@ export default function CompareTripsPage() {
                 lineHeight: 1.7,
               }}
             >
-              Review each journey or ask the AI planner to
-              explain their differences based on your travel
-              interests, preferred pace and available time.
+              Review each journey or ask the AI planner
+              to explain their differences based on your
+              travel interests, preferred pace and
+              available time.
             </p>
 
             <div
@@ -706,7 +692,8 @@ export default function CompareTripsPage() {
             </div>
           </section>
 
-          {/* NOTE */}
+          {/* IMPORTANT NOTE */}
+
           <section
             style={{
               marginTop: 24,
@@ -722,12 +709,15 @@ export default function CompareTripsPage() {
                 lineHeight: 1.7,
               }}
             >
-              Starting prices are planning estimates rather
-              than final quotations. Final itinerary, current
-              travel documentation, permits, route access,
-              availability, local conditions and pricing
-              should be confirmed for your travel dates before
-              booking.
+              Starting prices are planning estimates
+              rather than final quotations. Final
+              itinerary, travel documentation, permits,
+              route access, availability, local
+              conditions and pricing should be
+              confirmed for your travel dates before
+              booking. The Ganden to Samye Trek requires
+              appropriate fitness, acclimatization and
+              locally confirmed trekking arrangements.
             </p>
           </section>
         </>
