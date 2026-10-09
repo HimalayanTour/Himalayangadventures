@@ -1,3 +1,4 @@
+
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createHash } from "crypto";
@@ -57,6 +58,7 @@ async function isAdminLoggedIn() {
 function getDb() {
   const url =
     process.env.NEXT_PUBLIC_SUPABASE_URL;
+
   const serviceKey =
     process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -84,20 +86,28 @@ function formatTourName(
   const tourNames: Record<string, string> = {
     "lhasa-classic":
       "Lhasa Classic Journey",
+
     "lhasa-everest-base-camp":
       "Lhasa to Everest Base Camp",
+
     "lhoka-southern-tibet":
       "Lhoka (Southern Tibet)",
+
     "tibet-high-plateau":
       "Tibet High Plateau",
+
     "kailash-mansarovar-journey":
       "Kailash & Mansarovar Journey",
+
     "kailash-kora":
       "Mount Kailash Kora",
+
     "namtso-lake":
       "Lhasa & Namtso Lake",
+
     "tibet-photography":
       "Tibet Photography Journey",
+
     "tibet-culture-monasteries":
       "Tibet Culture & Monasteries",
   };
@@ -149,6 +159,8 @@ function getPageHref({
     : "/admin";
 }
 
+// ADMIN LOGIN
+
 async function loginAdmin(
   formData: FormData
 ) {
@@ -187,6 +199,8 @@ async function loginAdmin(
   redirect("/admin");
 }
 
+// ADMIN LOGOUT
+
 async function logoutAdmin() {
   "use server";
 
@@ -209,6 +223,8 @@ async function logoutAdmin() {
   redirect("/admin");
 }
 
+// MAIN ADMIN DASHBOARD
+
 export default async function AdminPage({
   searchParams,
 }: {
@@ -225,6 +241,8 @@ export default async function AdminPage({
 
   const loggedIn =
     await isAdminLoggedIn();
+
+  // LOGIN SCREEN
 
   if (!loggedIn) {
     return (
@@ -305,7 +323,11 @@ export default async function AdminPage({
     );
   }
 
+  // DATABASE CONNECTION
+
   const db = getDb();
+
+  // SEARCH AND FILTERS
 
   const q = String(
     query.q || ""
@@ -333,6 +355,8 @@ export default async function AdminPage({
       ? parsedPage
       : 1;
 
+  // BOOKINGS QUERY
+
   let bookingsQuery = db
     .from("bookings")
     .select(
@@ -358,6 +382,8 @@ export default async function AdminPage({
       ascending: false,
     });
 
+  // FILTER BY STATUS
+
   if (status !== "all") {
     bookingsQuery =
       bookingsQuery.eq(
@@ -365,6 +391,8 @@ export default async function AdminPage({
         status
       );
   }
+
+  // SEARCH BOOKINGS
 
   if (q) {
     const safeQ = q
@@ -380,8 +408,11 @@ export default async function AdminPage({
     }
   }
 
+  // PAGINATION
+
   const from =
     (page - 1) * PAGE_SIZE;
+
   const to =
     from + PAGE_SIZE - 1;
 
@@ -426,31 +457,91 @@ export default async function AdminPage({
     );
   }
 
-  const { count: newCount } =
-    await db
+  // DASHBOARD STATISTICS
+  // All values are calculated from Supabase.
+
+  const [
+    allCountResult,
+    newCountResult,
+    contactedCountResult,
+    confirmedCountResult,
+    cancelledCountResult,
+  ] = await Promise.all([
+    db
+      .from("bookings")
+      .select("id", {
+        count: "exact",
+        head: true,
+      }),
+
+    db
       .from("bookings")
       .select("id", {
         count: "exact",
         head: true,
       })
-      .eq("status", "new");
+      .eq("status", "new"),
 
-  const { count: confirmedCount } =
-    await db
+    db
       .from("bookings")
       .select("id", {
         count: "exact",
         head: true,
       })
-      .eq("status", "confirmed");
+      .eq("status", "contacted"),
 
-  const { count: allCount } =
-    await db
+    db
       .from("bookings")
       .select("id", {
         count: "exact",
         head: true,
-      });
+      })
+      .eq("status", "confirmed"),
+
+    db
+      .from("bookings")
+      .select("id", {
+        count: "exact",
+        head: true,
+      })
+      .eq("status", "cancelled"),
+  ]);
+
+  const statisticResults = [
+    allCountResult,
+    newCountResult,
+    contactedCountResult,
+    confirmedCountResult,
+    cancelledCountResult,
+  ];
+
+  const statisticError =
+    statisticResults.find(
+      (result) => result.error
+    )?.error;
+
+  if (statisticError) {
+    throw new Error(
+      `Could not load booking statistics: ${statisticError.message}`
+    );
+  }
+
+  const allCount =
+    allCountResult.count ?? 0;
+
+  const newCount =
+    newCountResult.count ?? 0;
+
+  const contactedCount =
+    contactedCountResult.count ?? 0;
+
+  const confirmedCount =
+    confirmedCountResult.count ?? 0;
+
+  const cancelledCount =
+    cancelledCountResult.count ?? 0;
+
+  // DASHBOARD CARD STYLES
 
   const cardStyle = {
     padding: "18px",
@@ -461,6 +552,43 @@ export default async function AdminPage({
       "rgba(255,255,255,0.035)",
   };
 
+  // STATISTICS DISPLAY
+
+  const statistics = [
+    {
+      label: "ALL BOOKINGS",
+      count: allCount,
+      description: "Total requests",
+      color: "#e7f6f5",
+    },
+    {
+      label: "NEW REQUESTS",
+      count: newCount,
+      description: "Waiting for review",
+      color: "#78e5ca",
+    },
+    {
+      label: "CONTACTED",
+      count: contactedCount,
+      description: "Customers contacted",
+      color: "#8fceff",
+    },
+    {
+      label: "CONFIRMED",
+      count: confirmedCount,
+      description: "Confirmed journeys",
+      color: "#78e5ca",
+    },
+    {
+      label: "CANCELLED",
+      count: cancelledCount,
+      description: "Cancelled requests",
+      color: "#ffb4ad",
+    },
+  ];
+
+  // ADMIN PAGE
+
   return (
     <main
       className="container"
@@ -469,6 +597,8 @@ export default async function AdminPage({
         paddingBottom: 90,
       }}
     >
+      {/* DASHBOARD HEADER */}
+
       <section
         style={{
           display: "flex",
@@ -519,6 +649,8 @@ export default async function AdminPage({
         </form>
       </section>
 
+      {/* FIVE STATISTICS CARDS */}
+
       <section
         style={{
           display: "grid",
@@ -528,51 +660,52 @@ export default async function AdminPage({
           marginBottom: 26,
         }}
       >
-        <div style={cardStyle}>
-          <div className="muted">
-            ALL BOOKINGS
-          </div>
+        {statistics.map((item) => (
           <div
+            key={item.label}
             style={{
-              fontSize: 30,
-              fontWeight: 800,
-              marginTop: 8,
+              ...cardStyle,
+              padding: "22px",
             }}
           >
-            {allCount || 0}
-          </div>
-        </div>
+            <div
+              className="muted"
+              style={{
+                fontSize: 12,
+                fontWeight: 800,
+                letterSpacing:
+                  "0.08em",
+              }}
+            >
+              {item.label}
+            </div>
 
-        <div style={cardStyle}>
-          <div className="muted">
-            NEW REQUESTS
-          </div>
-          <div
-            style={{
-              fontSize: 30,
-              fontWeight: 800,
-              marginTop: 8,
-            }}
-          >
-            {newCount || 0}
-          </div>
-        </div>
+            <div
+              style={{
+                fontSize: 34,
+                fontWeight: 800,
+                marginTop: 10,
+                marginBottom: 5,
+                color: item.color,
+              }}
+            >
+              {item.count}
+            </div>
 
-        <div style={cardStyle}>
-          <div className="muted">
-            CONFIRMED
+            <div
+              className="muted"
+              style={{
+                fontSize: 12,
+                lineHeight: 1.5,
+              }}
+            >
+              {item.description}
+            </div>
           </div>
-          <div
-            style={{
-              fontSize: 30,
-              fontWeight: 800,
-              marginTop: 8,
-            }}
-          >
-            {confirmedCount || 0}
-          </div>
-        </div>
+        ))}
       </section>
+
+      {/* BOOKING FILTERS */}
 
       <section
         className="card"
@@ -595,7 +728,7 @@ export default async function AdminPage({
             style={{
               display: "grid",
               gridTemplateColumns:
-                "minmax(220px, 2fr) minmax(170px, 1fr)",
+                "repeat(auto-fit, minmax(220px, 1fr))",
               gap: 14,
             }}
           >
@@ -626,15 +759,19 @@ export default async function AdminPage({
                 <option value="all">
                   All statuses
                 </option>
+
                 <option value="new">
                   New
                 </option>
+
                 <option value="contacted">
                   Contacted
                 </option>
+
                 <option value="confirmed">
                   Confirmed
                 </option>
+
                 <option value="cancelled">
                   Cancelled
                 </option>
@@ -674,6 +811,8 @@ export default async function AdminPage({
         </form>
       </section>
 
+      {/* BOOKING REQUESTS */}
+
       <section className="card">
         <div
           style={{
@@ -709,6 +848,8 @@ export default async function AdminPage({
           </div>
         </div>
 
+        {/* EMPTY RESULT */}
+
         {bookings.length === 0 ? (
           <div
             className="notice"
@@ -726,6 +867,8 @@ export default async function AdminPage({
               gap: 14,
             }}
           >
+            {/* INDIVIDUAL BOOKINGS */}
+
             {bookings.map(
               (booking) => {
                 const currentStatus =
@@ -739,8 +882,7 @@ export default async function AdminPage({
                   >
                     <div
                       style={{
-                        display:
-                          "flex",
+                        display: "flex",
                         justifyContent:
                           "space-between",
                         alignItems:
@@ -799,15 +941,21 @@ export default async function AdminPage({
                           }}
                         >
                           {booking.email}
+
                           <br />
+
                           {formatTourName(
                             booking.tour_slug
                           )}
+
                           <br />
+
                           Preferred dates:{" "}
                           {booking.dates ||
                             "Not specified"}
+
                           {" · "}
+
                           Travelers:{" "}
                           {booking.travelers ??
                             "Not specified"}
@@ -827,6 +975,8 @@ export default async function AdminPage({
             )}
           </div>
         )}
+
+        {/* PAGINATION */}
 
         {totalPages > 1 && (
           <div
@@ -867,8 +1017,7 @@ export default async function AdminPage({
                 </a>
               )}
 
-              {page <
-                totalPages && (
+              {page < totalPages && (
                 <a
                   className="btn"
                   href={getPageHref({
