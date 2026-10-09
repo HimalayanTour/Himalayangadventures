@@ -920,6 +920,10 @@ export default function BookingForm({
                 Select travel style
               </option>
 
+              <option value="Trekking & hiking">
+                Trekking &amp; hiking
+              </option>
+
               <option value="Culture">
                 Culture &amp; heritage
               </option>
