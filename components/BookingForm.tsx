@@ -1,10 +1,13 @@
+
 "use client";
 
 import {
-  FormEvent,
   useEffect,
   useState,
+  type FormEvent,
 } from "react";
+
+import { tours } from "@/lib/tours";
 
 type BookingFormProps = {
   tourSlug?: string;
@@ -25,233 +28,138 @@ type AiJourney = {
   savedAt: string;
 };
 
-const tourNames: Record<string, string> = {
-  "lhasa-classic":
-    "Lhasa Classic Journey",
+const fieldStyle = {
+  width: "100%",
+};
 
-  "lhasa-everest-base-camp":
-    "Lhasa to Everest Base Camp",
+const selectStyle = {
+  width: "100%",
+  padding: "14px",
+  borderRadius: "12px",
+};
 
-  "lhoka-southern-tibet":
-    "Lhoka (Southern Tibet)",
-
-  "tibet-high-plateau":
-    "Tibet High Plateau",
-
-  "kailash-mansarovar-journey":
-    "Kailash & Mansarovar Journey",
-
-  "kailash-kora":
-    "Mount Kailash Kora",
-
-  "namtso-lake":
-    "Lhasa & Namtso Lake",
-
-  "tibet-photography":
-    "Tibet Photography Journey",
-
-  "tibet-culture-monasteries":
-    "Tibet Culture & Monasteries",
+const panelStyle = {
+  padding: 20,
+  borderRadius: 16,
+  border: "1px solid rgba(255,255,255,.1)",
+  background: "rgba(255,255,255,.035)",
 };
 
 export default function BookingForm({
   tourSlug = "",
 }: BookingFormProps) {
-  const [
-    statusMessage,
-    setStatusMessage,
-  ] = useState("");
+  const [statusMessage, setStatusMessage] =
+    useState("");
 
-  const [
-    sending,
-    setSending,
-  ] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
 
-  const [
-    sent,
-    setSent,
-  ] = useState(false);
+  const [destination, setDestination] =
+    useState("");
 
-  const [
-    destination,
-    setDestination,
-  ] = useState("");
+  const [days, setDays] = useState("");
 
-  const [
-    days,
-    setDays,
-  ] = useState("");
+  const [travelers, setTravelers] =
+    useState("2");
 
-  const [
-    travelers,
-    setTravelers,
-  ] = useState("2");
+  const [tripStyle, setTripStyle] =
+    useState("");
 
-  const [
-    tripStyle,
-    setTripStyle,
-  ] = useState("");
+  const [accommodation, setAccommodation] =
+    useState("");
 
-  const [
-    accommodation,
-    setAccommodation,
-  ] = useState("");
+  const [message, setMessage] =
+    useState("");
 
-  const [
-    message,
-    setMessage,
-  ] = useState("");
+  const [aiJourney, setAiJourney] =
+    useState<AiJourney | null>(null);
 
-  const [
-    aiJourney,
-    setAiJourney,
-  ] = useState<AiJourney | null>(
-    null
-  );
+  const [showAiJourney, setShowAiJourney] =
+    useState(true);
 
-  const [
-    showAiJourney,
-    setShowAiJourney,
-  ] = useState(true);
-
+  // Load planning details from the website.
   useEffect(() => {
-    const params =
-      new URLSearchParams(
-        window.location.search
-      );
+    const params = new URLSearchParams(
+      window.location.search
+    );
 
-    const urlDestination =
-      params.get("destination") || "";
+    setDestination(
+      params.get("destination") || ""
+    );
 
-    const urlDays =
-      params.get("days") || "";
+    setDays(
+      params.get("days") || ""
+    );
 
-    const urlTravelers =
-      params.get("travelers") || "";
+    setTravelers(
+      params.get("travelers") || "2"
+    );
 
-    const urlStyle =
-      params.get("style") || "";
+    setTripStyle(
+      params.get("style") || ""
+    );
 
-    const urlAccommodation =
-      params.get("accommodation") || "";
+    setAccommodation(
+      params.get("accommodation") || ""
+    );
 
-    const urlMessage =
-      params.get("message") || "";
+    setMessage(
+      params.get("message") || ""
+    );
 
-    if (urlDestination) {
-      setDestination(
-        urlDestination
-      );
-    }
-
-    if (urlDays) {
-      setDays(urlDays);
-    }
-
-    if (urlTravelers) {
-      setTravelers(
-        urlTravelers
-      );
-    }
-
-    if (urlStyle) {
-      setTripStyle(
-        urlStyle
-      );
-    }
-
-    if (urlAccommodation) {
-      setAccommodation(
-        urlAccommodation
-      );
-    }
-
-    if (urlMessage) {
-      setMessage(
-        urlMessage
-      );
-    }
-
-    /*
-     * -----------------------------------------
-     * AI JOURNEY HANDOFF
-     * -----------------------------------------
-     *
-     * The AI Planner stores the complete
-     * recommendation before sending the
-     * traveler to this booking page.
-     */
-
+    // Restore itinerary from the AI Planner.
     try {
-      const savedAiJourney =
-        window.localStorage.getItem(
-          "himalayan26_ai_journey"
-        );
+      const saved = window.localStorage.getItem(
+        "himalayan26_ai_journey"
+      );
 
-      if (savedAiJourney) {
+      if (saved) {
         const parsed =
-          JSON.parse(
-            savedAiJourney
-          ) as Partial<AiJourney>;
+          JSON.parse(saved) as Partial<AiJourney>;
 
         if (
-          typeof parsed
-            .recommendation ===
+          typeof parsed.recommendation ===
             "string" &&
           parsed.recommendation.trim()
         ) {
           setAiJourney({
             originalRequest:
-              typeof parsed
-                .originalRequest ===
+              typeof parsed.originalRequest ===
               "string"
-                ? parsed
-                    .originalRequest
+                ? parsed.originalRequest
                 : "",
 
             recommendation:
-              parsed
-                .recommendation,
+              parsed.recommendation,
 
             liveResearchUsed:
-              parsed
-                .liveResearchUsed ===
-              true,
+              parsed.liveResearchUsed === true,
 
             researchUnavailable:
-              parsed
-                .researchUnavailable ===
-              true,
+              parsed.researchUnavailable === true,
 
             researchMessage:
-              typeof parsed
-                .researchMessage ===
+              typeof parsed.researchMessage ===
               "string"
-                ? parsed
-                    .researchMessage
+                ? parsed.researchMessage
                 : "",
 
-            sources:
-              Array.isArray(
-                parsed.sources
-              )
-                ? parsed.sources.filter(
-                    (
-                      source
-                    ): source is ResearchSource =>
-                      typeof source
-                        ?.title ===
-                        "string" &&
-                      typeof source
-                        ?.url ===
-                        "string"
-                  )
-                : [],
+            sources: Array.isArray(
+              parsed.sources
+            )
+              ? parsed.sources.filter(
+                  (
+                    source
+                  ): source is ResearchSource =>
+                    typeof source?.title ===
+                      "string" &&
+                    typeof source?.url ===
+                      "string"
+                )
+              : [],
 
             savedAt:
-              typeof parsed
-                .savedAt ===
-              "string"
+              typeof parsed.savedAt === "string"
                 ? parsed.savedAt
                 : "",
           });
@@ -264,21 +172,13 @@ export default function BookingForm({
       );
     }
 
-    /*
-     * If the customer arrived from
-     * Request this Tibet journey,
-     * bring the form into view.
-     */
-
     if (
       window.location.hash ===
       "#booking-request"
     ) {
       window.setTimeout(() => {
         document
-          .getElementById(
-            "booking-request"
-          )
+          .getElementById("booking-request")
           ?.scrollIntoView({
             behavior: "smooth",
             block: "start",
@@ -287,166 +187,77 @@ export default function BookingForm({
     }
   }, []);
 
+  // Automatically use names from lib/tours.ts.
+  // This includes Ganden to Samye Trek.
+  const selectedTourName =
+    tours.find(
+      (tour) => tour.slug === tourSlug
+    )?.name ||
+    tourSlug
+      .replace(/-/g, " ")
+      .replace(
+        /\b\w/g,
+        (letter) => letter.toUpperCase()
+      );
+
   async function handleSubmit(
-    event:
-      FormEvent<HTMLFormElement>
+    event: FormEvent<HTMLFormElement>
   ) {
     event.preventDefault();
 
-    if (
-      sending ||
-      sent
-    ) {
+    if (sending || sent) {
       return;
     }
 
     setSending(true);
     setStatusMessage("");
 
-    const form =
-      event.currentTarget;
+    const formData = new FormData(
+      event.currentTarget
+    );
 
-    const formData =
-      new FormData(form);
-
-    const name =
+    const getText = (key: string) =>
       String(
-        formData.get(
-          "name"
-        ) || ""
+        formData.get(key) || ""
       ).trim();
 
-    const email =
-      String(
-        formData.get(
-          "email"
-        ) || ""
-      ).trim();
+    const travelerCount = Math.max(
+      1,
+      Number(
+        formData.get("travelers")
+      ) || 1
+    );
 
-    const phone =
-      String(
-        formData.get(
-          "phone"
-        ) || ""
-      ).trim();
+    // Include destination and duration.
+    const journeyDetails: string[] = [];
 
-    const country =
-      String(
-        formData.get(
-          "country"
-        ) || ""
-      ).trim();
-
-    const dates =
-      String(
-        formData.get(
-          "dates"
-        ) || ""
-      ).trim();
-
-    const selectedTripStyle =
-      String(
-        formData.get(
-          "tripStyle"
-        ) || ""
-      ).trim();
-
-    const selectedAccommodation =
-      String(
-        formData.get(
-          "accommodation"
-        ) || ""
-      ).trim();
-
-    const userMessage =
-      String(
-        formData.get(
-          "message"
-        ) || ""
-      ).trim();
-
-    const travelerCount =
-      Math.max(
-        1,
-        Number(
-          formData.get(
-            "travelers"
-          )
-        ) || 1
-      );
-
-    const selectedDestination =
-      String(
-        formData.get(
-          "destination"
-        ) || ""
-      ).trim();
-
-    const selectedDays =
-      String(
-        formData.get(
-          "days"
-        ) || ""
-      ).trim();
-
-    /*
-     * -----------------------------------------
-     * NORMAL JOURNEY DETAILS
-     * -----------------------------------------
-     */
-
-    const journeyDetails:
-      string[] = [];
-
-    if (
-      selectedDestination
-    ) {
+    if (getText("destination")) {
       journeyDetails.push(
-        `Destination: ${selectedDestination}`
+        `Destination: ${getText("destination")}`
       );
     }
 
-    if (
-      selectedDays
-    ) {
+    if (getText("days")) {
       journeyDetails.push(
-        `Preferred trip length: ${selectedDays} days`
+        `Preferred trip length: ${getText("days")} days`
       );
     }
 
-    /*
-     * -----------------------------------------
-     * AI JOURNEY DETAILS
-     * -----------------------------------------
-     */
-
+    // Include the full AI recommendation.
     let aiJourneyText = "";
 
     if (aiJourney) {
-      const sections:
-        string[] = [];
+      const sections: string[] = [
+        "================================",
+        "AI-PLANNED TIBET JOURNEY",
+        "================================",
+      ];
 
-      sections.push(
-        "================================"
-      );
-
-      sections.push(
-        "AI-PLANNED TIBET JOURNEY"
-      );
-
-      sections.push(
-        "================================"
-      );
-
-      if (
-        aiJourney
-          .originalRequest
-      ) {
+      if (aiJourney.originalRequest) {
         sections.push(
           [
             "TRAVELER'S ORIGINAL AI REQUEST",
-            aiJourney
-              .originalRequest,
+            aiJourney.originalRequest,
           ].join("\n")
         );
       }
@@ -454,52 +265,39 @@ export default function BookingForm({
       sections.push(
         [
           "AI JOURNEY RECOMMENDATION",
-          aiJourney
-            .recommendation,
+          aiJourney.recommendation,
         ].join("\n")
       );
+
+      const researchStatus =
+        aiJourney.liveResearchUsed
+          ? "Live research was included."
+          : aiJourney.researchUnavailable
+            ? "Live research was requested but unavailable. The recommendation was created without live verification."
+            : "Live research was not used.";
 
       sections.push(
         [
           "LIVE RESEARCH STATUS",
-          aiJourney
-            .liveResearchUsed
-            ? "Live research was included."
-            : aiJourney
-                .researchUnavailable
-              ? "Live research was requested but unavailable. The recommendation was created without live verification."
-              : "Live research was not used.",
+          researchStatus,
         ].join("\n")
       );
 
-      if (
-        aiJourney
-          .researchMessage
-      ) {
+      if (aiJourney.researchMessage) {
         sections.push(
           [
             "RESEARCH NOTE",
-            aiJourney
-              .researchMessage,
+            aiJourney.researchMessage,
           ].join("\n")
         );
       }
 
-      if (
-        aiJourney.sources
-          .length > 0
-      ) {
+      if (aiJourney.sources.length > 0) {
         const sourceText =
           aiJourney.sources
             .map(
-              (
-                source,
-                index
-              ) =>
-                `${index + 1}. ${
-                  source.title ||
-                  "Source"
-                }\n${source.url}`
+              (source, index) =>
+                `${index + 1}. ${source.title}\n${source.url}`
             )
             .join("\n\n");
 
@@ -516,28 +314,15 @@ export default function BookingForm({
       );
 
       aiJourneyText =
-        sections.join(
-          "\n\n"
-        );
+        sections.join("\n\n");
     }
 
-    /*
-     * -----------------------------------------
-     * FINAL MESSAGE
-     * -----------------------------------------
-     *
-     * Everything goes into the existing
-     * message field, so the current booking
-     * API, Supabase record and notification
-     * email can already receive the AI plan.
-     */
+    const userMessage =
+      getText("message");
 
     const finalMessage = [
-      journeyDetails.length >
-      0
-        ? journeyDetails.join(
-            "\n"
-          )
+      journeyDetails.length > 0
+        ? journeyDetails.join("\n")
         : "",
 
       userMessage
@@ -552,50 +337,33 @@ export default function BookingForm({
       .filter(Boolean)
       .join("\n\n");
 
+    // Existing booking API and Supabase connection.
     const body = {
       tourSlug,
-
-      name,
-
-      email,
-
-      phone,
-
-      country,
-
-      dates,
-
-      travelers:
-        travelerCount,
-
-      tripStyle:
-        selectedTripStyle,
-
+      name: getText("name"),
+      email: getText("email"),
+      phone: getText("phone"),
+      country: getText("country"),
+      dates: getText("dates"),
+      travelers: travelerCount,
+      tripStyle: getText("tripStyle"),
       accommodation:
-        selectedAccommodation,
-
-      message:
-        finalMessage,
+        getText("accommodation"),
+      message: finalMessage,
     };
 
     try {
-      const response =
-        await fetch(
-          "/api/bookings",
-          {
-            method: "POST",
-
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
-
-            body:
-              JSON.stringify(
-                body
-              ),
-          }
-        );
+      const response = await fetch(
+        "/api/bookings",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify(body),
+        }
+      );
 
       let result: {
         message?: string;
@@ -603,20 +371,16 @@ export default function BookingForm({
       } = {};
 
       try {
-        result =
-          await response.json();
+        result = await response.json();
       } catch {
         result = {};
       }
 
-      if (
-        !response.ok
-      ) {
+      if (!response.ok) {
         setStatusMessage(
           result.error ||
             "Could not send your Tibet trip request. Please try again."
         );
-
         return;
       }
 
@@ -627,20 +391,13 @@ export default function BookingForm({
           "Thank you! Your Tibet trip request has been received. Our travel team will contact you soon."
       );
 
-      /*
-       * The request was saved successfully.
-       * Remove the temporary browser copy
-       * so it is not accidentally attached
-       * to another future booking.
-       */
-
       if (aiJourney) {
         try {
           window.localStorage.removeItem(
             "himalayan26_ai_journey"
           );
         } catch {
-          // Safe to ignore.
+          // Ignore browser storage errors.
         }
       }
     } catch (error) {
@@ -657,26 +414,6 @@ export default function BookingForm({
     }
   }
 
-  const fieldStyle = {
-    width: "100%",
-  };
-
-  const selectStyle = {
-    width: "100%",
-    padding: "14px",
-    borderRadius: "12px",
-  };
-
-  const selectedTourName =
-    tourNames[tourSlug] ||
-    tourSlug
-      .replace(/-/g, " ")
-      .replace(
-        /\b\w/g,
-        (letter) =>
-          letter.toUpperCase()
-      );
-
   return (
     <form
       id="booking-request"
@@ -692,8 +429,7 @@ export default function BookingForm({
         border:
           "1px solid rgba(255,255,255,.10)",
 
-        scrollMarginTop:
-          100,
+        scrollMarginTop: 100,
       }}
     >
       {/* HEADER */}
@@ -701,26 +437,15 @@ export default function BookingForm({
       <div
         style={{
           display: "flex",
-
-          alignItems:
-            "flex-start",
-
+          alignItems: "flex-start",
           justifyContent:
             "space-between",
-
           gap: 20,
-
-          flexWrap:
-            "wrap",
-
+          flexWrap: "wrap",
           marginBottom: 30,
         }}
       >
-        <div
-          style={{
-            maxWidth: 680,
-          }}
-        >
+        <div>
           <span className="pill">
             TIBET TRIP REQUEST
           </span>
@@ -728,170 +453,81 @@ export default function BookingForm({
           <h2
             style={{
               marginTop: 15,
-
-              marginBottom:
-                10,
-
+              marginBottom: 10,
               fontSize:
                 "clamp(30px, 5vw, 46px)",
-
-              lineHeight:
-                1.08,
+              lineHeight: 1.08,
             }}
           >
-            Start planning your
-            Tibet journey
+            Start planning your Tibet journey
           </h2>
 
           <p
             className="muted"
             style={{
-              margin: 0,
-
-              lineHeight:
-                1.7,
-
-              maxWidth:
-                650,
+              lineHeight: 1.7,
+              maxWidth: 650,
             }}
           >
-            Share a few details
-            about your plans. This
-            sends a Tibet trip
-            request—it does not
-            require payment or
-            create a confirmed
-            reservation.
+            Share a few details about your
+            plans. This sends a Tibet trip
+            request. No payment is required
+            and no reservation is confirmed
+            until the arrangements are agreed.
           </p>
         </div>
 
         <div
           style={{
-            padding:
-              "10px 14px",
-
-            borderRadius:
-              999,
-
+            padding: "10px 14px",
+            borderRadius: 999,
             border:
               "1px solid rgba(109,224,194,.24)",
-
             background:
               "rgba(109,224,194,.08)",
-
-            color:
-              "#7ce6cd",
-
-            fontSize:
-              12,
-
-            fontWeight:
-              800,
-
-            whiteSpace:
-              "nowrap",
+            color: "#7ce6cd",
+            fontSize: 12,
+            fontWeight: 800,
           }}
         >
           NO PAYMENT REQUIRED
         </div>
       </div>
 
-      {/* AI JOURNEY */}
+      {/* AI ITINERARY */}
 
       {aiJourney && (
         <section
           style={{
-            marginBottom:
-              30,
-
-            padding:
-              "clamp(20px, 3vw, 28px)",
-
-            borderRadius:
-              18,
-
+            ...panelStyle,
+            marginBottom: 28,
             border:
               "1px solid rgba(109,224,194,.26)",
-
-            background:
-              "linear-gradient(135deg, rgba(109,224,194,.10), rgba(8,30,37,.74))",
           }}
         >
           <div
             style={{
-              display:
-                "flex",
-
-              alignItems:
-                "flex-start",
-
+              display: "flex",
+              alignItems: "center",
               justifyContent:
                 "space-between",
-
-              gap: 18,
-
-              flexWrap:
-                "wrap",
+              gap: 12,
+              flexWrap: "wrap",
             }}
           >
             <div>
               <div
+                className="eyebrow"
                 style={{
-                  color:
-                    "#78e5ca",
-
-                  fontSize:
-                    11,
-
-                  fontWeight:
-                    900,
-
-                  letterSpacing:
-                    ".14em",
-
-                  marginBottom:
-                    8,
+                  marginBottom: 8,
                 }}
               >
-                YOUR AI-PLANNED
-                TIBET JOURNEY
+                YOUR AI-PLANNED TIBET JOURNEY
               </div>
 
-              <h3
-                style={{
-                  margin:
-                    "0 0 8px",
-
-                  fontSize:
-                    "clamp(23px, 4vw, 31px)",
-                }}
-              >
-                Your recommendation
-                is attached
+              <h3>
+                Your recommendation is attached
               </h3>
-
-              <p
-                className="muted"
-                style={{
-                  margin: 0,
-
-                  maxWidth:
-                    700,
-
-                  lineHeight:
-                    1.65,
-                }}
-              >
-                The Tibet travel
-                team will receive
-                the same AI journey
-                recommendation you
-                reviewed, so you can
-                continue discussing
-                this itinerary
-                without starting
-                again.
-              </p>
             </div>
 
             <button
@@ -899,10 +535,7 @@ export default function BookingForm({
               className="btn alt"
               onClick={() =>
                 setShowAiJourney(
-                  (
-                    current
-                  ) =>
-                    !current
+                  (current) => !current
                 )
               }
             >
@@ -912,63 +545,25 @@ export default function BookingForm({
             </button>
           </div>
 
-          {aiJourney
-            .originalRequest && (
+          {aiJourney.originalRequest && (
             <div
               style={{
-                marginTop:
-                  22,
-
-                padding:
-                  16,
-
-                borderRadius:
-                  14,
-
-                background:
-                  "rgba(0,0,0,.16)",
-
-                border:
-                  "1px solid rgba(255,255,255,.07)",
+                ...panelStyle,
+                marginTop: 20,
               }}
             >
-              <div
-                style={{
-                  color:
-                    "#78e5ca",
-
-                  fontSize:
-                    10,
-
-                  fontWeight:
-                    900,
-
-                  letterSpacing:
-                    ".12em",
-
-                  marginBottom:
-                    7,
-                }}
-              >
-                YOUR ORIGINAL
-                REQUEST
-              </div>
+              <strong>
+                YOUR ORIGINAL REQUEST
+              </strong>
 
               <p
                 style={{
-                  margin: 0,
-
-                  lineHeight:
-                    1.7,
-
-                  whiteSpace:
-                    "pre-wrap",
+                  marginTop: 12,
+                  lineHeight: 1.7,
+                  whiteSpace: "pre-wrap",
                 }}
               >
-                {
-                  aiJourney
-                    .originalRequest
-                }
+                {aiJourney.originalRequest}
               </p>
             </div>
           )}
@@ -976,154 +571,43 @@ export default function BookingForm({
           {showAiJourney && (
             <div
               style={{
-                marginTop:
-                  16,
-
-                padding:
-                  18,
-
-                maxHeight:
-                  520,
-
-                overflowY:
-                  "auto",
-
-                borderRadius:
-                  14,
-
-                background:
-                  "rgba(0,0,0,.19)",
-
-                border:
-                  "1px solid rgba(255,255,255,.08)",
+                ...panelStyle,
+                marginTop: 16,
+                maxHeight: 520,
+                overflowY: "auto",
               }}
             >
-              <div
-                style={{
-                  color:
-                    "#78e5ca",
-
-                  fontSize:
-                    10,
-
-                  fontWeight:
-                    900,
-
-                  letterSpacing:
-                    ".12em",
-
-                  marginBottom:
-                    10,
-                }}
-              >
-                AI JOURNEY
-                RECOMMENDATION
-              </div>
+              <strong>
+                AI JOURNEY RECOMMENDATION
+              </strong>
 
               <div
                 style={{
-                  whiteSpace:
-                    "pre-wrap",
-
-                  lineHeight:
-                    1.75,
-
-                  fontSize:
-                    14,
-
-                  color:
-                    "#d7e2e4",
+                  marginTop: 12,
+                  lineHeight: 1.75,
+                  whiteSpace: "pre-wrap",
                 }}
               >
-                {
-                  aiJourney
-                    .recommendation
-                }
+                {aiJourney.recommendation}
               </div>
             </div>
           )}
 
-          <div
+          <p
+            className="muted"
             style={{
-              marginTop:
-                16,
-
-              display:
-                "flex",
-
-              gap: 8,
-
-              flexWrap:
-                "wrap",
+              marginTop: 16,
+              fontSize: 13,
             }}
           >
-            <span
-              style={{
-                padding:
-                  "7px 10px",
+            {aiJourney.liveResearchUsed
+              ? "Live research included"
+              : aiJourney.researchUnavailable
+                ? "Live research unavailable"
+                : "AI planning"}
 
-                borderRadius:
-                  999,
-
-                fontSize:
-                  11,
-
-                fontWeight:
-                  800,
-
-                border:
-                  aiJourney
-                    .liveResearchUsed
-                    ? "1px solid rgba(109,224,194,.3)"
-                    : "1px solid rgba(255,193,7,.28)",
-
-                background:
-                  aiJourney
-                    .liveResearchUsed
-                    ? "rgba(109,224,194,.08)"
-                    : "rgba(255,193,7,.07)",
-
-                color:
-                  aiJourney
-                    .liveResearchUsed
-                    ? "#78e5ca"
-                    : "#edd987",
-              }}
-            >
-              {aiJourney
-                .liveResearchUsed
-                ? "● Live research included"
-                : aiJourney
-                    .researchUnavailable
-                  ? "● Live research unavailable"
-                  : "● AI planning"}
-            </span>
-
-            <span
-              style={{
-                padding:
-                  "7px 10px",
-
-                borderRadius:
-                  999,
-
-                fontSize:
-                  11,
-
-                fontWeight:
-                  800,
-
-                border:
-                  "1px solid rgba(255,255,255,.1)",
-
-                color:
-                  "#b8c8cb",
-              }}
-            >
-              Itinerary attached
-              to this request
-            </span>
-          </div>
+            {" · Itinerary attached to this request"}
+          </p>
         </section>
       )}
 
@@ -1132,135 +616,56 @@ export default function BookingForm({
       {tourSlug && (
         <div
           style={{
-            marginBottom:
-              28,
-
-            padding:
-              18,
-
-            borderRadius:
-              16,
-
+            ...panelStyle,
+            marginBottom: 28,
             border:
               "1px solid rgba(109,224,194,.18)",
-
-            background:
-              "rgba(109,224,194,.055)",
           }}
         >
           <div
+            className="eyebrow"
             style={{
-              color:
-                "#76e2c8",
-
-              fontSize:
-                11,
-
-              fontWeight:
-                900,
-
-              letterSpacing:
-                ".13em",
-
-              marginBottom:
-                6,
+              marginBottom: 9,
             }}
           >
-            SELECTED TIBET
-            JOURNEY
+            SELECTED TIBET JOURNEY
           </div>
 
           <strong
             style={{
-              fontSize:
-                17,
+              fontSize: 17,
             }}
           >
-            {
-              selectedTourName
-            }
+            {selectedTourName}
           </strong>
         </div>
       )}
 
-      {/* YOUR DETAILS */}
+      {/* SECTION 1: PERSONAL DETAILS */}
 
       <section>
-        <div
+        <h3
           style={{
-            display: "flex",
-            gap: 12,
-            alignItems:
-              "center",
-            marginBottom:
-              18,
+            marginBottom: 8,
           }}
         >
-          <span
-            style={{
-              width: 30,
-              height: 30,
+          01 · Your details
+        </h3>
 
-              borderRadius:
-                "50%",
-
-              display:
-                "grid",
-
-              placeItems:
-                "center",
-
-              background:
-                "rgba(109,224,194,.11)",
-
-              color:
-                "#78e5ca",
-
-              fontSize:
-                12,
-
-              fontWeight:
-                900,
-            }}
-          >
-            01
-          </span>
-
-          <div>
-            <strong
-              style={{
-                display:
-                  "block",
-
-                fontSize:
-                  19,
-              }}
-            >
-              Your details
-            </strong>
-
-            <span
-              className="muted"
-              style={{
-                fontSize:
-                  13,
-              }}
-            >
-              How our Tibet
-              travel team can
-              reach you
-            </span>
-          </div>
-        </div>
+        <p
+          className="muted"
+          style={{
+            marginBottom: 20,
+          }}
+        >
+          How our Tibet travel team can reach you.
+        </p>
 
         <div
           style={{
-            display:
-              "grid",
-
+            display: "grid",
             gridTemplateColumns:
               "repeat(auto-fit, minmax(230px, 1fr))",
-
             gap: 16,
           }}
         >
@@ -1274,14 +679,10 @@ export default function BookingForm({
               name="name"
               type="text"
               required
-              disabled={
-                sent
-              }
+              disabled={sent}
               autoComplete="name"
               placeholder="Your full name"
-              style={
-                fieldStyle
-              }
+              style={fieldStyle}
             />
           </div>
 
@@ -1295,14 +696,10 @@ export default function BookingForm({
               name="email"
               type="email"
               required
-              disabled={
-                sent
-              }
+              disabled={sent}
               autoComplete="email"
               placeholder="you@example.com"
-              style={
-                fieldStyle
-              }
+              style={fieldStyle}
             />
           </div>
 
@@ -1315,14 +712,10 @@ export default function BookingForm({
               id="booking-phone"
               name="phone"
               type="tel"
-              disabled={
-                sent
-              }
+              disabled={sent}
               autoComplete="tel"
               placeholder="+1 555 123 4567"
-              style={
-                fieldStyle
-              }
+              style={fieldStyle}
             />
           </div>
 
@@ -1335,14 +728,10 @@ export default function BookingForm({
               id="booking-country"
               name="country"
               type="text"
-              disabled={
-                sent
-              }
+              disabled={sent}
               autoComplete="country-name"
               placeholder="Japan, USA, Australia..."
-              style={
-                fieldStyle
-              }
+              style={fieldStyle}
             />
           </div>
         </div>
@@ -1351,128 +740,60 @@ export default function BookingForm({
       <div
         style={{
           height: 1,
-
           background:
             "rgba(255,255,255,.08)",
-
-          margin:
-            "32px 0",
+          margin: "32px 0",
         }}
       />
 
-      {/* JOURNEY DETAILS */}
+      {/* SECTION 2: JOURNEY DETAILS */}
 
       <section>
-        <div
+        <h3
           style={{
-            display:
-              "flex",
-
-            gap: 12,
-
-            alignItems:
-              "center",
-
-            marginBottom:
-              18,
+            marginBottom: 8,
           }}
         >
-          <span
-            style={{
-              width: 30,
-              height: 30,
+          02 · Your Tibet journey
+        </h3>
 
-              borderRadius:
-                "50%",
-
-              display:
-                "grid",
-
-              placeItems:
-                "center",
-
-              background:
-                "rgba(109,224,194,.11)",
-
-              color:
-                "#78e5ca",
-
-              fontSize:
-                12,
-
-              fontWeight:
-                900,
-            }}
-          >
-            02
-          </span>
-
-          <div>
-            <strong
-              style={{
-                display:
-                  "block",
-
-                fontSize:
-                  19,
-              }}
-            >
-              Your Tibet
-              journey
-            </strong>
-
-            <span
-              className="muted"
-              style={{
-                fontSize:
-                  13,
-              }}
-            >
-              When, how long and
-              how many people are
-              traveling
-            </span>
-          </div>
-        </div>
+        <p
+          className="muted"
+          style={{
+            marginBottom: 20,
+          }}
+        >
+          When, how long and how many people
+          are traveling.
+        </p>
 
         <div
           style={{
-            display:
-              "grid",
-
+            display: "grid",
             gridTemplateColumns:
               "repeat(auto-fit, minmax(220px, 1fr))",
-
             gap: 16,
           }}
         >
           {destination && (
             <div className="field">
               <label htmlFor="booking-destination">
-                Tibet journey
-                focus
+                Tibet journey focus
               </label>
 
               <input
                 id="booking-destination"
                 name="destination"
                 type="text"
-                value={
-                  destination
-                }
-                onChange={(
-                  event
-                ) =>
+                value={destination}
+                onChange={(event) =>
                   setDestination(
-                    event
-                      .target
-                      .value
+                    event.target.value
                   )
                 }
-                disabled={
-                  sent
-                }
+                disabled={sent}
                 placeholder="Tibet"
+                style={fieldStyle}
               />
             </div>
           )}
@@ -1480,8 +801,7 @@ export default function BookingForm({
           {days && (
             <div className="field">
               <label htmlFor="booking-days">
-                Preferred trip
-                length
+                Preferred trip length
               </label>
 
               <input
@@ -1490,46 +810,36 @@ export default function BookingForm({
                 type="number"
                 min="1"
                 max="60"
-                value={
-                  days
-                }
-                onChange={(
-                  event
-                ) =>
+                value={days}
+                onChange={(event) =>
                   setDays(
-                    event
-                      .target
-                      .value
+                    event.target.value
                   )
                 }
-                disabled={
-                  sent
-                }
+                disabled={sent}
+                style={fieldStyle}
               />
             </div>
           )}
 
           <div className="field">
             <label htmlFor="booking-dates">
-              Preferred travel
-              dates
+              Preferred travel dates
             </label>
 
             <input
               id="booking-dates"
               name="dates"
               type="text"
-              disabled={
-                sent
-              }
+              disabled={sent}
               placeholder="Example: 5–18 October 2026"
+              style={fieldStyle}
             />
           </div>
 
           <div className="field">
             <label htmlFor="booking-travelers">
-              Number of
-              travelers
+              Number of travelers
             </label>
 
             <input
@@ -1538,21 +848,14 @@ export default function BookingForm({
               type="number"
               min="1"
               max="50"
-              value={
-                travelers
-              }
-              onChange={(
-                event
-              ) =>
+              value={travelers}
+              onChange={(event) =>
                 setTravelers(
-                  event
-                    .target
-                    .value
+                  event.target.value
                 )
               }
-              disabled={
-                sent
-              }
+              disabled={sent}
+              style={fieldStyle}
             />
           </div>
         </div>
@@ -1561,98 +864,38 @@ export default function BookingForm({
       <div
         style={{
           height: 1,
-
           background:
             "rgba(255,255,255,.08)",
-
-          margin:
-            "32px 0",
+          margin: "32px 0",
         }}
       />
 
-      {/* TRAVEL PREFERENCES */}
+      {/* SECTION 3: TRAVEL PREFERENCES */}
 
       <section>
-        <div
+        <h3
           style={{
-            display:
-              "flex",
-
-            gap: 12,
-
-            alignItems:
-              "center",
-
-            marginBottom:
-              18,
+            marginBottom: 8,
           }}
         >
-          <span
-            style={{
-              width: 30,
-              height: 30,
+          03 · Travel preferences
+        </h3>
 
-              borderRadius:
-                "50%",
-
-              display:
-                "grid",
-
-              placeItems:
-                "center",
-
-              background:
-                "rgba(109,224,194,.11)",
-
-              color:
-                "#78e5ca",
-
-              fontSize:
-                12,
-
-              fontWeight:
-                900,
-            }}
-          >
-            03
-          </span>
-
-          <div>
-            <strong
-              style={{
-                display:
-                  "block",
-
-                fontSize:
-                  19,
-              }}
-            >
-              Travel
-              preferences
-            </strong>
-
-            <span
-              className="muted"
-              style={{
-                fontSize:
-                  13,
-              }}
-            >
-              Help us understand
-              the Tibet experience
-              you want
-            </span>
-          </div>
-        </div>
+        <p
+          className="muted"
+          style={{
+            marginBottom: 20,
+          }}
+        >
+          Help us understand the Tibet
+          experience you want.
+        </p>
 
         <div
           style={{
-            display:
-              "grid",
-
+            display: "grid",
             gridTemplateColumns:
               "repeat(auto-fit, minmax(230px, 1fr))",
-
             gap: 16,
           }}
         >
@@ -1664,33 +907,21 @@ export default function BookingForm({
             <select
               id="booking-trip-style"
               name="tripStyle"
-              value={
-                tripStyle
-              }
-              onChange={(
-                event
-              ) =>
+              value={tripStyle}
+              onChange={(event) =>
                 setTripStyle(
-                  event
-                    .target
-                    .value
+                  event.target.value
                 )
               }
-              disabled={
-                sent
-              }
-              style={
-                selectStyle
-              }
+              disabled={sent}
+              style={selectStyle}
             >
               <option value="">
-                Select travel
-                style
+                Select travel style
               </option>
 
               <option value="Culture">
-                Culture &
-                heritage
+                Culture &amp; heritage
               </option>
 
               <option value="Adventure">
@@ -1698,8 +929,7 @@ export default function BookingForm({
               </option>
 
               <option value="Spiritual">
-                Spiritual &
-                pilgrimage
+                Spiritual &amp; pilgrimage
               </option>
 
               <option value="Photography">
@@ -1707,8 +937,7 @@ export default function BookingForm({
               </option>
 
               <option value="Comfort">
-                Comfort &
-                slower pace
+                Comfort &amp; slower pace
               </option>
 
               <option value="Family">
@@ -1727,35 +956,23 @@ export default function BookingForm({
 
           <div className="field">
             <label htmlFor="booking-accommodation">
-              Accommodation
-              preference
+              Accommodation preference
             </label>
 
             <select
               id="booking-accommodation"
               name="accommodation"
-              value={
-                accommodation
-              }
-              onChange={(
-                event
-              ) =>
+              value={accommodation}
+              onChange={(event) =>
                 setAccommodation(
-                  event
-                    .target
-                    .value
+                  event.target.value
                 )
               }
-              disabled={
-                sent
-              }
-              style={
-                selectStyle
-              }
+              disabled={sent}
+              style={selectStyle}
             >
               <option value="">
-                Select
-                accommodation
+                Select accommodation
               </option>
 
               <option value="Comfortable">
@@ -1771,8 +988,7 @@ export default function BookingForm({
               </option>
 
               <option value="Best available in remote areas">
-                Best available
-                in remote areas
+                Best available in remote areas
               </option>
 
               <option value="Not sure">
@@ -1785,79 +1001,49 @@ export default function BookingForm({
         <div
           className="field"
           style={{
-            marginTop:
-              16,
+            marginTop: 16,
           }}
         >
           <label htmlFor="booking-message">
-            Tell us about your
-            Tibet trip
+            Tell us about your Tibet trip
           </label>
 
           <textarea
             id="booking-message"
             name="message"
             rows={7}
-            value={
-              message
-            }
-            onChange={(
-              event
-            ) =>
+            value={message}
+            onChange={(event) =>
               setMessage(
-                event
-                  .target
-                  .value
+                event.target.value
               )
             }
-            disabled={
-              sent
-            }
+            disabled={sent}
             placeholder="Tell us anything else we should know about your Tibet journey."
             style={{
-              minHeight:
-                170,
+              minHeight: 170,
             }}
           />
         </div>
       </section>
 
-      {/* SUBMIT */}
+      {/* SUBMIT BUTTON */}
 
       {!sent && (
         <div
           style={{
-            marginTop:
-              28,
-
-            padding:
-              20,
-
-            borderRadius:
-              16,
-
-            background:
-              "rgba(255,255,255,.025)",
-
-            border:
-              "1px solid rgba(255,255,255,.08)",
+            ...panelStyle,
+            marginTop: 28,
           }}
         >
           <button
             className="btn"
             type="submit"
-            disabled={
-              sending
-            }
+            disabled={sending}
             style={{
-              width:
-                "100%",
-
-              minHeight:
-                54,
-
-              fontSize:
-                16,
+              width: "100%",
+              minHeight: 54,
+              fontSize: 16,
             }}
           >
             {sending
@@ -1870,17 +1056,10 @@ export default function BookingForm({
           <p
             className="muted"
             style={{
-              margin:
-                "12px 0 0",
-
-              textAlign:
-                "center",
-
-              fontSize:
-                13,
-
-              lineHeight:
-                1.6,
+              margin: "12px 0 0",
+              textAlign: "center",
+              fontSize: 13,
+              lineHeight: 1.6,
             }}
           >
             {aiJourney
@@ -1890,58 +1069,27 @@ export default function BookingForm({
         </div>
       )}
 
-      {/* SUCCESS */}
+      {/* SUCCESS MESSAGE */}
 
       {sent && (
         <div
           style={{
-            marginTop:
-              28,
-
+            marginTop: 28,
             padding:
               "clamp(22px, 4vw, 34px)",
-
-            borderRadius:
-              18,
-
+            borderRadius: 18,
             border:
               "1px solid rgba(109,224,194,.3)",
-
             background:
-              "linear-gradient(135deg, rgba(109,224,194,.12), rgba(109,224,194,.035))",
-
-            textAlign:
-              "center",
+              "rgba(109,224,194,.09)",
+            textAlign: "center",
           }}
         >
           <div
             style={{
-              width: 48,
-              height: 48,
-
-              display:
-                "grid",
-
-              placeItems:
-                "center",
-
-              margin:
-                "0 auto 14px",
-
-              borderRadius:
-                "50%",
-
-              background:
-                "rgba(109,224,194,.15)",
-
-              color:
-                "#78e5ca",
-
-              fontSize:
-                24,
-
-              fontWeight:
-                900,
+              fontSize: 32,
+              color: "#78e5ca",
+              marginBottom: 12,
             }}
           >
             ✓
@@ -1949,28 +1097,19 @@ export default function BookingForm({
 
           <h3
             style={{
-              margin:
-                "0 0 8px",
-
-              fontSize:
-                25,
+              fontSize: 25,
+              marginBottom: 12,
             }}
           >
-            Tibet trip request
-            received
+            Tibet trip request received
           </h3>
 
           <p
             className="muted"
             style={{
-              maxWidth:
-                620,
-
-              margin:
-                "0 auto",
-
-              lineHeight:
-                1.7,
+              maxWidth: 620,
+              margin: "0 auto",
+              lineHeight: 1.7,
             }}
           >
             {statusMessage ||
@@ -1980,47 +1119,31 @@ export default function BookingForm({
           {aiJourney && (
             <p
               style={{
-                margin:
-                  "12px auto 0",
-
-                maxWidth:
-                  620,
-
-                color:
-                  "#78e5ca",
-
-                fontSize:
-                  14,
-
-                fontWeight:
-                  700,
+                marginTop: 14,
+                color: "#78e5ca",
+                fontWeight: 700,
               }}
             >
-              Your AI itinerary
-              was included with
-              this request.
+              Your AI itinerary was included
+              with this request.
             </p>
           )}
         </div>
       )}
 
-      {!sent &&
-        statusMessage && (
-          <div
-            className="notice"
-            style={{
-              marginTop:
-                18,
+      {/* ERROR MESSAGE */}
 
-              lineHeight:
-                1.6,
-            }}
-          >
-            {
-              statusMessage
-            }
-          </div>
-        )}
+      {!sent && statusMessage && (
+        <div
+          className="notice"
+          style={{
+            marginTop: 18,
+            lineHeight: 1.6,
+          }}
+        >
+          {statusMessage}
+        </div>
+      )}
     </form>
   );
 }
