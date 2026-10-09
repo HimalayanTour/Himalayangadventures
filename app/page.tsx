@@ -1,3 +1,4 @@
+
 "use client";
 
 import dynamic from "next/dynamic";
@@ -6,9 +7,10 @@ import { tours } from "@/lib/tours";
 import TourCard from "@/components/TourCard";
 import AIAgent from "@/components/AIAgent";
 
-const Map = dynamic(() => import("@/components/Map"), {
-  ssr: false,
-});
+const Map = dynamic(
+  () => import("@/components/Map"),
+  { ssr: false }
+);
 
 const regions = [
   {
@@ -31,9 +33,9 @@ const regions = [
   },
   {
     name: "Mount Kailash",
-    label: "KORA · PILGRIMAGE · WESTERN TIBET",
-    text: "Journey across western Tibet toward Mount Kailash and experience one of the plateau's most significant pilgrimage landscapes.",
-    href: "/tours/kailash-kora",
+    label: "PILGRIMAGE · SACRED LANDSCAPES · WESTERN TIBET",
+    text: "Journey across western Tibet toward Mount Kailash and Lake Mansarovar, exploring one of the plateau's most significant pilgrimage landscapes.",
+    href: "/tours/kailash-mansarovar-journey",
   },
   {
     name: "Namtso & the Plateau",
@@ -137,7 +139,8 @@ export default function Home() {
                 letterSpacing: "-0.065em",
                 margin: 0,
                 maxWidth: "920px",
-                textShadow: "0 8px 40px rgba(0,0,0,.35)",
+                textShadow:
+                  "0 8px 40px rgba(0,0,0,.35)",
               }}
             >
               Journey across
@@ -153,12 +156,15 @@ export default function Home() {
                 fontSize: "clamp(17px, 2vw, 21px)",
                 lineHeight: 1.7,
                 color: "rgba(238,246,247,.82)",
-                textShadow: "0 3px 20px rgba(0,0,0,.4)",
+                textShadow:
+                  "0 3px 20px rgba(0,0,0,.4)",
               }}
             >
-              Thoughtfully designed journeys through Tibet — from Lhasa and
-              Everest to Mount Kailash, sacred lakes, monasteries and the vast
-              landscapes of the Tibetan Plateau.
+              Thoughtfully designed journeys through
+              Tibet — from Lhasa and Everest to Mount
+              Kailash, sacred lakes, monasteries and
+              the vast landscapes of the Tibetan
+              Plateau.
             </p>
 
             <div
@@ -170,11 +176,17 @@ export default function Home() {
                 flexWrap: "wrap",
               }}
             >
-              <Link className="btn" href="/ai-trip-planner">
+              <Link
+                className="btn"
+                href="/ai-trip-planner"
+              >
                 Plan my Tibet journey
               </Link>
 
-              <Link className="btn alt" href="/tours">
+              <Link
+                className="btn alt"
+                href="/tours"
+              >
                 Explore Tibet tours
               </Link>
             </div>
@@ -187,7 +199,8 @@ export default function Home() {
               gridTemplateColumns:
                 "repeat(auto-fit, minmax(150px, 1fr))",
               maxWidth: "760px",
-              borderTop: "1px solid rgba(255,255,255,.18)",
+              borderTop:
+                "1px solid rgba(255,255,255,.18)",
               paddingTop: "24px",
               gap: "20px",
             }}
@@ -202,7 +215,9 @@ export default function Home() {
               >
                 {tours.length}
               </strong>
-              <span className="muted">Tibet journeys</span>
+              <span className="muted">
+                Tibet journeys
+              </span>
             </div>
 
             <div>
@@ -215,7 +230,9 @@ export default function Home() {
               >
                 1
               </strong>
-              <span className="muted">Specialist destination</span>
+              <span className="muted">
+                Specialist destination
+              </span>
             </div>
 
             <div>
@@ -228,7 +245,9 @@ export default function Home() {
               >
                 AI
               </strong>
-              <span className="muted">Assisted planning</span>
+              <span className="muted">
+                Assisted planning
+              </span>
             </div>
           </div>
         </div>
@@ -263,20 +282,25 @@ export default function Home() {
             <div>
               <div
                 className="eyebrow"
-                style={{ marginBottom: "14px", letterSpacing: ".16em" }}
+                style={{
+                  marginBottom: "14px",
+                  letterSpacing: ".16em",
+                }}
               >
                 TIBET, YOUR WAY
               </div>
 
               <h2
                 style={{
-                  fontSize: "clamp(38px, 6vw, 64px)",
+                  fontSize:
+                    "clamp(38px, 6vw, 64px)",
                   lineHeight: 1,
                   margin: 0,
                   maxWidth: "720px",
                 }}
               >
-                One extraordinary destination. Many ways to experience it.
+                One extraordinary destination.
+                Many ways to experience it.
               </h2>
             </div>
 
@@ -289,17 +313,29 @@ export default function Home() {
                   margin: 0,
                 }}
               >
-                Explore Lhasa, Lhoka, Shigatse, Everest, Namtso, Mount Kailash and
-                remote plateau landscapes through journeys shaped around
-                altitude, culture, scenery and your preferred pace.
+                Explore Lhasa, Lhoka, Shigatse,
+                Everest, Namtso, Mount Kailash
+                and remote plateau landscapes
+                through journeys shaped around
+                altitude, culture, scenery and
+                your preferred pace.
               </p>
 
-              <div className="actions" style={{ marginTop: "22px" }}>
-                <Link className="btn alt" href="/tibet">
+              <div
+                className="actions"
+                style={{ marginTop: "22px" }}
+              >
+                <Link
+                  className="btn alt"
+                  href="/tibet"
+                >
                   Discover Tibet
                 </Link>
 
-                <Link className="btn alt" href="/travel-intent">
+                <Link
+                  className="btn alt"
+                  href="/travel-intent"
+                >
                   Find my travel style
                 </Link>
               </div>
@@ -314,7 +350,8 @@ export default function Home() {
           <div
             style={{
               display: "flex",
-              justifyContent: "space-between",
+              justifyContent:
+                "space-between",
               alignItems: "end",
               gap: "24px",
               flexWrap: "wrap",
@@ -324,14 +361,18 @@ export default function Home() {
             <div>
               <div
                 className="eyebrow"
-                style={{ marginBottom: "14px", letterSpacing: ".16em" }}
+                style={{
+                  marginBottom: "14px",
+                  letterSpacing: ".16em",
+                }}
               >
                 SIGNATURE TIBET JOURNEYS
               </div>
 
               <h2
                 style={{
-                  fontSize: "clamp(38px, 5vw, 58px)",
+                  fontSize:
+                    "clamp(38px, 5vw, 58px)",
                   margin: 0,
                 }}
               >
@@ -347,19 +388,27 @@ export default function Home() {
                   marginBottom: 0,
                 }}
               >
-                Start with Tibet's classic routes, then shape the journey
-                around your dates, interests, altitude experience and pace.
+                Start with Tibet&apos;s classic
+                routes, then shape the journey
+                around your dates, interests,
+                altitude experience and pace.
               </p>
             </div>
 
-            <Link className="btn alt" href="/tours">
+            <Link
+              className="btn alt"
+              href="/tours"
+            >
               View all {tours.length} journeys
             </Link>
           </div>
 
           <div className="grid">
             {tours.slice(0, 6).map((tour) => (
-              <TourCard key={tour.slug} tour={tour} />
+              <TourCard
+                key={tour.slug}
+                tour={tour}
+              />
             ))}
           </div>
         </div>
@@ -371,21 +420,26 @@ export default function Home() {
           <div
             className="card"
             style={{
-              padding: "clamp(28px, 5vw, 54px)",
+              padding:
+                "clamp(28px, 5vw, 54px)",
               background:
                 "linear-gradient(135deg, rgba(16,39,47,.96), rgba(10,62,63,.58))",
             }}
           >
             <div
               className="eyebrow"
-              style={{ marginBottom: "14px", letterSpacing: ".16em" }}
+              style={{
+                marginBottom: "14px",
+                letterSpacing: ".16em",
+              }}
             >
               EXPLORE TIBET
             </div>
 
             <h2
               style={{
-                fontSize: "clamp(38px, 5vw, 58px)",
+                fontSize:
+                  "clamp(38px, 5vw, 58px)",
                 maxWidth: "800px",
                 marginTop: 0,
                 marginBottom: "18px",
@@ -404,9 +458,12 @@ export default function Home() {
                 marginBottom: "32px",
               }}
             >
-              Explore different sides of Tibet — historic cities, Himalayan
-              viewpoints, sacred landscapes, high-altitude lakes and remote
-              plateau routes.
+              Explore different sides of
+              Tibet — historic cities,
+              Himalayan viewpoints, sacred
+              landscapes, high-altitude
+              lakes and remote plateau
+              routes.
             </p>
 
             <div
@@ -425,8 +482,10 @@ export default function Home() {
                     display: "block",
                     padding: "24px",
                     borderRadius: "18px",
-                    border: "1px solid rgba(255,255,255,.1)",
-                    background: "rgba(5,18,24,.38)",
+                    border:
+                      "1px solid rgba(255,255,255,.1)",
+                    background:
+                      "rgba(5,18,24,.38)",
                     color: "inherit",
                     textDecoration: "none",
                   }}
@@ -473,20 +532,25 @@ export default function Home() {
         <div className="container">
           <div
             className="eyebrow"
-            style={{ marginBottom: "14px", letterSpacing: ".16em" }}
+            style={{
+              marginBottom: "14px",
+              letterSpacing: ".16em",
+            }}
           >
             INTELLIGENT TIBET PLANNING
           </div>
 
           <h2
             style={{
-              fontSize: "clamp(38px, 5vw, 58px)",
+              fontSize:
+                "clamp(38px, 5vw, 58px)",
               maxWidth: "800px",
               marginTop: 0,
               marginBottom: "14px",
             }}
           >
-            Turn an idea into a smarter Tibet journey.
+            Turn an idea into a smarter
+            Tibet journey.
           </h2>
 
           <p
@@ -497,9 +561,12 @@ export default function Home() {
               marginBottom: "32px",
             }}
           >
-            Use the planning assistant to explore routes, compare journey
-            ideas and think through duration, altitude, interests and pacing.
-            Then see how the journeys connect across Tibet.
+            Use the planning assistant to
+            explore routes, compare journey
+            ideas and think through duration,
+            altitude, interests and pacing.
+            Then see how the journeys connect
+            across Tibet.
           </p>
 
           <div className="layout2">
@@ -515,12 +582,18 @@ export default function Home() {
               >
                 <div
                   className="eyebrow"
-                  style={{ marginBottom: "10px" }}
+                  style={{
+                    marginBottom: "10px",
+                  }}
                 >
                   INTERACTIVE TIBET MAP
                 </div>
 
-                <h3 style={{ marginBottom: "10px" }}>
+                <h3
+                  style={{
+                    marginBottom: "10px",
+                  }}
+                >
                   Understand the plateau.
                 </h3>
 
@@ -531,8 +604,11 @@ export default function Home() {
                     margin: 0,
                   }}
                 >
-                  Explore the locations behind our journeys, from Lhasa and
-                  Lhoka to Shigatse, Everest, Namtso and Mount Kailash.
+                  Explore the locations
+                  behind our journeys, from
+                  Lhasa and Lhoka to
+                  Shigatse, Everest, Namtso
+                  and Mount Kailash.
                 </p>
               </div>
 
@@ -547,14 +623,18 @@ export default function Home() {
         <div className="container">
           <div
             className="eyebrow"
-            style={{ marginBottom: "14px", letterSpacing: ".16em" }}
+            style={{
+              marginBottom: "14px",
+              letterSpacing: ".16em",
+            }}
           >
             CHOOSE YOUR WAY
           </div>
 
           <h2
             style={{
-              fontSize: "clamp(38px, 5vw, 58px)",
+              fontSize:
+                "clamp(38px, 5vw, 58px)",
               marginTop: 0,
               marginBottom: "30px",
             }}
@@ -589,7 +669,9 @@ export default function Home() {
               >
                 <div
                   className="eyebrow"
-                  style={{ marginBottom: "12px" }}
+                  style={{
+                    marginBottom: "12px",
+                  }}
                 >
                   {style.label}
                 </div>
@@ -624,7 +706,8 @@ export default function Home() {
           <div
             className="card"
             style={{
-              padding: "clamp(38px, 6vw, 72px)",
+              padding:
+                "clamp(38px, 6vw, 72px)",
               textAlign: "center",
               background:
                 "radial-gradient(circle at 50% 0%, rgba(109,224,194,.18), transparent 42%), linear-gradient(135deg, rgba(15,48,54,.96), rgba(7,25,32,.98))",
@@ -644,7 +727,8 @@ export default function Home() {
               style={{
                 maxWidth: "850px",
                 margin: "0 auto",
-                fontSize: "clamp(42px, 6vw, 68px)",
+                fontSize:
+                  "clamp(42px, 6vw, 68px)",
                 lineHeight: 1,
               }}
             >
@@ -662,9 +746,12 @@ export default function Home() {
                 fontSize: "17px",
               }}
             >
-              Explore our Tibet journeys, compare routes or tell us what
-              matters to you and begin creating a journey around your dates,
-              interests and preferred pace.
+              Explore our Tibet journeys,
+              compare routes or tell us what
+              matters to you and begin
+              creating a journey around your
+              dates, interests and preferred
+              pace.
             </p>
 
             <div
@@ -674,15 +761,24 @@ export default function Home() {
                 justifyContent: "center",
               }}
             >
-              <Link className="btn" href="/ai-trip-planner">
+              <Link
+                className="btn"
+                href="/ai-trip-planner"
+              >
                 Plan Tibet with AI
               </Link>
 
-              <Link className="btn alt" href="/custom-journey">
+              <Link
+                className="btn alt"
+                href="/custom-journey"
+              >
                 Create a private journey
               </Link>
 
-              <Link className="btn alt" href="/contact-book">
+              <Link
+                className="btn alt"
+                href="/contact-book"
+              >
                 Request a Tibet trip
               </Link>
             </div>
