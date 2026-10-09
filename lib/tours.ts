@@ -55,14 +55,14 @@ export const tours = [
   },
 
   {
-    slug: "kailash-kora",
-    name: "Mount Kailash Kora",
+    slug: "ganden-samye-trek",
+    name: "Ganden to Samye Trek",
     region: "Tibet",
-    duration: "13 days",
-    price: "$2,690",
+    duration: "9 days",
+    price: "$2,190",
     difficulty: "Challenging",
-    lat: 31.0675,
-    lng: 81.3119,
+    lat: 29.765,
+    lng: 91.474,
   },
 
   {
