@@ -32,6 +32,8 @@ const allowedStatuses = [
   "cancelled",
 ];
 
+// ADMIN AUTHENTICATION
+
 function makeAdminToken(password: string) {
   return createHash("sha256")
     .update(password)
@@ -46,6 +48,7 @@ async function isAdminLoggedIn() {
   }
 
   const cookieStore = await cookies();
+
   const session =
     cookieStore.get("admin_session")?.value;
 
@@ -54,6 +57,8 @@ async function isAdminLoggedIn() {
     session === makeAdminToken(password)
   );
 }
+
+// SUPABASE CONNECTION
 
 function getDb() {
   const url =
@@ -75,6 +80,8 @@ function getDb() {
     },
   });
 }
+
+// FORMAT TOUR NAMES
 
 function formatTourName(
   slug: string | null
@@ -128,6 +135,8 @@ function formatTourName(
 function formatDate(value: string) {
   return new Date(value).toLocaleString();
 }
+
+// PAGINATION URL
 
 function getPageHref({
   page,
@@ -188,8 +197,7 @@ async function loginAdmin(
     {
       httpOnly: true,
       secure:
-        process.env.NODE_ENV ===
-        "production",
+        process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
       maxAge: 60 * 60 * 24 * 7,
@@ -212,8 +220,7 @@ async function logoutAdmin() {
     {
       httpOnly: true,
       secure:
-        process.env.NODE_ENV ===
-        "production",
+        process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
       maxAge: 0,
@@ -242,7 +249,7 @@ export default async function AdminPage({
   const loggedIn =
     await isAdminLoggedIn();
 
-  // LOGIN SCREEN
+  // ADMIN LOGIN SCREEN
 
   if (!loggedIn) {
     return (
@@ -327,7 +334,7 @@ export default async function AdminPage({
 
   const db = getDb();
 
-  // SEARCH AND FILTERS
+  // SEARCH AND STATUS FILTER
 
   const q = String(
     query.q || ""
@@ -338,9 +345,7 @@ export default async function AdminPage({
   ).toLowerCase();
 
   const status =
-    allowedStatuses.includes(
-      requestedStatus
-    )
+    allowedStatuses.includes(requestedStatus)
       ? requestedStatus
       : "all";
 
@@ -355,7 +360,7 @@ export default async function AdminPage({
       ? parsedPage
       : 1;
 
-  // BOOKINGS QUERY
+  // LOAD BOOKINGS
 
   let bookingsQuery = db
     .from("bookings")
@@ -386,13 +391,10 @@ export default async function AdminPage({
 
   if (status !== "all") {
     bookingsQuery =
-      bookingsQuery.eq(
-        "status",
-        status
-      );
+      bookingsQuery.eq("status", status);
   }
 
-  // SEARCH BOOKINGS
+  // SEARCH CUSTOMERS
 
   if (q) {
     const safeQ = q
@@ -439,9 +441,7 @@ export default async function AdminPage({
 
   const totalPages = Math.max(
     1,
-    Math.ceil(
-      totalBookings / PAGE_SIZE
-    )
+    Math.ceil(totalBookings / PAGE_SIZE)
   );
 
   if (
@@ -457,8 +457,7 @@ export default async function AdminPage({
     );
   }
 
-  // DASHBOARD STATISTICS
-  // All values are calculated from Supabase.
+  // LIVE BOOKING STATISTICS
 
   const [
     allCountResult,
@@ -541,7 +540,7 @@ export default async function AdminPage({
   const cancelledCount =
     cancelledCountResult.count ?? 0;
 
-  // DASHBOARD CARD STYLES
+  // DASHBOARD STYLES
 
   const cardStyle = {
     padding: "18px",
@@ -551,8 +550,6 @@ export default async function AdminPage({
     background:
       "rgba(255,255,255,0.035)",
   };
-
-  // STATISTICS DISPLAY
 
   const statistics = [
     {
@@ -587,7 +584,7 @@ export default async function AdminPage({
     },
   ];
 
-  // ADMIN PAGE
+  // ADMIN DASHBOARD PAGE
 
   return (
     <main
@@ -597,7 +594,7 @@ export default async function AdminPage({
         paddingBottom: 90,
       }}
     >
-      {/* DASHBOARD HEADER */}
+      {/* HEADER */}
 
       <section
         style={{
@@ -673,8 +670,7 @@ export default async function AdminPage({
               style={{
                 fontSize: 12,
                 fontWeight: 800,
-                letterSpacing:
-                  "0.08em",
+                letterSpacing: "0.08em",
               }}
             >
               {item.label}
@@ -705,7 +701,7 @@ export default async function AdminPage({
         ))}
       </section>
 
-      {/* BOOKING FILTERS */}
+      {/* SEARCH AND FILTER BOOKINGS */}
 
       <section
         className="card"
@@ -779,12 +775,15 @@ export default async function AdminPage({
             </div>
           </div>
 
+          {/* DASHBOARD ACTION BUTTONS */}
+
           <div
             style={{
               display: "flex",
               gap: 10,
               flexWrap: "wrap",
               marginTop: 16,
+              alignItems: "center",
             }}
           >
             <button
@@ -801,8 +800,24 @@ export default async function AdminPage({
               Clear filters
             </a>
 
+            {/* PRIMARY EXCEL EXPORT */}
+
             <a
               className="btn"
+              href="/api/admin/bookings/export-excel"
+              style={{
+                background: "#67e1c2",
+                color: "#071a21",
+                fontWeight: 800,
+              }}
+            >
+              Export Excel (.xlsx)
+            </a>
+
+            {/* SECONDARY CSV EXPORT */}
+
+            <a
+              className="btn alt"
               href="/api/admin/bookings/export"
             >
               Export CSV
@@ -811,7 +826,7 @@ export default async function AdminPage({
         </form>
       </section>
 
-      {/* BOOKING REQUESTS */}
+      {/* CUSTOMER BOOKING REQUESTS */}
 
       <section className="card">
         <div
@@ -848,7 +863,7 @@ export default async function AdminPage({
           </div>
         </div>
 
-        {/* EMPTY RESULT */}
+        {/* EMPTY RESULTS MESSAGE */}
 
         {bookings.length === 0 ? (
           <div
@@ -857,8 +872,7 @@ export default async function AdminPage({
               padding: 22,
             }}
           >
-            No bookings match these
-            filters.
+            No bookings match these filters.
           </div>
         ) : (
           <div
@@ -867,116 +881,106 @@ export default async function AdminPage({
               gap: 14,
             }}
           >
-            {/* INDIVIDUAL BOOKINGS */}
+            {/* INDIVIDUAL BOOKING CARDS */}
 
-            {bookings.map(
-              (booking) => {
-                const currentStatus =
-                  booking.status ||
-                  "new";
+            {bookings.map((booking) => {
+              const currentStatus =
+                booking.status || "new";
 
-                return (
-                  <article
-                    key={booking.id}
-                    style={cardStyle}
+              return (
+                <article
+                  key={booking.id}
+                  style={cardStyle}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent:
+                        "space-between",
+                      alignItems:
+                        "flex-start",
+                      gap: 14,
+                      flexWrap: "wrap",
+                    }}
                   >
                     <div
                       style={{
-                        display: "flex",
-                        justifyContent:
-                          "space-between",
-                        alignItems:
-                          "flex-start",
-                        gap: 14,
-                        flexWrap:
-                          "wrap",
+                        minWidth: 0,
+                        flex: "1 1 520px",
                       }}
                     >
                       <div
                         style={{
-                          minWidth: 0,
-                          flex: "1 1 520px",
+                          display: "flex",
+                          gap: 8,
+                          flexWrap: "wrap",
+                          alignItems: "center",
+                          marginBottom: 12,
                         }}
                       >
-                        <div
-                          style={{
-                            display:
-                              "flex",
-                            gap: 8,
-                            flexWrap:
-                              "wrap",
-                            alignItems:
-                              "center",
-                            marginBottom:
-                              12,
-                          }}
-                        >
-                          <span className="pill">
-                            {currentStatus}
-                          </span>
+                        <span className="pill">
+                          {currentStatus}
+                        </span>
 
-                          <span className="muted">
-                            {formatDate(
-                              booking.created_at
-                            )}
-                          </span>
-                        </div>
-
-                        <h3
-                          style={{
-                            margin:
-                              "0 0 8px",
-                          }}
-                        >
-                          {booking.name}
-                        </h3>
-
-                        <div
-                          className="muted"
-                          style={{
-                            lineHeight:
-                              1.7,
-                            overflowWrap:
-                              "anywhere",
-                          }}
-                        >
-                          {booking.email}
-
-                          <br />
-
-                          {formatTourName(
-                            booking.tour_slug
+                        <span className="muted">
+                          {formatDate(
+                            booking.created_at
                           )}
-
-                          <br />
-
-                          Preferred dates:{" "}
-                          {booking.dates ||
-                            "Not specified"}
-
-                          {" · "}
-
-                          Travelers:{" "}
-                          {booking.travelers ??
-                            "Not specified"}
-                        </div>
+                        </span>
                       </div>
 
-                      <a
-                        className="btn"
-                        href={`/admin/bookings/${booking.id}`}
+                      <h3
+                        style={{
+                          margin: "0 0 8px",
+                        }}
                       >
-                        View booking
-                      </a>
+                        {booking.name}
+                      </h3>
+
+                      <div
+                        className="muted"
+                        style={{
+                          lineHeight: 1.7,
+                          overflowWrap:
+                            "anywhere",
+                        }}
+                      >
+                        {booking.email}
+
+                        <br />
+
+                        {formatTourName(
+                          booking.tour_slug
+                        )}
+
+                        <br />
+
+                        Preferred dates:{" "}
+                        {booking.dates ||
+                          "Not specified"}
+
+                        {" · "}
+
+                        Travelers:{" "}
+                        {booking.travelers ??
+                          "Not specified"}
+                      </div>
                     </div>
-                  </article>
-                );
-              }
-            )}
+
+                    <a
+                      className="btn"
+                      href={`/admin/bookings/${booking.id}`}
+                    >
+                      View booking
+                    </a>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         )}
 
-        {/* PAGINATION */}
+        {/* TEN BOOKINGS PER PAGE */}
 
         {totalPages > 1 && (
           <div
@@ -1007,8 +1011,7 @@ export default async function AdminPage({
                 <a
                   className="btn"
                   href={getPageHref({
-                    page:
-                      page - 1,
+                    page: page - 1,
                     status,
                     q,
                   })}
@@ -1021,8 +1024,7 @@ export default async function AdminPage({
                 <a
                   className="btn"
                   href={getPageHref({
-                    page:
-                      page + 1,
+                    page: page + 1,
                     status,
                     q,
                   })}
